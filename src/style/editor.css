@@ -7,6 +7,8 @@
   flex-shrink: 0;
   overflow: visible;
   background: var(--bg-surface);
+  width: 100%;
+  max-width: 800px;
 }
 
 .eb {
