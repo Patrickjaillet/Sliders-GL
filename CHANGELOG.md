@@ -6,6 +6,20 @@ Copyright © 2026 SANDEFJORD DEVELOPMENT (Patrick JAILLET) — All rights reserv
 
 ---
 
+## [2.13.0] — 2026-07-21
+
+### Removed
+
+- **Share links** — the "copy share link" toolbar button and its versioned multi-pass variant have been removed. Sharing a shader now happens through the existing export formats (standalone HTML, GLSL, Three.js snippet, etc.).
+- **Crash reporting** — the opt-in "Help improve Z-GL" crash-report prompt and its underlying error-log forwarding have been removed.
+- **Post-processing pipeline** — the entire post-process stack has been removed: bloom, tone mapping, vignette, CRT filter, FXAA, TAA, film grain, and LUT color grading, along with the FX Stack, Style Layers, Shape Mask, Color Remap, and color-blindness simulation features that were built on top of it. The renderer now always outputs the raw shader result.
+- **Performance panel** — the "perf" toolbar button and its popup (frame budget, FPS cap, resolution, profiling, GPU capabilities) have been removed.
+- **Tools menu** — the toolbar's "tools" overflow menu and its pinned-tools quick-access system have been removed, along with the features it exposed: pop-out viewport, the standalone shader-docs panel (F1 still opens the full Help Center), the workspace panel, the Ray Marching Assistant, SDF Visualizer, SDF Composer, presentation mode, and the local "open shader file" / "import ZIP" actions.
+- **Preset library** — the preset-browsing drawer, its save/wizard dialogs, and its ShaderToy-import row have been removed. Loading presets programmatically (embed API) and importing local shader/preset files continue to work.
+- **Layout presets** — the "layout" toolbar button, its built-in presets (Coder / Performer / Animator / Minimal), custom saved layouts, and the detach-panel-into-floating-window feature have been removed. Manual panel/inspector resizing and the Uniforms/Channels tab switcher are unaffected.
+
+---
+
 ## [2.12.0] — 2026-07-21
 
 ### Phase 6 — Cleanup, tests, QA

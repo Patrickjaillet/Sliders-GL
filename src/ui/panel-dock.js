@@ -21,16 +21,13 @@ const PANELS = [
   { key: 'rm',       label: 'RayMarch', btn: 'rmAssistantToggleBtn',    root: '#zgl-rm-panel',       cat: 'debug' },
   { key: 'sdfviz',   label: 'SDF Viz',  btn: 'sdfVizToggleBtn',         root: '#zgl-sdfviz-panel',   cat: 'debug' },
   { key: 'sdfcomp',  label: 'SDF',      btn: 'sdfComposerToggleBtn',    root: '#zgl-sdfcomp-panel',  cat: 'create' },
-  { key: 'cblind',   label: 'ColorBlind', btn: 'colorblindnessToggleBtn', root: '#colorblindness-panel', cat: 'debug' },
   { key: 'docs',     label: 'Docs',     btn: 'shaderDocsBtn',           root: '#sdpOverlay',         cat: 'doc' },
   // Phase P — registre complété : panneaux trouvés avec un déclencheur réel
   // vérifié (id ou data-action) et un nœud racine confirmé dans le code.
   { key: 'workspace', label: 'Projects', btn: 'workspaceToggleBtn',     root: '#z-gl-workspace-sidebar', cat: 'doc' },
-  { key: 'palette',   label: 'Palette',  dataAction: 'togglePalettePanel', root: '#palPanel',         cat: 'create' },
   { key: 'warp',      label: 'Warp',     dataAction: 'toggleWarpPanel',    root: '#warpPanel',        cat: 'create' },
   { key: 'includes',  label: 'Includes', btn: 'includesMgrBtn',         root: '#zgl-includes-panel', cat: 'doc' },
   { key: 'snippets',  label: 'Snippets', btn: 'snippetLibBtn',          root: '#slibOverlay',        cat: 'doc' },
-  { key: 'lut',       label: 'LUT',      btn: 'lutLibToggleBtn',        root: '#lutLibPanel',        cat: 'create' },
   // Non ajoutés : 'settings'/'history' n'ont aucun déclencheur (id ou
   // data-action) présent dans ui.html actuellement — seulement accessibles au
   // clavier (Ctrl+, / Ctrl+Shift+Z). 'camera' (camera-panel.js) a été retiré du

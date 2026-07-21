@@ -107,8 +107,6 @@ export function _applyResolution() {
   if (state.mat3?.uniforms?.iResolution) {
     state.mat3.uniforms.iResolution.value.set(w, h, 1);
   }
-  // Post-process render target
-  if (state.callbacks?.resizePostRT) state.callbacks.resizePostRT(w, h);
   if (state.callbacks?.mpResizeRTs)  state.callbacks.mpResizeRTs(w, h);
 
   // Update HUD

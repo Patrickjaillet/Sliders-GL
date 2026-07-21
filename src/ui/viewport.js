@@ -3,13 +3,12 @@
 import { state } from '../core/state.js';
 import { trapModalFocus } from '../io/actions.js';
 import { slUndo, slRedo } from './undo.js';
-import { openLibrary, closeLibrary, libOpen, openSaveModal, closeSaveModal, closeConfirmModal, closeWizardModal } from '../io/library.js';
+import { closeConfirmModal } from '../io/library.js';
 import { closeExportModal } from '../export/export.js';
 import { closeSTModal } from '../io/shadertoy.js';
 import { doResize } from '../gl/renderer.js';
 import { safeLocalGet, safeLocalSet } from '../core/utils.js';
-import { isTauri } from '../native/tauri.js';
-import { togglePerfPanel } from '../render/perf.js';
+import { toggleInspectorPanel } from './inspector-context.js';
 
 let vpFullscreen = false;
 function toggleFullscreenVP() {
@@ -44,83 +43,13 @@ export function toggleCodeFocus(force) {
   setTimeout(doResize, 60);
 }
 
-let _presentationMode = false;
-let _presHud = null;
-
-function _buildPresHud() {
-  if (_presHud) return _presHud;
-  const hud = document.createElement('div');
-  hud.id = 'presHud';
-  hud.className = 'pres-hud';
-  hud.setAttribute('aria-label', 'Presentation HUD');
-
-  const fps = document.createElement('div');
-  fps.className = 'pres-hud-pill pres-hud-fps';
-  fps.id = 'presHudFps';
-  fps.textContent = '-- FPS';
-
-  const res = document.createElement('div');
-  res.className = 'pres-hud-pill';
-  res.id = 'presHudRes';
-  res.textContent = '-- × --';
-
-  const exit = document.createElement('button');
-  exit.className = 'pres-hud-exit';
-  exit.title = 'Exit presentation mode (Escape or F)';
-  exit.textContent = '✕';
-  exit.addEventListener('click', () => togglePresentation(false));
-
-  hud.appendChild(fps);
-  hud.appendChild(res);
-  hud.appendChild(exit);
-  document.body.appendChild(hud);
-  _presHud = hud;
-  return hud;
-}
-
-function _syncPresHud() {
-  if (!_presHud) return;
-  const fpsPill = document.getElementById('fpspill');
-  const resPill = document.getElementById('respill');
-  if (fpsPill) _presHud.querySelector('.pres-hud-fps').textContent = fpsPill.textContent;
-  if (resPill) _presHud.querySelector('[id="presHudRes"]').textContent = resPill.textContent;
-}
-
-let _presHudInterval = null;
-
-export function togglePresentation(force) {
-  const next = force !== undefined ? force : !_presentationMode;
-  _presentationMode = next;
-
-  document.body.classList.toggle('pres-mode', next);
-
-  if (next) {
-    _buildPresHud();
-    _presHud.classList.add('visible');
-    _presHudInterval = setInterval(_syncPresHud, 200);
-  } else {
-    if (_presHud) _presHud.classList.remove('visible');
-    clearInterval(_presHudInterval);
-    _presHudInterval = null;
-  }
-
-  setTimeout(doResize, 50);
-}
-
 document.addEventListener('keydown', e => {
   if (trapModalFocus(e)) return;
   if (e.key === 'F11') { e.preventDefault(); toggleFullscreenVP(); }
-  if (e.key === 'f' && !e.ctrlKey && !e.metaKey && !e.altKey && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' && !e.target.closest('.monaco-editor')) {
-    e.preventDefault();
-    togglePresentation();
-    return;
-  }
   if ((e.ctrlKey||e.metaKey) && e.shiftKey && (e.key === 'F' || e.key === 'f')) { e.preventDefault(); toggleCodeFocus(); return; }
   // Fix 3.4 — Ctrl+Shift+S dupliqué entre viewport.js et io/project-ui.js.
   // En mode navigateur (!isTauri()) les deux handlers se déclenchaient en cascade.
   // Utiliser stopImmediatePropagation() pour qu'un seul handler s'exécute.
-  if ((e.ctrlKey||e.metaKey) && e.shiftKey && e.key === 'S' && !isTauri()) { e.preventDefault(); e.stopImmediatePropagation(); openSaveModal(); return; }
-  if ((e.ctrlKey||e.metaKey) && !e.shiftKey && e.key === 'o' && !isTauri()) { e.preventDefault(); e.stopImmediatePropagation(); openLibrary(); return; }
   if ((e.ctrlKey||e.metaKey) && !e.shiftKey && e.key === 'z' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
     e.preventDefault(); slUndo(); return;
   }
@@ -137,21 +66,9 @@ document.addEventListener('keydown', e => {
       snipBtn?.focus();
       return;
     }
-    const layoutPopup = document.getElementById('layoutPresetPopup');
-    if (layoutPopup?.classList.contains('open')) {
-      layoutPopup.classList.remove('open');
-      const layoutBtn = document.getElementById('layoutPresetBtn');
-      layoutBtn?.setAttribute('aria-expanded', 'false');
-      layoutBtn?.focus();
-      return;
-    }
     if (document.getElementById('stModal')?.classList.contains('open')) { closeSTModal(); return; }
-    if (document.getElementById('wizardModal')?.classList.contains('open')) { closeWizardModal(); return; }
-    if (document.getElementById('saveModal')?.classList.contains('open')) { closeSaveModal(); return; }
     if (document.getElementById('confirmModal')?.classList.contains('open')) { closeConfirmModal(); return; }
     if (document.getElementById('exportModal')?.classList.contains('open')) { closeExportModal(); return; }
-    if (libOpen) { closeLibrary(); return; }
-    if (_presentationMode) { togglePresentation(false); return; }
     if (_codeFocus) { toggleCodeFocus(false); return; }
     if (vpFullscreen) { toggleFullscreenVP(); return; }
   }
@@ -343,8 +260,8 @@ function _initTimeScrubber() {
     bar.classList.toggle('active', state.paused);
   });
 
-  // §R — clic sur le pill FPS → ouvre l'inspector en mode perf
-  fpspill?.addEventListener('click', () => togglePerfPanel());
+  // §R — clic sur le pill FPS → ouvre/ferme le panneau inspector
+  fpspill?.addEventListener('click', () => toggleInspectorPanel());
 
   // Sync inverse : reflète state.simTime sur le scrubber tant qu'il n'est pas
   // en cours de drag (sinon la valeur affichée se battrait avec le doigt/la souris).

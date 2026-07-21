@@ -18,8 +18,6 @@ const _domRefs = {
   respill: null,
   fpspill: null,
   fps: null,
-  gputpill: null,
-  perfAlertBadge: null,
   tpill: null,
 };
 
@@ -28,8 +26,6 @@ function _cacheDomRefs() {
   _domRefs.respill ??= document.getElementById('respill');
   _domRefs.fpspill ??= document.getElementById('fpspill');
   _domRefs.fps ??= document.getElementById('fps');
-  _domRefs.gputpill ??= document.getElementById('gputpill');
-  _domRefs.perfAlertBadge ??= document.getElementById('perfAlertBadge');
   _domRefs.tpill ??= document.getElementById('tpill');
   return _domRefs;
 }
@@ -298,8 +294,6 @@ export function initGL(canvas, width, height) {
     }
   });
 
-  if (state.callbacks.initPostProcess) state.callbacks.initPostProcess();
-
   loop();
   return { renderer, scene, camera, material };
 }
@@ -318,7 +312,6 @@ export function doResize() {
   state.renderer3.setPixelRatio(1);
   state.renderer3.setSize(w, h, false);
   if (state.mat3) state.mat3.uniforms.iResolution.value.set(w, h, 1);
-  if (state.callbacks.resizePostRT) state.callbacks.resizePostRT(w, h);
   if (state.callbacks.mpResizeRTs)  state.callbacks.mpResizeRTs(w, h);
   if (respill) respill.textContent = `${w} \u00d7 ${h}`;
   const statusRes = document.getElementById('statusRes');
@@ -357,18 +350,6 @@ function _tick() {
   const dom = _cacheDomRefs();
   const now = performance.now();
 
-  if (state.perf.fpsCap > 0) {
-    const interval = 1000 / state.perf.fpsCap;
-    if (!state.perf._lastFrameMs) state.perf._lastFrameMs = now;
-    const elapsed = now - state.perf._lastFrameMs;
-    if (elapsed < interval) return;
-
-    const steps = Math.max(1, Math.floor(elapsed / interval));
-    state.perf._lastFrameMs += steps * interval;
-  } else {
-    state.perf._lastFrameMs = now;
-  }
-
   const dt = Math.min((now - state.lastTs) / 1000, 0.1);
   state.lastTs = now;
   if (!state.paused) state.simTime += dt;
@@ -396,31 +377,11 @@ function _tick() {
 
   if (state.callbacks.renderMultiPass) state.callbacks.renderMultiPass(dt);
 
-  if (state.perf.postEnabled && state.perf.postRT) {
-    state.renderer3.setRenderTarget(state.perf.postRT);
-    state.renderer3.render(state.scene3, state.cam3);
-    if (state.callbacks.renderTAA) state.callbacks.renderTAA();
-    if (state.callbacks.syncPostUniforms) state.callbacks.syncPostUniforms();
-    if (state.callbacks.renderColorBlindness) state.callbacks.renderColorBlindness();
-    if (state.callbacks.renderPostIntegration) state.callbacks.renderPostIntegration();
-    if (state.perf.fxaa && state.perf.fxaaRT) {
-      state.renderer3.setRenderTarget(state.perf.fxaaRT);
-      state.renderer3.render(state.perf.postScene, state.perf.postCam);
-      if (state.callbacks.renderFXAA) state.callbacks.renderFXAA();
-    } else {
-      state.renderer3.setRenderTarget(null);
-      state.renderer3.render(state.perf.postScene, state.perf.postCam);
-    }
-  } else {
-    state.renderer3.render(state.scene3, state.cam3);
-  }
+  state.renderer3.render(state.scene3, state.cam3);
 
   capturePrevFrameChannels();
 
   const frameMs = performance.now() - t0;
-  state.perf.cpuMs = state.perf.cpuMs * 0.85 + frameMs * 0.15;
-
-  if (state.callbacks.updateSparkline) state.callbacks.updateSparkline(frameMs);
 
   state.fcount++; state.ftimer += dt;
   if (state.ftimer >= 0.5) {
@@ -432,16 +393,6 @@ function _tick() {
     }
     if (dom.fps)     dom.fps.textContent     = fps + ' fps';
     state.fcount = 0; state.ftimer = 0;
-  }
-
-  const gpuEl = dom.gputpill;
-  if (gpuEl && gpuEl.style.display !== 'none') {
-    gpuEl.textContent = '~' + state.perf.cpuMs.toFixed(1) + ' ms';
-  }
-
-  if (state.perf.alertEnabled) {
-    const badge = dom.perfAlertBadge;
-    if (badge) badge.classList.toggle('visible', state.perf.cpuMs > 16);
   }
 
   if (dom.tpill) dom.tpill.textContent = 't = ' + state.simTime.toFixed(2);

@@ -6,7 +6,6 @@ import './shader/parser.js';
 import './ui/slider.js';
 import './ui/viewport.js';
 import './channels/channels.js';
-import './render/perf.js';
 import './render/multipass.js';
 import './io/actions.js';
 import './io/library.js';
@@ -20,10 +19,9 @@ import './app/init.js';
 import { initI18n } from './i18n/i18n.js';
 initI18n();
 
-import { initEvents, exposeGlobals, initToolsMoreMenu } from './ui/events.js';
+import { initEvents, exposeGlobals } from './ui/events.js';
 initEvents();
 exposeGlobals();
-initToolsMoreMenu();
 
 // Phase E — slider panel filter bar (search + modified-only)
 import { initSliderFilter } from './ui/slider.js';

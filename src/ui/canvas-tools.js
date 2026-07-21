@@ -14,7 +14,6 @@ import { toast } from '../io/actions.js';
 import { doResize } from '../gl/renderer.js';
 import { safeLocalGet, safeLocalSet } from '../core/utils.js';
 import { toggleCanvasGizmos } from './canvas-gizmos.js';
-import { popOutViewport } from './viewport-popout.js';
 import { exportScreenshot } from '../export/export.js';
 
 let _cw = null;   // #cwrap
@@ -366,7 +365,6 @@ function _openCtx(x, y) {
     { label: _guides ? 'Hide guides' : 'Show guides', fn: () => toggleGuides() },
     { label: 'Toggle position gizmos', fn: () => toggleCanvasGizmos() },
     { label: _pickMode ? '✓ Disable pick mode' : 'Pick mode UV', fn: () => togglePickMode() },
-    { label: 'Pop out viewport', fn: () => popOutViewport() },
     { label: 'Reset zoom', fn: resetZoom },
   ];
   const menu = document.createElement('div');

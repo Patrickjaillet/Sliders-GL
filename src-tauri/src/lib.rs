@@ -90,31 +90,6 @@ fn read_file_bytes(path: String) -> Result<Vec<u8>, String> {
     std::fs::read(&path).map_err(|e| format!("Cannot read \"{path}\": {e}"))
 }
 
-// WARN-04 — Crash logger offline (écrit dans %APPDATA%\com.zgl.editor\logs\crash.log)
-#[tauri::command]
-fn log_crash(app: tauri::AppHandle, report: serde_json::Value) -> Result<(), String> {
-    use std::io::Write;
-
-    let log_dir = app
-        .path()
-        .app_data_dir()
-        .unwrap_or_else(|_| std::env::temp_dir().join("z-gl"))
-        .join("logs");
-
-    std::fs::create_dir_all(&log_dir).map_err(|e| e.to_string())?;
-
-    let log_path = log_dir.join("crash.log");
-    let mut file = std::fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(&log_path)
-        .map_err(|e| e.to_string())?;
-
-    let line = format!("{}\n", report);
-    file.write_all(line.as_bytes()).map_err(|e| e.to_string())?;
-    Ok(())
-}
-
 // BUG-08 — Git versioning commands
 #[tauri::command]
 fn git_diff_file(path: String) -> Result<String, String> {
@@ -234,7 +209,6 @@ pub fn run() {
             watch_file,
             unwatch_file,
             read_file_bytes,
-            log_crash,
             git_diff_file,
             git_blame_file,
             get_cli_args,

@@ -514,12 +514,6 @@ html.no-transition * {
 .cw.hud-off .hud-l {
   display: none;
 }
-/* HUD masqué automatiquement en mode présentation */
-body.pres-mode .hud,
-body.pres-mode .hud-l {
-  display: none;
-}
-
 /* 4.2 — Overlay 2D de guides (au-dessus du canvas, sous les pills) */
 .canvas-guides {
   position: absolute;
@@ -1070,54 +1064,6 @@ canvas#glc {
 
 
 /* ══════════════════════════════════════════════
-   OVERLAY LIBRARY (tiroir latéral droit)
-   ══════════════════════════════════════════════ */
-
-.lib-overlay {
-  position: fixed;
-  inset: calc(var(--titlebar-h, 32px) + var(--hh)) 0 0 0;
-  z-index: 90;
-  display: flex;
-  justify-content: flex-end;
-  padding: 8px;
-  background: rgba(0, 0, 0, 0.25);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition:
-    opacity  var(--duration-normal) var(--ease-silk),
-    visibility var(--duration-normal) var(--ease-silk);
-}
-
-.lib-overlay.open {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-/* Tiroir library */
-.lib-drawer {
-  width: min(460px, calc(100vw - 16px));
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  background: var(--bg-panel);
-  border: 1px solid var(--border-strong);
-  box-shadow: var(--shadow-popup);
-  transform: translateX(12px);
-  transition:
-    transform var(--duration-normal) var(--ease-silk),
-    opacity   var(--duration-normal) var(--ease-silk);
-}
-
-.lib-overlay.open .lib-drawer {
-  transform: translateX(0);
-}
-
-
-/* ══════════════════════════════════════════════
    PANNEAU INSPECTEUR (colonne droite)
    ══════════════════════════════════════════════ */
 
@@ -1280,7 +1226,6 @@ canvas#glc {
 .modal-overlay{ z-index: 100; }
 .ctx-menu     { z-index: 200; }
 #toast-stack  { z-index: 300; }
-.lib-overlay  { z-index: 90;  }
 .perf-pop     { z-index: 50;  }
 
 
@@ -1476,7 +1421,6 @@ body.embed-mode .cw {
   header .hb { padding: 0 7px; }
   header .hb .hb-label,
   header .file-menu-btn .fmenu-name,
-  header .tools-more-btn,
   header .layout-preset-btn { font-size: 0; }
   header .hb svg { margin: 0; }
 }

@@ -16,13 +16,9 @@ import { initProject } from '../io/project.js';
 import { initProjectShortcuts, setProjectBreadcrumb } from '../io/project-ui.js';
 import { chClear } from '../channels/channels-core.js';
 import { toast } from '../io/actions.js';
-import { setRenderResolution } from '../render/perf.js';
-import { initGpuTimestamps } from '../render/gpu-timestamp.js';
-import { detectGLCaps, renderGLCapsPanel } from '../render/gl-caps.js';
 import { initTooltips } from '../ui/tooltip.js';
 import { initDock } from '../ui/dock.js';
 import { initKeyboardNav } from '../ui/keyboard-nav.js';
-import { initPinnedTools } from '../ui/pinned-tools.js';
 import { initPanelDock } from '../ui/panel-dock.js';
 import { initSidebarTabs } from '../ui/sidebar-tabs.js';
 import { initInspectorContext } from '../ui/inspector-context.js';
@@ -86,8 +82,6 @@ window.addEventListener('load', async () => {
   // Phase Y — gutter dots Monaco pour les lignes avec slider associé
   initSliderGutterDots();
   initKeyboardNav();
-  // §1.2 — Outils épinglés dans le header (clic droit sur une entrée du menu Tools)
-  initPinnedTools();
   // §2.2 — Barre de dock des panneaux ouverts (bas de la colonne droite)
   initPanelDock();
   // §3.4 — Barre de navigation des passes multipass (sous l'éditeur)
@@ -200,37 +194,6 @@ window.addEventListener('load', async () => {
   // Phase 1.2: Global Ctrl+N / Ctrl+O / Ctrl+S / Ctrl+Shift+S shortcuts
   initProjectShortcuts();
 
-  // Phase 1.3a: Custom resolution input event
-  window.addEventListener('zgl:setCustomRes', (e) => {
-    const parts = String(e.detail).split(',').map(s => parseInt(s.trim(), 10));
-    if (parts.length === 2 && parts.every(n => n > 0 && n <= 7680)) {
-      setRenderResolution('custom', parts);
-    } else {
-      toast('Invalid resolution — use W,H e.g. 1280,720', 'warn');
-    }
-  });
-
-  // Phase 1.3b: GPU timestamp queries — init if WebGPU is available
-  // (runs asynchronously; no-ops if adapter doesn't support timestamp-query)
-  if (navigator.gpu) {
-    navigator.gpu.requestAdapter().then(adapter => {
-      if (!adapter) return;
-      const requiredFeatures = adapter.features.has('timestamp-query')
-        ? ['timestamp-query'] : [];
-      adapter.requestDevice({ requiredFeatures }).then(device => {
-        initGpuTimestamps(device);
-      }).catch(() => {});
-    }).catch(() => {});
-  }
-
-  // Phase 1.3c: GL caps — detect once the renderer is ready (next microtask)
-  queueMicrotask(() => {
-    if (state.renderer3) {
-      const caps = detectGLCaps(state.renderer3.getContext());
-      if (caps) renderGLCapsPanel(caps);
-    }
-  });
-
   // Wire the open_shader_file Rust command → processImportedText pipeline.
   if (isTauri()) {
     onOpenFile(({ path, text }) => {
@@ -251,7 +214,7 @@ window.addEventListener('load', async () => {
   // ── Fix sliders invisibles (Tauri/WebView2) ──────────────────────────────
   // Les workers Monaco peuvent échouer dans WebView2 (warning "Could not create
   // web worker"). Même si l'éditeur fonctionne en fallback thread principal,
-  // l'init asynchrone de Monaco (restoreFromHash → setTimeout(applyAndParse))
+  // l'init asynchrone de Monaco (setTimeout(applyAndParse))
   // peut ne jamais déclencher buildUI() → panneau de sliders vide.
   //
   // Les sliders n'ont PAS besoin de Monaco : ils sont construits en parsant le

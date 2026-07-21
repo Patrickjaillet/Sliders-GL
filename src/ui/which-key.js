@@ -17,7 +17,6 @@ const GROUPS = [
   { title: 'View', keys: [
     ['Ctrl+Shift+F', 'Code focus'],
     ['F11', 'Fullscreen viewport'],
-    ['F', 'Presentation mode'],
     ['Space', 'Pause / resume'],
   ] },
   { title: 'Canvas', keys: [
@@ -32,9 +31,8 @@ const GROUPS = [
   { title: 'Tools', keys: [
     ['Ctrl+Shift+G', 'Performance panel'],
     ['Ctrl+Shift+B', 'Color blindness'],
-    ['Ctrl+Shift+W', 'Workspace'],
     ['Ctrl+Shift+U', 'LUT library'],
-    ['F1', 'Shader docs (GLSL builtins)'],
+    ['F1', 'Help center'],
     ['?', 'This keyboard map'],
   ] },
 ];

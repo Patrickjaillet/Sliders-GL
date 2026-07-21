@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { state, subscribe, notify, setState, getState, setStateBatched } from './state.js';
 
 // --------------------------------------------------------------------------
@@ -11,15 +11,6 @@ function cleanupKey(key) {
   const obj = keys.reduce((acc, k) => acc[k], state);
   obj[lastKey] = undefined;
 }
-
-// state.perf starts as `null` (Fix 1.6 in state.js: perf.js is the sole
-// source of truth and replaces it wholesale on init, avoiding a Retina
-// flash). This test file only imports state.js, so that side effect never
-// runs — seed a minimal stand-in so perf.* tests below don't depend on
-// perf.js's heavy import chain (THREE.js, renderer, post-passes…).
-beforeEach(() => {
-  if (!state.perf) state.perf = { fps: 0 };
-});
 
 // --------------------------------------------------------------------------
 // subscribe / notify
@@ -99,8 +90,8 @@ describe('setState', () => {
   });
 
   it('updates a nested key using dot notation', () => {
-    setState('perf.fps', 120);
-    expect(state.perf.fps).toBe(120);
+    setState('ai.loadProgress', 120);
+    expect(state.ai.loadProgress).toBe(120);
   });
 
   it('triggers subscribers synchronously', () => {
@@ -143,8 +134,8 @@ describe('getState', () => {
   });
 
   it('reads a nested key via dot notation', () => {
-    state.perf.fps = 30;
-    expect(getState('perf.fps')).toBe(30);
+    state.ai.loadProgress = 30;
+    expect(getState('ai.loadProgress')).toBe(30);
   });
 
   it('returns undefined for a missing key', () => {

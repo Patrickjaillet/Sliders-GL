@@ -230,11 +230,11 @@ function insertSnippet(code) {
 
 function updateResolution(w, h) {
   // Fix 3.1 — changer glc.width/height seul ne relance pas le pipeline de rendu.
-  // Déléguer à setRenderResolution() de render/perf.js.
-  import('../render/perf.js').then(({ setRenderResolution }) => {
+  // Déléguer à setRenderResolution() de render/resolution.js.
+  import('../render/resolution.js').then(({ setRenderResolution }) => {
     setRenderResolution('custom', [w, h]);
   }).catch(() => {
-    // Fallback minimal si perf.js non chargé
+    // Fallback minimal si resolution.js non chargé
     const glc = document.getElementById('glc');
     if (glc) { glc.width = w; glc.height = h; }
   });

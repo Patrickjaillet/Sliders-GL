@@ -11,8 +11,7 @@ import { buildUI, syncSlidersFromCode, isFromSlider } from './slider.js';
 import { applyGLShader, checkFragCompile, wrapFrag, showErr, hideErr } from '../gl/renderer.js';
 import { EXAMPLE, SNIPPETS } from '../core/constants.js';
 import { initInlayUniformValues } from './inlay-uniform-values.js';
-import { openLocalFileDialog, openZipFileDialog, initBrowserFileDrop } from '../import/local-file-import.js';
-import { openShaderDocPanel, closeShaderDocPanel, toggleShaderDocPanel } from './shader-doc-panel.js';
+import { initBrowserFileDrop } from '../import/local-file-import.js';
 import { initComplexityBadge } from './complexity-badge.js';
 import { initValueScrub } from './value-scrub.js';
 import { initColorInline } from './color-inline.js';
@@ -20,9 +19,6 @@ import { initHoverInspector, findSliderEntry } from './hover-inspector.js';
 import { initShaderAnatomy, toggleShaderAnatomy } from './shader-anatomy.js';
 import { applyAndParseActive } from '../render/multipass.js';
 import { applyAndParse } from '../io/actions.js';
-import { restoreFromHash } from '../export/export.js';
-import { togglePalettePanel } from './palette-panel.js';
-import { toggleFXPanel } from './fx-stack-panel.js';
 import { initVersionHistoryPanel, openPanel as _vhOpenPanel, closePanel as _vhClosePanel, togglePanel as _vhTogglePanel } from './version-history-panel.js';
 import { commit } from './version-history.js';
 import { toast } from '../io/actions.js';
@@ -31,17 +27,15 @@ import { registerGLSLLanguage, BUILTIN_FUNCTIONS, BUILTIN_VARIABLES, SEMANTIC_LE
 import { registerGLSLCodeActions } from './glsl-code-actions.js';
 import { formatGLSL, flashFormattedStatus } from '../shader/glsl-formatter.js';
 import { loadExample, copyCode } from '../io/actions.js';
-import { openLibrary, openShaderComposer, closeShaderComposer, loadPreset, loadUserPresets } from '../io/library.js';
-
-export { openShaderComposer, closeShaderComposer };
-import { togglePerfPanel } from '../render/perf.js';
-import { exportScreenshot, openExportModal, shareLink } from '../export/export.js';
+import { loadPreset } from '../io/library.js';
+import { loadUserPresets } from '../io/presets.js';
+import { toggleInspectorPanel } from './inspector-context.js';
+import { exportScreenshot, openExportModal } from '../export/export.js';
 import { toggleFullscreenVP, togglePause } from './viewport.js';
 import { adaptiveDebounce, cancelAdaptiveDebounce } from '../render/adaptive-debounce.js';
-import { toggleColorBlindnessPanel } from '../render/colorblindness-ui.js';
 import { toggleSettingsPanel } from './settings-panel.js';
 
-export { toggleColorBlindnessPanel, toggleSettingsPanel };
+export { toggleSettingsPanel };
 // 1.4: GLSL completions — token lists come from glsl-language.js
 const GLSL_BUILTINS = [
   ...BUILTIN_FUNCTIONS.map(label => ({ label, kind: 1, insertText: label, detail: 'GLSL built-in function' })),
@@ -248,46 +242,30 @@ function buildPaletteCommands() {
     { label: 'Unfold All',                    keys: '',                     run: () => state.editor?.trigger('palette', 'editor.unfoldAll', null) },
     { label: 'Load Example Shader',           keys: '',                     run: () => loadExample() },
     { label: 'Copy Shader Code',              keys: '',                     run: () => copyCode() },
-    // ── Library ─────────────────────────────────────────────────────────────
-    { label: 'Open Shader Library',           keys: '',                     run: () => openLibrary() },
     // ── Performance ─────────────────────────────────────────────────────────
-    { label: 'Toggle Ray Marching Assistant (Phase 15.3)', keys: 'Ctrl+Shift+M', run: () => toggleRaymarchAssistant() },
-    { label: 'Toggle SDF Visualizer (Phase 15.3)',   keys: '',              run: () => toggleSdfVisualizer() },
-    { label: 'Toggle SDF Composer (Phase 15.3)',     keys: '',              run: () => toggleSdfComposer() },
-    { label: 'Toggle Color Blindness Mode (Phase 21.2)', keys: 'Ctrl+Shift+B', run: () => toggleColorBlindnessPanel() },
     { label: 'Toggle Settings (Phase 21.1)', keys: 'Ctrl+,', run: () => toggleSettingsPanel() },
-    { label: 'Toggle Performance Panel',      keys: 'Ctrl+Shift+G',         run: () => togglePerfPanel() },
+    { label: 'Toggle Inspector Panel',        keys: 'Ctrl+Shift+G',         run: () => toggleInspectorPanel() },
     { label: 'Toggle GPU Per-Pass Profiler (Phase 7.1)', keys: '',          run: () => import('../render/pass-profiler.js').then(m => m.togglePassProfiler()) },
     { label: 'Toggle Includes Manager (F-8.2)',          keys: '',          run: () => toggleIncludesPanel() },
     { label: 'Toggle Block Palette (F-1.2)',            keys: 'Ctrl+Shift+K', run: () => toggleBlockPalette() },
-    { label: 'Toggle Color Palette Panel (F-4.3)',      keys: '',          run: () => togglePalettePanel() },
-    { label: 'Toggle FX Stack Panel (F-2.2)',           keys: '',          run: () => toggleFXPanel() },
     // ── Focus modes (UI v2 §J.2) ────────────────────────────────────────────
     { label: 'Focus: Zen mode (editor)',      keys: '',                     run: () => import('./focus-modes.js').then(m => m.focusZen()) },
     { label: 'Focus: Performance mode (canvas)', keys: '',                  run: () => import('./focus-modes.js').then(m => m.focusPerformance()) },
     { label: 'Focus: Teaching mode',          keys: '',                     run: () => import('./focus-modes.js').then(m => m.focusTeaching()) },
     { label: 'Focus: Normal (reset)',         keys: '',                     run: () => import('./focus-modes.js').then(m => m.focusNormal()) },
     { label: 'Toggle Shader Anatomy overlay',  keys: '',                    run: () => toggleShaderAnatomy() },
-    // ── Import fichiers locaux (Phase 18.2) ─────────────────────────────────
-    { label: 'Open local shader file (.glsl/.wgsl/…)',    keys: '',    run: () => openLocalShaderFile() },
-    { label: 'Import Shadertoy ZIP archive',             keys: '',    run: () => openLocalZipFile() },
     // ── Project management ───────────────────────────────────────────────────
-    { label: 'Toggle Multi-project Workspace (Phase 20.1)', keys: 'Ctrl+Shift+W', run: () => toggleWorkspacePanel() },
     { label: 'Toggle Version History (Phase 20.2)',  keys: 'Ctrl+Shift+Z', run: () => toggleVersionHistory() },
     { label: 'Toggle Shader Library (Phase 20.3)',  keys: 'Ctrl+Shift+F', run: () => toggleShaderLibrary() },
-    { label: 'Toggle LUT Library 50+ (Phase 19.2)',      keys: 'Ctrl+Shift+L',   run: () => toggleLUTLibPanel() },
-    { label: 'Toggle LUT 1D Editor (Phase 19.2)',        keys: '',               run: () => toggleLUT1DEditor() },
     // ── Export ──────────────────────────────────────────────────────────────
     { label: 'Export → Screenshot',           keys: '',                     run: () => exportScreenshot() },
     { label: 'Export → Standalone HTML',      keys: '',                     run: () => openExportModal() },
-    { label: 'Share Link (URL)',              keys: '',                     run: () => shareLink() },
     // ── Viewport ────────────────────────────────────────────────────────────
     { label: 'Toggle Fullscreen Viewport',    keys: '',                     run: () => toggleFullscreenVP() },
     { label: 'Toggle Pause Rendering',        keys: '',                     run: () => togglePause() },
     // ── Theme ───────────────────────────────────────────────────────────────
     // ── Presets (Phase T) — user's own saved presets only; the full builtin
-    // catalog (dozens of entries) already has a dedicated browsing UI
-    // ("Open Shader Library" above) and would drown out everything else here.
+    // catalog (dozens of entries) would drown out everything else here.
     ...loadUserPresets().map(p => ({
       label: `Load: ${p.name}`,
       detail: 'from Library',
@@ -940,12 +918,12 @@ function openCommandPalette() {
     run: (ed) => ed.trigger('keyboard', 'editor.action.referenceSearch.trigger', null),
   });
 
-  // P2.14 — Toggle Performance Panel shortcut
+  // P2.14 — Toggle Inspector Panel shortcut
   state.editor.addAction({
-    id: 'z-gl.toggle-perf-panel',
-    label: 'Toggle Performance Panel',
+    id: 'z-gl.toggle-inspector-panel',
+    label: 'Toggle Inspector Panel',
     keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyG],
-    run: () => togglePerfPanel(),
+    run: () => toggleInspectorPanel(),
   });
 
   monaco.languages.registerReferenceProvider('glsl', {
@@ -1048,11 +1026,8 @@ function openCommandPalette() {
     });
   });
 
-  // Restore shared shader after Monaco is ready.
-  // If no hash payload is present, keep default example behavior.
   (async () => {
-    const restored = await restoreFromHash();
-    if (!restored) setTimeout(applyAndParse, 150);
+    setTimeout(applyAndParse, 150);
     setTimeout(() => applyCompileMarkers(state.editor), 180);
     setTimeout(() => applyTypeCheckMarkers(state.editor), 220);
     // Minimap starts enabled — reflect that in the button state
@@ -1139,221 +1114,20 @@ _ensureBrowserFileDrop();
 
 if (typeof state.editor !== 'undefined' && state.editor) {
   state.editor.addAction({
-    id:    'z-gl.toggle-colorblindness-panel',
-    label: 'Toggle Color Blindness Mode (Phase 21.2)',
-    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyB],
-    run:   () => toggleColorBlindnessPanel(),
-  });
-
-  state.editor.addAction({
     id:    'z-gl.toggle-settings-panel',
     label: 'Toggle Settings (Phase 21.1)',
     keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Comma],
     run:   () => toggleSettingsPanel(),
   });
 }
-// ── Phase 18.2 — Import fichiers locaux ──────────────────────────────────────
-
-export function openLocalShaderFile() {
-  openLocalFileDialog();
-}
-
-export function openLocalZipFile() {
-  openZipFileDialog();
-}
-
 export function _ensureBrowserFileDrop() {
   initBrowserFileDrop(document.body);
-}
-
-// ── Phase 15.3 — Ray Marching Assistant ──────────────────────────────────────
-
-let _rmAssistant = null;
-let _sdfViz      = null;
-let _sdfComposer = null;
-
-async function _getRaymarchAssistant() {
-  if (_rmAssistant) return _rmAssistant;
-  const { initRaymarchAssistant } = await import('../render/raymarch-assistant.js');
-  const { initSdfVisualizer, updateSrc: sdfVizUpdateSrc } = await import('../render/sdf-visualizer.js');
-  _sdfViz = initSdfVisualizer();
-  _rmAssistant = initRaymarchAssistant({
-    onApply: (params) => {
-      const src = state.editor?.getValue();
-      if (!src) return;
-      const { getInjectedSrc } = _rmAssistantModule;
-      const patched = getInjectedSrc(src);
-      if (patched !== src) state.editor?.setValue(patched);
-    },
-    onOpenSdfViz: () => _sdfViz?.toggle(),
-  });
-  return _rmAssistant;
-}
-
-let _rmAssistantModule = null;
-
-async function _ensureRaymarchModule() {
-  if (_rmAssistantModule) return _rmAssistantModule;
-  _rmAssistantModule = await import('../render/raymarch-assistant.js');
-  return _rmAssistantModule;
-}
-
-export async function toggleRaymarchAssistant() {
-  const mod = await _ensureRaymarchModule();
-  const ui  = await _getRaymarchAssistant();
-  const src = state.editor?.getValue() ?? '';
-  mod.refresh(src);
-  ui.toggle();
-}
-
-export async function openRaymarchAssistant() {
-  const ui  = await _getRaymarchAssistant();
-  const mod = await _ensureRaymarchModule();
-  const src = state.editor?.getValue() ?? '';
-  mod.refresh(src);
-  ui.open();
-}
-
-export async function toggleSdfVisualizer() {
-  await _getRaymarchAssistant();
-  const src = state.editor?.getValue() ?? '';
-  if (_sdfViz) { _sdfViz.updateSrc ? _sdfViz.updateSrc(src) : null; _sdfViz.toggle(); }
-}
-
-export async function toggleSdfComposer() {
-  if (!_sdfComposer) {
-    const { initSdfComposer } = await import('../render/sdf-composer.js');
-    _sdfComposer = initSdfComposer({
-      onInsert: (code) => {
-        const editor = state.editor;
-        if (!editor) return;
-        const selection = editor.getSelection();
-        editor.executeEdits('sdf-composer', [{ range: selection, text: '\n' + code + '\n' }]);
-      },
-    });
-  }
-  _sdfComposer.toggle();
-}
-
-// Auto-detect raymarch on editor change
-export function _setupRaymarchAutoDetect() {
-  if (!state.editor) return;
-  state.editor.onDidChangeModelContent(() => {
-    if (!_rmAssistant) return;
-    const src = state.editor.getValue();
-    import('../render/raymarch-assistant.js').then(mod => mod.autoDetectAndShow(src));
-  });
-}
-
-if (typeof monaco !== 'undefined' && state.editor) {
-  state.editor.addAction({
-    id:    'z-gl.toggle-raymarch-assistant',
-    label: 'Toggle Ray Marching Assistant (Phase 15.3)',
-    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyM],
-    run:   () => toggleRaymarchAssistant(),
-  });
-}
-
-
-// ── Phase 19.2 — Bibliothèque de LUTs ─────────────────────────────────────────
-
-let _lutLibPanel = null;
-
-async function _ensureLUTLibPanel() {
-  if (!_lutLibPanel) {
-    const { initLUTLibPanel, openPanel, closePanel, togglePanel } = await import('../render/lut-library-panel.js');
-    await initLUTLibPanel();
-    _lutLibPanel = { open: openPanel, close: closePanel, toggle: togglePanel };
-  }
-  return _lutLibPanel;
-}
-
-export async function openLUTLibPanel() {
-  const p = await _ensureLUTLibPanel();
-  p.open();
-}
-
-export async function closeLUTLibPanel() {
-  if (_lutLibPanel) _lutLibPanel.close();
-}
-
-export async function toggleLUTLibPanel() {
-  const p = await _ensureLUTLibPanel();
-  p.toggle();
-}
-
-if (typeof monaco !== 'undefined' && state.editor) {
-  state.editor.addAction({
-    id:    'z-gl.toggle-lut-library',
-    label: 'Toggle LUT Library (Phase 19.2)',
-    // Ctrl+Shift+L was already bound to Monaco's "Select All Occurrences"
-    // (z-gl.cursor-select-all-occurrences) — real, live keybinding collision
-    // where the LUT toggle silently never fired. Moved to a free slot.
-    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyU],
-    run:   () => toggleLUTLibPanel(),
-  });
-}
-
-let _lut1dEditor = null;
-
-async function _ensureLUT1DEditor() {
-  if (!_lut1dEditor) {
-    const { openLUT1DEditor, closeLUT1DEditor, toggleLUT1DEditor } = await import('../render/lut-1d-editor.js');
-    _lut1dEditor = { open: openLUT1DEditor, close: closeLUT1DEditor, toggle: toggleLUT1DEditor };
-  }
-  return _lut1dEditor;
-}
-
-export async function toggleLUT1DEditor() {
-  const p = await _ensureLUT1DEditor();
-  p.toggle();
 }
 
 // ── F-8.2 — Includes Manager Panel ───────────────────────────────────────────
 
 export function toggleIncludesPanel() {
   import('./includes-panel.js').then(m => m.toggle());
-}
-
-// ── Phase 19.4 — Documentation GLSL embarquée ────────────────────────────────
-
-export function openShaderDocs(word) {
-  openShaderDocPanel(word || '');
-}
-
-export function closeShaderDocs() {
-  closeShaderDocPanel();
-}
-
-export function toggleShaderDocs(word) {
-  toggleShaderDocPanel(word || '');
-}
-
-// ── Phase 20.1 — Workspace multi-projets ──────────────────────────────────────
-
-let _workspacePanel = null;
-
-async function _ensureWorkspacePanel() {
-  if (!_workspacePanel) {
-    const { initWorkspacePanel, openPanel, closePanel, togglePanel } = await import('./workspace-panel.js');
-    await initWorkspacePanel();
-    _workspacePanel = { open: openPanel, close: closePanel, toggle: togglePanel };
-  }
-  return _workspacePanel;
-}
-
-export async function openWorkspacePanel() {
-  const p = await _ensureWorkspacePanel();
-  p.open();
-}
-
-export async function closeWorkspacePanel() {
-  if (_workspacePanel) _workspacePanel.close();
-}
-
-export async function toggleWorkspacePanel() {
-  const p = await _ensureWorkspacePanel();
-  p.toggle();
 }
 
 // ── Phase 20.2 — Versioning local intégré ────────────────────────────────────
@@ -1466,14 +1240,3 @@ document.addEventListener('keydown', async (e) => {
   }
 });
 
-// Global F1 keyboard shortcut (when editor is not focused)
-document.addEventListener('keydown', async (e) => {
-  if (e.key === 'F1' && !e.ctrlKey && !e.metaKey && !e.altKey) {
-    const activeEl = document.activeElement;
-    const inEditor = activeEl?.closest?.('.monaco-editor');
-    if (!inEditor) {
-      e.preventDefault();
-      openShaderDocPanel('');
-    }
-  }
-});

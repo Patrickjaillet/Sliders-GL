@@ -2,8 +2,7 @@
 // Phase 6 — Export & Sharing  (additions to export.js)
 // ─────────────────────────────────────────────────────────────────────────────
 // Covers:
-//   6.3 — Code: p5.js sketch, GLSL Sandbox, ShaderToy paste format,
-//               versioned multi-pass share URL
+//   6.3 — Code: p5.js sketch, GLSL Sandbox, ShaderToy paste format
 //   6.1 B — Export preview thumbnail
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -11,7 +10,6 @@ import * as THREE from 'three';
 import { state } from '../core/state.js';
 import { VERT } from '../gl/renderer.js';
 import { toast } from '../io/actions.js';
-import { fmtN, updateFill, patchLine } from '../ui/slider.js';
 
 /** Render one offscreen frame at w×h and return the raw ImageData */
 function _renderOffscreen(w, h, { alpha = false } = {}) {
@@ -216,159 +214,6 @@ export function exportShaderToyFormat() {
   const blob = new Blob([header + cleaned], { type: 'text/plain' });
   _triggerDownload(blob, 'shader-shadertoy.glsl');
   toast('ShaderToy format exported', 'ok');
-}
-
-// ── 6.3 D — Versioned multi-pass share URL ───────────────────────────────────
-
-/**
- * Build a versioned, multi-pass aware share URL.
- * Payload schema v2:
- * {
- *   v: 2,
- *   name: string,
- *   passes: { id: string, code: string, label: string }[],
- *   sliders: { id, value }[],
- *   t: number,
- *   timeScale: number,
- * }
- */
-export async function shareLinkV2() {
-  const code = state.editor?.getValue() ?? '';
-
-  // Collect passes if multi-pass is active
-  const passes = [];
-
-  // Main image pass always present
-  passes.push({ id: 'image', label: 'Image', code });
-
-  // Additional passes from state (if multi-pass system exposes them)
-  if (Array.isArray(state.passes)) {
-    for (const p of state.passes) {
-      if (p.id !== 'image' && p.code) {
-        passes.push({ id: p.id, label: p.label ?? p.id, code: p.code });
-      }
-    }
-  }
-
-  const sliderState = (state.vars ?? []).map(v => ({ id: v.id, value: v.value }));
-
-  const payload = {
-    v: 2,
-    name: state.currentPreset ?? 'untitled',
-    passes,
-    sliders: sliderState,
-    t: state.simTime ?? 0,
-    timeScale: state.timeScale ?? 1,
-  };
-
-  try {
-    const json = JSON.stringify(payload);
-    const bytes = new TextEncoder().encode(json);
-
-    let encoded;
-    if (typeof CompressionStream !== 'undefined') {
-      const cs = new CompressionStream('deflate-raw');
-      const writer = cs.writable.getWriter();
-      writer.write(bytes);
-      writer.close();
-      const compressed = await new Response(cs.readable).arrayBuffer();
-      encoded = btoa(String.fromCharCode(...new Uint8Array(compressed)));
-    } else {
-      encoded = btoa(unescape(encodeURIComponent(json)));
-    }
-
-    const url =
-      location.origin + location.pathname + '#shader2=' + encodeURIComponent(encoded);
-    await navigator.clipboard.writeText(url);
-
-    const passSuffix = passes.length > 1 ? ` (${passes.length} passes)` : '';
-    toast(`Share link v2 copied${passSuffix}!`, 'ok');
-  } catch (e) {
-    toast('Failed to copy share link: ' + e.message, 'err');
-  }
-}
-
-/**
- * Restore from a v2 share URL hash.
- * Returns true if restored, false otherwise.
- */
-export async function restoreFromHashV2() {
-  const hash = location.hash;
-  if (!hash.startsWith('#shader2=')) return false;
-
-  try {
-    const encoded = decodeURIComponent(hash.slice('#shader2='.length));
-    const raw = atob(encoded);
-    const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
-
-    let json;
-    if (typeof DecompressionStream !== 'undefined') {
-      try {
-        const ds = new DecompressionStream('deflate-raw');
-        const writer = ds.writable.getWriter();
-        writer.write(bytes);
-        writer.close();
-        const buf = await new Response(ds.readable).arrayBuffer();
-        json = new TextDecoder().decode(buf);
-      } catch {
-        json = decodeURIComponent(escape(raw));
-      }
-    } else {
-      json = decodeURIComponent(escape(raw));
-    }
-
-    const payload = JSON.parse(json);
-    if (!payload || payload.v !== 2) return false;
-
-    // Restore image pass
-    const imagePass = payload.passes?.find(p => p.id === 'image');
-    if (imagePass && state.editor) {
-      state.editor.setValue(imagePass.code);
-    }
-
-    // Restore additional passes if multi-pass system available
-    if (Array.isArray(payload.passes) && Array.isArray(state.passes)) {
-      for (const savedPass of payload.passes) {
-        if (savedPass.id === 'image') continue;
-        const livePass = state.passes.find(p => p.id === savedPass.id);
-        if (livePass) livePass.code = savedPass.code;
-      }
-    }
-
-    if (typeof payload.t === 'number') state.simTime = payload.t;
-    if (typeof payload.timeScale === 'number') state.timeScale = payload.timeScale;
-
-    setTimeout(() => {
-      // Re-use applyAndParse from actions if available
-      if (typeof state.callbacks?.applyAndParse === 'function') {
-        state.callbacks.applyAndParse();
-      }
-
-      // Restore sliders
-      if (payload.sliders) {
-        payload.sliders.forEach(s => {
-          const e = state.varMap?.[s.id];
-          if (!e) return;
-          e.value = s.value;
-          const sl = document.getElementById('sl-' + s.id);
-          const sv = document.getElementById('sv-' + s.id);
-          if (sl) sl.value = s.value;
-          if (sv) sv.value = fmtN(s.value, e.decimals);
-          updateFill(s.id, e);
-          patchLine(e);
-        });
-      }
-
-      const passSuffix =
-        payload.passes?.length > 1 ? ` (${payload.passes.length} passes)` : '';
-      toast(`Shader restored from link${passSuffix}`, 'ok');
-    }, 300);
-
-    return true;
-  } catch (e) {
-    console.warn('[Phase6] restoreFromHashV2 failed:', e);
-    return false;
-  }
 }
 
 // ═════════════════════════════════════════════════════════════════════════════

@@ -104,7 +104,6 @@ vi.mock('../gl/renderer.js', () => ({
   hideErr:          vi.fn(),
 }));
 
-vi.mock('../render/perf.js',           () => ({ setTAAVelocityTex: vi.fn() }));
 vi.mock('./sound-pass.js', () => ({
   soundEnable:   vi.fn(async () => true),
   soundDisable:  vi.fn(),

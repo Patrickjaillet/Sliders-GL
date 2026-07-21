@@ -1,14 +1,11 @@
 // Phase Q roadmap UI/UX — Inspector Contextuel (panneau droit)
 //
-// L'inspector droit (200px) était jusqu'ici toujours "Performance". Il devient
-// contextuel : son contenu change selon le contexte courant (perf / pass actif /
-// slider survolé / uniform runtime survolé dans Monaco), tout en gardant le mode
-// Performance comme contenu par défaut (inchangé, juste déplacé dans #insp-perf).
+// L'inspector droit (200px) change de contenu selon le contexte courant
+// (pass actif / slider survolé / uniform runtime survolé dans Monaco).
 //
 // Chaque mode est piloté par un événement déjà existant dans la codebase plutôt
 // que par un couplage direct entre modules :
 //   - 'pass'    ← window 'zgl:passchange' (émis par multipass.js)
-//   - 'perf'    ← window 'zgl:inspectormode' (émis par perf.js au clic sur le bouton perf)
 //   - 'slider'  ← mouseover délégué sur #sw (.sr rows)
 //   - 'uniform' ← Monaco editor.onMouseMove (réutilise hover-inspector.js)
 
@@ -18,8 +15,8 @@ import { startRangeEdit } from './context-menu.js';
 import { switchSidebarTab } from './sidebar-tabs.js';
 import { RUNTIME, findSliderEntry } from './hover-inspector.js';
 
-const MODE_TITLES = { perf: 'Performance', pass: 'Pass', slider: 'Slider', uniform: 'Uniform' };
-let _mode = 'perf';
+const MODE_TITLES = { pass: 'Pass', slider: 'Slider', uniform: 'Uniform' };
+let _mode = 'pass';
 
 function _setActivePane(mode) {
   document.querySelectorAll('.insp-pane').forEach(p => {
@@ -116,7 +113,7 @@ function _initSliderHover() {
     if (_mode !== 'slider') setInspectorMode('slider');
   });
   sw.addEventListener('mouseleave', () => {
-    if (_mode === 'slider') setInspectorMode('perf');
+    if (_mode === 'slider') setInspectorMode('pass');
   });
 }
 
@@ -137,40 +134,31 @@ function _initUniformHover() {
     const word = model?.getWordAtPosition(pos);
     const fn = word && RUNTIME[word.word];
     if (!fn) {
-      if (_mode === 'uniform') setInspectorMode('perf');
+      if (_mode === 'uniform') setInspectorMode('pass');
       return;
     }
     setInspectorMode('uniform', `<div class="insp-uniform-md">${_mdLite(fn())}</div>`);
   });
   state.editor.onMouseLeave(() => {
-    if (_mode === 'uniform') setInspectorMode('perf');
+    if (_mode === 'uniform') setInspectorMode('pass');
   });
 }
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 
-// Phase 5 — inspector properties style: click a perf-section title to
-// collapse/expand that property group (disclosure triangle via CSS).
-function _initPerfSectionCollapse() {
-  const body = document.getElementById('insp-perf');
-  if (!body) return;
-  body.addEventListener('click', e => {
-    const title = e.target.closest('.perf-section-title');
-    if (!title) return;
-    title.closest('.perf-section')?.classList.toggle('collapsed');
-  });
+/** Toggle the visibility of the whole right-hand inspector column. */
+export function toggleInspectorPanel(e) {
+  if (e) e.stopPropagation();
+  const layout = document.getElementById('layout');
+  if (!layout) return;
+  layout.classList.toggle('inspector-open');
 }
 
 export function initInspectorContext() {
   // Switching the active pass is a deliberate user action — always surface its info.
   window.addEventListener('zgl:passchange', () => _renderPassInfo());
-  window.addEventListener('zgl:inspectormode', ev => {
-    const mode = ev.detail?.mode;
-    if (mode === 'perf') setInspectorMode('perf');
-  });
   _initSliderHover();
   _initUniformHover();
-  _initPerfSectionCollapse();
 }
 
 export { setInspectorMode };

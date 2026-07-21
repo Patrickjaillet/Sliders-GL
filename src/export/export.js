@@ -1,11 +1,10 @@
-﻿// Export — screenshot, video, share link, GLSL/HTML/Three snippet
+﻿// Export — screenshot, video, GLSL/HTML/Three snippet
 
 import * as THREE from 'three';
 import JSZip from 'jszip';
 import { state } from '../core/state.js';
 import { VERT } from '../gl/renderer.js';
-import { toast, openModalDialog, closeModalDialog, applyAndParse } from '../io/actions.js';
-import { fmtN, updateFill, patchLine } from '../ui/slider.js';
+import { toast, openModalDialog, closeModalDialog } from '../io/actions.js';
 
 // ── Export modal ──
 function openExportModal() {
@@ -202,148 +201,6 @@ function finalizeVideoExport() {
 }
 
 // ─────────────────────────────────────────
-// 4.3 SHARE LINK (URL hash)
-// ─────────────────────────────────────────
-// Lightweight compress/decompress using base64 + built-in compression
-// Falls back to raw base64 if CompressionStream not available
-
-async function compressToBase64(str) {
-  const bytes = new TextEncoder().encode(str);
-  if (typeof CompressionStream !== 'undefined') {
-    const cs = new CompressionStream('deflate-raw');
-    const writer = cs.writable.getWriter();
-    writer.write(bytes); writer.close();
-    const compressed = await new Response(cs.readable).arrayBuffer();
-    return btoa(String.fromCharCode(...new Uint8Array(compressed)));
-  }
-  // Fallback: plain base64
-  return btoa(unescape(encodeURIComponent(str)));
-}
-
-async function decompressFromBase64(b64) {
-  const raw = atob(b64);
-  const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
-  if (typeof DecompressionStream !== 'undefined') {
-    try {
-      const ds = new DecompressionStream('deflate-raw');
-      const writer = ds.writable.getWriter();
-      writer.write(bytes); writer.close();
-      const buf = await new Response(ds.readable).arrayBuffer();
-      return new TextDecoder().decode(buf);
-    } catch(e) {}
-  }
-  // Fallback
-  return decodeURIComponent(escape(raw));
-}
-
-// §10.2 — construit l'URL de partage (shader + sliders encodés dans le hash)
-async function buildShareURL() {
-  const code = state.editor ? state.editor.getValue() : '';
-  const sliderState = state.vars.map(v => ({ id: v.id, value: v.value }));
-  const payload = JSON.stringify({ code, sliders: sliderState, t: state.simTime });
-  const encoded = await compressToBase64(payload);
-  return location.origin + location.pathname + '#shader=' + encodeURIComponent(encoded);
-}
-
-// §10.2 — feuille de partage : URL + extrait d'intégration <iframe>.
-async function shareLink() {
-  let url;
-  try { url = await buildShareURL(); }
-  catch { toast('Failed to build share link', 'err'); return; }
-
-  const embedURL = url.replace('#shader=', '?embed=1#shader=');
-  const embedSnippet = `<iframe src="${embedURL}" width="640" height="360" frameborder="0" allow="fullscreen" title="Z-GL shader"></iframe>`;
-
-  document.getElementById('share-sheet-overlay')?.remove();
-  const overlay = document.createElement('div');
-  overlay.id = 'share-sheet-overlay';
-  overlay.className = 'modal-overlay';
-  overlay.setAttribute('role', 'dialog');
-  overlay.setAttribute('aria-modal', 'true');
-  overlay.innerHTML = `
-    <div class="modal" style="width:480px;max-width:94vw">
-      <div class="modal-header">
-        <h3>Share shader</h3>
-        <button class="modal-close" id="share-sheet-close" aria-label="Close">
-          <svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg>
-        </button>
-      </div>
-      <label style="font-size:11px;color:var(--text-secondary);display:block;margin:8px 0 3px">Link</label>
-      <div style="display:flex;gap:6px">
-        <input id="share-url" readonly value="${url}" style="flex:1;min-width:0;padding:6px 8px;border-radius:var(--radius);border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-primary);font:11px var(--font-mono)">
-        <button class="modal-btn confirm" id="share-url-copy">Copy</button>
-      </div>
-      <label style="font-size:11px;color:var(--text-secondary);display:block;margin:12px 0 3px">Embed (iframe)</label>
-      <div style="display:flex;gap:6px">
-        <input id="share-embed" readonly value='${embedSnippet.replace(/'/g, '&#39;')}' style="flex:1;min-width:0;padding:6px 8px;border-radius:var(--radius);border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-primary);font:11px var(--font-mono)">
-        <button class="modal-btn" id="share-embed-copy">Copy</button>
-      </div>
-      <div id="share-qr-wrap" style="display:none;flex-direction:column;align-items:center;margin-top:14px">
-        <canvas id="share-qr" style="border-radius:6px;background:#fff;padding:6px"></canvas>
-        <div style="font-size:10px;color:var(--text-disabled);margin-top:4px">Scan to open on another device</div>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-  requestAnimationFrame(() => overlay.classList.add('open'));
-
-  const close = () => { overlay.classList.remove('open'); setTimeout(() => overlay.remove(), 250); };
-  const copy = (sel, label) => navigator.clipboard.writeText(document.getElementById(sel).value)
-    .then(() => toast(`${label} copied!`, 'ok')).catch(() => toast('Copy failed', 'err'));
-  overlay.querySelector('#share-sheet-close').addEventListener('click', close);
-  overlay.addEventListener('mousedown', e => { if (e.target === overlay) close(); });
-  overlay.querySelector('#share-url-copy').addEventListener('click', () => copy('share-url', 'Link'));
-  overlay.querySelector('#share-embed-copy').addEventListener('click', () => copy('share-embed', 'Embed snippet'));
-  const urlInput = /** @type {HTMLInputElement} */ (document.getElementById('share-url'));
-  urlInput.focus();
-  urlInput.select();
-
-  // §10.2 — QR code (masqué si l'URL dépasse la capacité d'un QR)
-  try {
-    const { drawQR } = await import('./qrcode.js');
-    const cv = /** @type {HTMLCanvasElement} */ (document.getElementById('share-qr'));
-    const wrap = document.getElementById('share-qr-wrap');
-    if (cv && wrap && drawQR(cv, url, { level: 'L', scale: 3, margin: 3 })) {
-      wrap.style.display = 'flex';
-    }
-  } catch { /* QR non critique */ }
-}
-
-async function restoreFromHash() {
-  const hash = location.hash;
-  if (!hash.startsWith('#shader=')) return false;
-  try {
-    const encoded = decodeURIComponent(hash.slice('#shader='.length));
-    const json = await decompressFromBase64(encoded);
-    const payload = JSON.parse(json);
-    if (payload.code && state.editor) {
-      state.editor.setValue(payload.code);
-      if (typeof payload.t === 'number') state.simTime = payload.t;
-      setTimeout(() => {
-        applyAndParse();
-        // Restore slider values after parse
-        if (payload.sliders) {
-          payload.sliders.forEach(s => {
-            const e = state.varMap[s.id];
-            if (!e) return;
-            e.value = s.value;
-            const sl = document.getElementById('sl-' + s.id);
-            const sv = document.getElementById('sv-' + s.id);
-            if (sl) sl.value = s.value;
-            if (sv) sv.value = fmtN(s.value, e.decimals);
-            updateFill(s.id, e);
-            patchLine(e);
-          });
-        }
-        toast('Shader restored from link', 'ok');
-      }, 300);
-      return true;
-    }
-  } catch(e) {
-    console.warn('Failed to restore from hash:', e);
-  }
-  return false;
-}
-
 // ─────────────────────────────────────────
 // 4.4 CODE EXPORT
 // ─────────────────────────────────────────
@@ -738,14 +595,12 @@ function exportCurrentFrame() {
   }
 }
 
-export { openExportModal, closeExportModal, switchExportTab, exportScreenshot, exportCurrentFrame, _mediaRecorder, _recordChunks, _recordTimer, _recordStart, _recordDuration, toggleVideoRecord, startVideoRecord, stopVideoRecord, finalizeVideoExport, compressToBase64, decompressFromBase64, shareLink, restoreFromHash, exportPureGLSL, exportMinifiedGLSL, exportThreeSnippet, exportStandaloneHTML, exportProjectZip };
+export { openExportModal, closeExportModal, switchExportTab, exportScreenshot, exportCurrentFrame, _mediaRecorder, _recordChunks, _recordTimer, _recordStart, _recordDuration, toggleVideoRecord, startVideoRecord, stopVideoRecord, finalizeVideoExport, exportPureGLSL, exportMinifiedGLSL, exportThreeSnippet, exportStandaloneHTML, exportProjectZip };
 
 // ── Phase 6 additions ─────────────────────────────────────────────────────────
 export {
   exportP5Sketch,
   exportGLSLSandbox,
   exportShaderToyFormat,
-  shareLinkV2,
-  restoreFromHashV2,
   renderExportPreview,
 } from './export-phase6.js';

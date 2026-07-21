@@ -91,11 +91,8 @@ export const state = {
 
   callbacks: {
     updateAudioTextures: null,
-    updateSparkline: null,
     renderMultiPass: null,
-    resizePostRT: null,
     mpResizeRTs: null,
-    initPostProcess: null,
     renderChannelUI: null,
     onBuildUI: null,
     stImportMultipass: null,
@@ -103,12 +100,6 @@ export const state = {
   },
 
   mp: createInitialMultipassState(),
-
-  // Fix 1.6 — state.perf initialisé à null ici ; perf.js est la seule source
-  // de vérité et le remplace entièrement lors de son initialisation.
-  // Évite le flash Retina (était devicePixelRatio) et les accès à des champs
-  // undefined si perf.js n'est pas encore exécuté.
-  perf: null,
 
   ai: {
     modelId:      null,
@@ -120,15 +111,12 @@ export const state = {
 
   hlslEditMode: false,
 
-  perfPanelOpen: false,
   viewportFullscreen: false,
 
-  // Phase 20.1 — Workspace multi-projets
+  // Phase 20.1 — Workspace multi-projets (données partagées par workspace-manager.js,
+  // version-history-panel.js et shader-library-panel.js)
   activeProjectId:   null,
   activeProjectName: null,
-  workspace: {
-    panelOpen: false,
-  },
 
   activePresetId: null,
 

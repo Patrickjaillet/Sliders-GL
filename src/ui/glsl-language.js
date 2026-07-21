@@ -1,5 +1,4 @@
 import { GLSL_DOCS, glslFormatHover } from '../shader/glsl-docs-db.js';
-import { registerF1DocAction } from './shader-doc-panel.js';
 /**
  * glsl-language.js
  * Registers a full GLSL ES 3.0 language definition in Monaco, including:
@@ -1023,9 +1022,6 @@ export function registerGLSLLanguage(monaco) {
       };
     },
   });
-
-  // ── F1 Documentation ────────────────────────────────────────────────────────
-  try { registerF1DocAction(monaco, state.editor, 'glsl'); } catch (_) {}
 
   // ── Completion provider ─────────────────────────────────────────────────────
   monaco.languages.registerCompletionItemProvider('glsl', {

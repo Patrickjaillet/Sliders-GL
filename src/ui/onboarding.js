@@ -14,7 +14,6 @@
  *   7.4.3  Built-in GLSL reference panel (searchable, offline)
  *   7.4.4  Tooltip documentation (handled in tooltip.js — already [x])
  *   7.4.5  "What's New" changelog modal (shown once after update)
- *   7.4.6  Crash reporter (Sentry-tauri integration stub + opt-in)
  */
 
 import { toast } from '../io/actions.js';
@@ -29,7 +28,6 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const KEY_FIRST_LAUNCH   = 'zgl_first_launch_done';
-const KEY_CRASH_OPT_IN   = 'zgl_crash_reporter_optin';
 
 export function updateHelpDot() { /* no-op: what's new removed */ }
 
@@ -75,11 +73,6 @@ export function showWelcomeScreen() {
           <div class="welcome-card-title">Load Example</div>
           <div class="welcome-card-desc">Start with a built-in shader</div>
         </button>
-        <button class="welcome-card" id="wc-library" aria-label="Browse shader library">
-          <div class="welcome-card-icon">⊞</div>
-          <div class="welcome-card-title">Browse Library</div>
-          <div class="welcome-card-desc">Explore saved presets</div>
-        </button>
         <button class="welcome-card" id="wc-tutorial" aria-label="Start interactive tutorial">
           <div class="welcome-card-icon">▶</div>
           <div class="welcome-card-title">Tutorial</div>
@@ -114,11 +107,6 @@ export function showWelcomeScreen() {
   overlay.querySelector('#wc-example').addEventListener('click', () => {
     _closeWelcome();
     document.querySelector('[data-action="loadExample"]')?.click();
-  });
-
-  overlay.querySelector('#wc-library').addEventListener('click', () => {
-    _closeWelcome();
-    document.querySelector('[data-action="openLibrary"]')?.click();
   });
 
   overlay.querySelector('#wc-tutorial').addEventListener('click', () => {
@@ -163,7 +151,7 @@ const TUTORIAL_STEPS = [
   {
     target: '#cwrap',
     title: 'Live Viewport',
-    body: 'Your shader renders here in real time. Right-click for screenshot, copy frame, guides, and pop-out. Press H to toggle the HUD, Ctrl+scroll to zoom.',
+    body: 'Your shader renders here in real time. Right-click for screenshot, copy frame, and guides. Press H to toggle the HUD, Ctrl+scroll to zoom.',
     position: 'left',
   },
   {
@@ -177,12 +165,6 @@ const TUTORIAL_STEPS = [
     title: 'Uniforms & Sliders',
     body: 'Constants written with #define or const float become live sliders here. Drag to tweak; Shift+drag for fine control; double-click to reset.',
     position: 'right',
-  },
-  {
-    target: '#toolsMoreBtn',
-    title: 'Tools',
-    body: 'Advanced panels live here: ray march assistant, SDF tools, LUT library, shader docs… Right-click an entry to pin it to the toolbar.',
-    position: 'bottom',
   },
   {
     target: '#exportBtn',
@@ -526,124 +508,6 @@ export function initGLSLReferenceShortcut() {
 
 
 // ═════════════════════════════════════════════════════════════════════════════
-// §7.4.6  CRASH REPORTER (opt-in, Sentry-tauri stub)
-// ═════════════════════════════════════════════════════════════════════════════
-
-let _crashReporterEnabled = false;
-
-function _isCrashReportingEnabled() {
-  try { return localStorage.getItem(KEY_CRASH_OPT_IN) === '1'; } catch { return false; }
-}
-
-/**
- * Initialize crash reporter opt-in preference.
- * If opt-in state is unknown, show a prompt on next launch.
- */
-export function initCrashReporter() {
-  _crashReporterEnabled = _isCrashReportingEnabled();
-
-  const hasDecided = localStorage.getItem(KEY_CRASH_OPT_IN) !== null;
-
-  if (!hasDecided) {
-    // Show opt-in prompt after a delay (non-intrusive)
-    setTimeout(_showCrashReporterPrompt, 8000);
-  }
-
-  if (_crashReporterEnabled) {
-    _setupCrashReporter();
-  }
-}
-
-function _showCrashReporterPrompt() {
-  // Only show if no modals are open
-  if (document.querySelector('.modal-overlay.open')) {
-    setTimeout(_showCrashReporterPrompt, 5000);
-    return;
-  }
-
-  // Bug fix — 'toast' was shadowing the imported toast() function with a DOM element.
-  // Renamed to toastStack; toast() from io/actions.js is now correctly in scope.
-  const toastStack = document.getElementById('toast-stack') || document.body;
-  const banner = document.createElement('div');
-  banner.id = 'crash-reporter-banner';
-  banner.setAttribute('role', 'alertdialog');
-  banner.setAttribute('aria-labelledby', 'crash-banner-msg');
-  banner.style.cssText = `
-    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-    z-index:8500;width:420px;max-width:95vw;
-    padding:14px 16px;background:var(--bg-panel-alt);
-    border:1px solid var(--b2);border-radius:12px;
-    box-shadow:var(--shadow-panel);display:flex;flex-direction:column;gap:8px;`;
-
-  banner.innerHTML = `
-    <div id="crash-banner-msg" style="font-size:12px;color:var(--t2)">
-      <strong style="color:var(--t1)">Help improve Z-GL</strong><br>
-      Send anonymous crash reports to help us fix bugs faster. No shader code or personal data is ever included.
-    </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button id="crash-no" style="font-size:11px;padding:5px 12px;background:var(--bg3);border:1px solid var(--b1);border-radius:6px;color:var(--t3);cursor:pointer" aria-label="Decline crash reporting">No thanks</button>
-      <button id="crash-yes" style="font-size:11px;padding:5px 14px;background:var(--spark);color:var(--text-inverse);border-radius:6px;font-weight:600;cursor:pointer" aria-label="Enable crash reporting">Enable reporting</button>
-    </div>`;
-
-  document.body.appendChild(banner);
-
-  banner.querySelector('#crash-yes').addEventListener('click', () => {
-    localStorage.setItem(KEY_CRASH_OPT_IN, '1');
-    _crashReporterEnabled = true;
-    _setupCrashReporter();
-    banner.remove();
-    toast('Crash reporting enabled. Thank you!', 'ok');
-  });
-
-  banner.querySelector('#crash-no').addEventListener('click', () => {
-    localStorage.setItem(KEY_CRASH_OPT_IN, '0');
-    banner.remove();
-  });
-
-  banner.querySelector('#crash-yes').focus();
-}
-
-function _setupCrashReporter() {
-  /**
-   * In a real Tauri app this would call:
-   *   import * as Sentry from '@sentry/browser';
-   *   Sentry.init({ dsn: 'https://...@sentry.io/...', release: __APP_VERSION__ });
-   *
-   * For now we set up a global error handler that logs to the console
-   * (and would forward to Sentry when the package is available).
-   */
-  window.addEventListener('error', (e) => {
-    const report = {
-      message: e.message,
-      source: e.filename,
-      line: e.lineno,
-      col: e.colno,
-      version: typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'unknown',
-      timestamp: new Date().toISOString(),
-    };
-
-    // Forward to Rust for persistent offline crash logging
-    const invoke = window.__TAURI__?.core?.invoke;
-    if (invoke) {
-      invoke('log_crash', { report }).catch(() => {});
-    }
-
-    console.group('[Z-GL Crash Reporter]');
-    console.error(report);
-    console.groupEnd();
-
-    // Future: Sentry.captureException(e.error, { extra: report });
-  });
-
-  window.addEventListener('unhandledrejection', (e) => {
-    console.group('[Z-GL Crash Reporter] Unhandled Promise Rejection');
-    console.error(e.reason);
-    console.groupEnd();
-    // Future: Sentry.captureException(e.reason);
-  });
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
 // §  KEYBOARD SHORTCUTS PANEL
 // ═════════════════════════════════════════════════════════════════════════════
 
@@ -656,8 +520,7 @@ const SHORTCUTS = [
   { key: 'Ctrl+Shift+F', action: 'Format GLSL code' },
   { key: 'Ctrl+= / Ctrl+-', action: 'Zoom UI in / out' },
   { key: 'Ctrl+0', action: 'Reset UI zoom' },
-  { key: 'F', action: 'Fullscreen / presentation mode' },
-  { key: 'F1', action: 'Open Shader Docs (GLSL builtins reference)' },
+  { key: 'F1', action: 'Open help center' },
   { key: 'F11', action: 'Fullscreen window' },
   { key: 'Escape', action: 'Close modal / exit mode' },
   { key: 'Space (on slider)', action: 'Pause / resume time' },
@@ -724,7 +587,6 @@ export function showShortcutsPanel() {
  */
 export function initOnboarding() {
   initGLSLReferenceShortcut();
-  initCrashReporter();
 
   setTimeout(() => {
     maybeShowWelcomeScreen();

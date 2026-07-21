@@ -1,6 +1,6 @@
 [package]
 name = "z-gl"
-version = "2.12.0"
+version = "2.13.0"
 description = "Real-time GLSL shader editor, 100% Shadertoy-compatible"
 authors = ["Z-GL Shadertoy"]
 edition = "2021"

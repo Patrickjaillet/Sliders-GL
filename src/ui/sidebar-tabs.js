@@ -20,15 +20,8 @@
 // habituels (menu Tools) : les rouvrir alors qu'ils sont docked les laisse
 // simplement masqués dans leur pane (comportement conservé, non régressif).
 
-import { getStyleLayers } from '../render/style-layers.js';
-// style-panel.js est déjà importé statiquement ailleurs (events.js) — import
-// statique ici aussi pour éviter un warning de chunking inutile (pas de gain
-// de lazy-loading puisqu'il est déjà dans le bundle principal).
-import { openStylePanel } from './style-panel.js';
-
 const TABS = [
   { id: 'uniforms', key: '1' },
-  { id: 'style',     key: '3' },
   { id: 'history',   key: '4' },
 ];
 
@@ -37,10 +30,6 @@ const _docked = {}; // id → root element already docked
 
 /** Construit (si besoin) le panneau réel et renvoie son nœud racine. */
 async function _ensureRoot(id) {
-  if (id === 'style') {
-    openStylePanel();
-    return document.getElementById('stylePanel');
-  }
   if (id === 'history') {
     const mod = await import('./version-history-panel.js');
     await mod.initVersionHistoryPanel();
@@ -61,21 +50,6 @@ async function _dockInto(id) {
     _docked[id] = root;
   }
   if (root.parentElement !== pane) pane.appendChild(root);
-}
-
-function _badgeCount(id) {
-  if (id === 'style') return getStyleLayers().length;
-  return 0;
-}
-
-function _updateBadges() {
-  for (const id of ['style']) {
-    const badge = document.querySelector(`#sbtab-${id} .sidebar-tab-badge`);
-    if (!badge) continue;
-    const n = _badgeCount(id);
-    badge.textContent = String(n);
-    badge.hidden = n === 0;
-  }
 }
 
 export async function switchSidebarTab(id) {
@@ -111,7 +85,4 @@ export function initSidebarTabs() {
     e.preventDefault();
     switchSidebarTab(tab.id);
   });
-
-  _updateBadges();
-  setInterval(_updateBadges, 1000);
 }

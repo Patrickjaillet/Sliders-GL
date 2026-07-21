@@ -4,7 +4,6 @@ import * as THREE from 'three';
 import { state } from '../core/state.js';
 import { toast, applyAndParse } from '../io/actions.js';
 import { wrapFrag, buildUniforms, VERT, applyGLShader, checkFragCompile, showErr, hideErr, wrapFragCube, _BLEND_MODES, BLEND_DESCS } from '../gl/renderer.js';
-import { setTAAVelocityTex } from '../render/perf.js';
 import { esc, escAttr } from '../core/utils.js';
 import { soundEnable, soundDisable, soundRebuild, soundIsRunning } from './sound-pass.js';
 import { adaptiveDebounce, cancelAdaptiveDebounce } from './adaptive-debounce.js';
@@ -139,8 +138,6 @@ function mpSyncTabs() {
   }
   const sbPassBadge = document.getElementById('sbPassBadge');
   if (sbPassBadge) sbPassBadge.textContent = _PASS_BADGE_LABELS[state.mp.active] ?? state.mp.active;
-  // Keep the TAA velocity selector in sync with available passes
-  try { mpPopulateTAAVelSel(); } catch (e) { /* ignore if UI not ready */ }
   // §3.4 — notifie la barre de navigation des passes (pass-nav.js)
   try { window.dispatchEvent(new CustomEvent('zgl:passchange')); } catch (e) { /* SSR/no-DOM */ }
 }
@@ -417,101 +414,6 @@ function mpSyncPassUniforms(id, dt) {
         }
       }
     });
-  }
-}
-
-/**
- * Set a multipass buffer as the TAA velocity source.
- * If `passId` is falsy or not found, clears the velocity texture.
- * The selected pass must be an enabled 2D buffer with a valid `.rt`.
- */
-function mpSetTAAVelocity(passId) {
-  if (!passId) {
-    setTAAVelocityTex(null);
-    if (state.perf) state.perf.taaVelocitySource = 'auto';
-    const st = document.getElementById('taaVelStatus');
-    if (st) {
-      st.textContent = 'Auto (generated)';
-      st.title = 'TAA velocity source: Auto (generated)';
-    }
-    const summaryBtn = document.getElementById('taaVelSummary');
-    const summaryText = document.getElementById('taaVelSummaryText');
-    if (summaryText) summaryText.textContent = 'TAA: Auto (generated)';
-    if (summaryBtn) summaryBtn.title = 'TAA velocity source: Auto (generated)';
-    return;
-  }
-  const p = state.mp.passes[passId];
-  if (!p || !p.rt) {
-    setTAAVelocityTex(null);
-    toast('TAA velocity: pass not available', 'warn');
-    return;
-  }
-  setTAAVelocityTex(p.rt.texture);
-  if (state.perf) state.perf.taaVelocitySource = passId;
-  const st2 = document.getElementById('taaVelStatus');
-  if (st2) st2.textContent = (MP_PASS_LABELS[passId] || passId);
-  if (st2) st2.title = `TAA velocity source: ${MP_PASS_LABELS[passId] || passId}`;
-  const summaryBtn2 = document.getElementById('taaVelSummary');
-  const summaryText2 = document.getElementById('taaVelSummaryText');
-  if (summaryText2) summaryText2.textContent = `TAA: ${MP_PASS_LABELS[passId] || passId}`;
-  if (summaryBtn2) summaryBtn2.title = `TAA velocity source: ${MP_PASS_LABELS[passId] || passId}`;
-  toast(`TAA velocity source: ${MP_PASS_LABELS[passId] || passId}`, 'ok');
-}
-
-/**
- * Populate the TAA velocity source selector from available multipass passes.
- * Adds: auto, none, buffer passes (Buf A..D), cube passes and Image if present.
- */
-function mpPopulateTAAVelSel() {
-  const sel = document.getElementById('taaVelSelect');
-  if (!sel) return;
-  const cur = sel.value;
-  sel.innerHTML = '';
-  const addOpt = (val, txt, disabled) => {
-    const o = document.createElement('option');
-    o.value = val;
-    o.textContent = txt;
-    if (disabled) o.disabled = true;
-    sel.appendChild(o);
-  };
-  addOpt('auto', 'Auto (generated)');
-  addOpt('none', 'None (jitter only)');
-  for (const id of MP_PASS_IDS) {
-    const p = state.mp.passes[id];
-    const label = MP_PASS_LABELS[id] || id;
-    const disabled = !(p && p.enabled && p.rt);
-    addOpt(id, disabled ? `${label} (disabled)` : label, !!disabled);
-  }
-  for (const id of MP_CUBE_PASS_IDS) {
-    const p = state.mp.passes[id];
-    const label = MP_PASS_LABELS[id] || id;
-    const disabled = !(p && p.enabled && p.rt);
-    addOpt(id, disabled ? `${label} (disabled)` : label, !!disabled);
-  }
-  if (state.mp.passes['image']) {
-    const p = state.mp.passes['image'];
-    const label = MP_PASS_LABELS['image'] || 'Image';
-    // Must match mpSetTAAVelocity's actual requirement (p.rt) — the Image
-    // pass usually renders straight to the canvas with no offscreen target,
-    // so selecting it here previously failed silently (toast only, no UI sync).
-    const disabled = !(p && p.rt);
-    addOpt('image', disabled ? `${label} (disabled)` : label, !!disabled);
-  }
-  const src = state.perf?.taaVelocitySource || 'auto';
-  const found = Array.from(sel.options).find(o => o.value === src);
-  if (found) sel.value = src; else sel.value = cur || 'auto';
-  const status = document.getElementById('taaVelStatus');
-  if (status) {
-    let st = '';
-    if (src === 'auto') st = 'Auto (generated)';
-    else if (src === 'none') st = 'None (jitter only)';
-    else st = MP_PASS_LABELS[src] || src || 'Auto';
-    status.textContent = st;
-    status.title = `TAA velocity source: ${st}`;
-    const summaryBtn3 = document.getElementById('taaVelSummary');
-    const summaryText3 = document.getElementById('taaVelSummaryText');
-    if (summaryText3) summaryText3.textContent = `TAA: ${st}`;
-    if (summaryBtn3) summaryBtn3.title = `TAA velocity source: ${st}`;
   }
 }
 
@@ -1295,7 +1197,7 @@ function mpToggleGBuffer(id) {
   }
 }
 
-export { MP_PASS_IDS, MP_CUBE_PASS_IDS, MP_COMPUTE_PASS_IDS, MP_SOUND_PASS_ID, MP_ALL_BUF_IDS, MP_PASS_LABELS, MP_BUF_COLORS, MP_BUF_TEMPLATE, MP_CUBE_TEMPLATE, MP_SOUND_TEMPLATE, mpSyncTabs, mpToggleOrSwitch, mpSwitchPass, mpEnablePass, mpDisablePass, mpInitRT, mpInitCubeRT, mpResizeRTs, mpRebuildPassMat, mpApplyPassCode, mpSyncPassUniforms, _mpDt, renderMultiPass, applyAndParseActive, _wireOpen, mpToggleWiring, mpRenderWiring, mpSetChannel, mpSetChannelBlend, stImportMultipass, mpToggleSound, mpSwitchToSound, mpToggleFeedbackDelay, mpSetPassResScale, mpSetTAAVelocity, mpPopulateTAAVelSel, mpCapturePass, mpToggleGBuffer };
+export { MP_PASS_IDS, MP_CUBE_PASS_IDS, MP_COMPUTE_PASS_IDS, MP_SOUND_PASS_ID, MP_ALL_BUF_IDS, MP_PASS_LABELS, MP_BUF_COLORS, MP_BUF_TEMPLATE, MP_CUBE_TEMPLATE, MP_SOUND_TEMPLATE, mpSyncTabs, mpToggleOrSwitch, mpSwitchPass, mpEnablePass, mpDisablePass, mpInitRT, mpInitCubeRT, mpResizeRTs, mpRebuildPassMat, mpApplyPassCode, mpSyncPassUniforms, _mpDt, renderMultiPass, applyAndParseActive, _wireOpen, mpToggleWiring, mpRenderWiring, mpSetChannel, mpSetChannelBlend, stImportMultipass, mpToggleSound, mpSwitchToSound, mpToggleFeedbackDelay, mpSetPassResScale, mpCapturePass, mpToggleGBuffer };
 
 state.callbacks.mpResizeRTs = mpResizeRTs;
 state.callbacks.renderMultiPass = renderMultiPass;

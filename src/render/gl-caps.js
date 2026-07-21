@@ -3,8 +3,8 @@
  *
  * Phase 1.3 — WebGL Extension Detection & Capability Reporting
  *
- * Queries the WebGL context for hardware capabilities and extension support,
- * then populates the perf panel with the results.
+ * Queries the WebGL context for hardware capabilities and extension support.
+ * Used by texture-compressor.js to pick the best native compressed format.
  *
  * Detects:
  *   - Max texture size, max render buffer size
@@ -156,94 +156,8 @@ export function detectGLCaps(gl) {
     extensions,
   };
 
-  // Store on state for other modules to read
-  state.perf.glCaps = _caps;
   return _caps;
 }
 
 /** Force a re-query (e.g. after context recreation). */
 export function invalidateGLCaps() { _caps = null; }
-
-// ─── Perf panel rendering ─────────────────────────────────────────────────────
-
-/**
- * Populate the `#glCapsPanel` element in the perf panel with the detected caps.
- * Creates the element lazily if it doesn't exist yet.
- *
- * @param {GLCaps} caps — result of detectGLCaps()
- */
-export function renderGLCapsPanel(caps) {
-  let panel = document.getElementById('glCapsPanel');
-  if (!panel) return;  // panel must be declared in ui.html
-
-  const check = (v) => v
-    ? '<span class="caps-yes">✓</span>'
-    : '<span class="caps-no">✗</span>';
-  const kb = (n) => n >= 1024 ? (n / 1024).toFixed(0) + ' K' : String(n);
-
-  panel.innerHTML = `
-    <div class="caps-row caps-header">
-      <span>WebGL ${caps.glVersion}</span>
-      <span class="caps-gpu-str" title="${_esc(caps.renderer)}">${_esc(_truncate(caps.renderer, 38))}</span>
-    </div>
-    <div class="caps-row">
-      <span class="caps-label">Max texture</span>
-      <span class="caps-val">${kb(caps.maxTextureSize)} px</span>
-    </div>
-    <div class="caps-row">
-      <span class="caps-label">Max renderbuf</span>
-      <span class="caps-val">${kb(caps.maxRenderBufSize)} px</span>
-    </div>
-    ${caps.maxSamples ? `<div class="caps-row">
-      <span class="caps-label">MSAA max</span>
-      <span class="caps-val">${caps.maxSamples}×</span>
-    </div>` : ''}
-    <div class="caps-row">
-      <span class="caps-label">Anisotropy</span>
-      <span class="caps-val">${caps.maxAnisotropy}×</span>
-    </div>
-    <div class="caps-row">
-      <span class="caps-label">Float tex</span>
-      <span class="caps-val">${check(caps.floatTextures)}</span>
-    </div>
-    <div class="caps-row">
-      <span class="caps-label">Float RT</span>
-      <span class="caps-val">${check(caps.floatRenderTarget)}</span>
-    </div>
-    <div class="caps-row">
-      <span class="caps-label">highp float</span>
-      <span class="caps-val">${check(caps.highpFloat)}</span>
-    </div>
-    <div class="caps-row">
-      <span class="caps-label">S3TC / DXT</span>
-      <span class="caps-val">${check(caps.s3tc)}</span>
-    </div>
-    <div class="caps-row">
-      <span class="caps-label">BC7 / BPTC</span>
-      <span class="caps-val">${check(caps.bc7)}</span>
-    </div>
-    <div class="caps-row">
-      <span class="caps-label">ETC2</span>
-      <span class="caps-val">${check(caps.etc)}</span>
-    </div>
-    <div class="caps-row">
-      <span class="caps-label">ASTC</span>
-      <span class="caps-val">${check(caps.astc)}</span>
-    </div>
-    <div class="caps-row">
-      <span class="caps-label">Best format</span>
-      <span class="caps-val" style="font-size:0.85em">${_esc(caps.bestCompressedFormat)}</span>
-    </div>
-    <div class="caps-row caps-ext-count">
-      <span class="caps-label">Extensions</span>
-      <span class="caps-val">${caps.extensions.length}</span>
-    </div>
-  `;
-}
-
-function _esc(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-function _truncate(s, maxLen) {
-  return s.length > maxLen ? s.slice(0, maxLen - 1) + '…' : s;
-}

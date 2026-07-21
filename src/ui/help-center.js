@@ -107,17 +107,14 @@ const DOCS = [
         title: 'Layout Overview',
         anchor: 'layout',
         content: `
-<p>Z-GL uses a <strong>dockable panel</strong> layout. Every panel can be dragged out into a floating window, re-docked, resized, or stacked in tabs.</p>
+<p>Z-GL uses a fixed panel layout with resizable panel widths and editor height.</p>
 <h4>Default layout panels</h4>
 <ul>
   <li><strong>Viewport</strong> — Live GPU render. Click to focus (mouse events pass to <code>iMouse</code>).</li>
   <li><strong>Editor</strong> — Monaco code editor for GLSL.</li>
   <li><strong>Sliders</strong> — Auto-generated controls for every <code>#define</code> / <code>const</code> in your shader.</li>
   <li><strong>Channels</strong> — Wire <code>iChannel0</code>–<code>iChannel3</code> to textures, video, audio, etc.</li>
-  <li><strong>Perf</strong> — GPU &amp; CPU timing, frame graph, VRAM usage.</li>
-</ul>
-<h4>Layout presets</h4>
-<p>Use <strong>View → Layout</strong> to switch between <em>Coder</em> (large editor), <em>Performer</em> (large viewport), <em>Animator</em> (compact editor), or <em>Minimal</em> (viewport only).</p>`
+</ul>`
       },
       {
         title: 'Editor Panel',
@@ -155,25 +152,6 @@ const DOCS = [
 <p>Sliders that are colour triplets/quads, small integer ranges, or rotation angles automatically render as a colour swatch, a stepper, or an angle dial instead of a plain field — see the README's "Specialized widgets" section.</p>
 <h4>Randomize</h4>
 <p>The <strong>🎲 random</strong> button re-rolls every unpinned slider once within its range — a single, undo-able change.</p>`
-      },
-      {
-        title: 'Performance Panel',
-        anchor: 'perf-panel',
-        content: `
-<p>The <strong>Perf panel</strong> surfaces GPU and CPU profiling data in real time.</p>
-<h4>Metrics displayed</h4>
-<ul>
-  <li><strong>FPS</strong> — Frames per second (rolling average over 60 frames).</li>
-  <li><strong>JS time</strong> — JavaScript overhead per frame (RAF callback cost).</li>
-  <li><strong>GPU time</strong> — Actual GPU execution time via the <code>timestamp-query</code> extension, when supported by the driver.</li>
-  <li><strong>Pass waterfall</strong> — Per-pass GPU time breakdown (Image, Buffer A–D).</li>
-  <li><strong>Frame history</strong> — Rolling 120-frame graph of GPU time per pass.</li>
-  <li><strong>VRAM estimate</strong> — Texture + buffer memory usage.</li>
-  <li><strong>Draw calls</strong> — Total draw calls per frame.</li>
-  <li><strong>Complexity score</strong> — Heuristic instruction count estimate.</li>
-</ul>
-<h4>FPS cap</h4>
-<p>Set the render rate to <strong>15 / 30 / 60 / 120 / Unlimited</strong> fps via the toolbar. The adaptive pixel ratio PID controller will also reduce resolution automatically under sustained GPU load.</p>`
       },
       {
         title: 'Multi-Pass',
