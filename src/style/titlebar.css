@@ -1,0 +1,98 @@
+/*
+ * src/style/titlebar.css
+ *
+ * Custom title bar — rendered only in the Tauri desktop build.
+ * When `decorations: false` + `transparent: true` are set in tauri.conf.json,
+ * the OS provides no chrome at all; this file re-creates it in HTML.
+ *
+ * Layout:
+ *   #titlebar
+ *     ├─ #titlebar-drag      (data-tauri-drag-region — fills all free space)
+ *     │   ├─ #titlebar-icon
+ *     │   └─ #titlebar-title
+ *     └─ #titlebar-controls
+ *         ├─ .tb-btn.tb-min
+ *         ├─ .tb-btn.tb-max
+ *         └─ .tb-btn.tb-close
+ *
+ * Height: 32px — matches the Windows 11 native title bar height exactly.
+ */
+
+:root {
+  --titlebar-h: 32px;
+}
+
+#titlebar {
+  display:         flex !important;
+  align-items:     center !important;
+  width:           100%;
+  height:          var(--titlebar-h);
+  background:      var(--bg-panel);
+  border-bottom:   1px solid var(--border);
+  flex-shrink:     0;
+  user-select:     none;
+  -webkit-user-select: none;
+  z-index:         9999;
+}
+
+#titlebar[hidden] { display: none !important; }
+
+#titlebar-drag {
+  display:     flex !important;
+  align-items: center !important;
+  gap:         6px;
+  flex:        1 1 auto;
+  min-width:   0;
+  height:      100%;
+  padding:     0 10px;
+  cursor:      default;
+  -webkit-app-region: drag;
+}
+
+#titlebar-icon {
+  width:          14px;
+  height:         14px;
+  flex-shrink:    0;
+  pointer-events: none;
+  -webkit-app-region: no-drag;
+}
+
+#titlebar-title {
+  font-size:      12px;
+  font-family:    var(--font-ui);
+  font-weight:    600;
+  color:          var(--text-primary);
+  white-space:    nowrap;
+  overflow:       hidden;
+  text-overflow:  ellipsis;
+}
+
+#titlebar-controls {
+  display:     flex !important;
+  align-items: stretch !important;
+  margin-left: auto;
+  height:      100%;
+  flex-shrink: 0;
+}
+
+.tb-btn {
+  display:            flex;
+  align-items:        center;
+  justify-content:    center;
+  width:              46px;
+  height:             100%;
+  border:             none;
+  background:         transparent;
+  color:              var(--text-primary);
+  cursor:             default;
+  transition:         background var(--t-fast), color var(--t-fast);
+  padding:            0;
+  outline:            none;
+  -webkit-app-region: no-drag;
+}
+
+.tb-btn:hover  { background: var(--bg-hover); }
+.tb-btn:active { background: var(--bg-active); }
+
+.tb-close:hover  { background: #C42B1C; color: #FFFFFF; }
+.tb-close:active { background: #A42315; color: #FFFFFF; }

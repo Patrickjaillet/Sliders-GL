@@ -1,0 +1,13 @@
+/* ============================================================
+   Z-GL — fonts.css
+   Style : Dark IDE · Terminal-Chic
+   Polices : Inter (UI) + JetBrains Mono (valeurs/code)
+   ============================================================ */
+
+/* Inter — labels, menus, titres UI */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+/* JetBrains Mono — valeurs numériques, code inline */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* Fallback @font-face si CDN indisponible (bundle local optionnel dans public/fonts/) */

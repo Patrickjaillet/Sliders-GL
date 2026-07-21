@@ -1,0 +1,12 @@
+# Environment variables
+.env*.local
+
+# Common ignores
+node_modules
+dist/
+.DS_Store
+Thumbs.db
+
+# Tauri build artifacts
+src-tauri/target/
+src-tauri/gen/

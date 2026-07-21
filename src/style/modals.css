@@ -1,0 +1,526 @@
+/* Z-GL — Modales, menus contextuels, toasts — Dark IDE */
+
+/* ── Overlay ─────────────────────────────────────────────────── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0,0,0,0.70);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease), visibility var(--dur) var(--ease);
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* ── Fenêtre modale ──────────────────────────────────────────── */
+
+.modal {
+  position: relative;
+  width: 340px;
+  max-width: min(92vw, 640px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-mid);
+  background: var(--bg-overlay);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  opacity: 0;
+  transform: translateY(8px) scale(0.99);
+  transition: transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+
+.modal-overlay.open .modal {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.modal-overlay.closing .modal {
+  transform: translateY(-4px);
+  opacity: 0;
+}
+
+
+.modal-header,
+.modal-body,
+.modal-footer,
+.modal-actions,
+.modal-field,
+.st-field {
+  position: relative;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border-sub);
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.modal h3,
+.modal-title {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast);
+}
+
+.modal-close:hover {
+  color: var(--text-primary);
+  border-color: var(--border);
+  background: var(--bg-hover);
+}
+
+.modal-close svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.modal-footer,
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border-sub);
+  flex-shrink: 0;
+}
+
+.modal-field,
+.st-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.modal-input,
+.rename-inp {
+  width: 100%;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-app);
+  color: var(--text-primary);
+  font: 13px var(--font-ui);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--t-fast);
+}
+
+.modal-input:focus,
+.rename-inp:focus {
+  border-color: var(--border-focus);
+}
+
+.modal-input::placeholder,
+.rename-inp::placeholder {
+  color: var(--text-disabled);
+}
+
+/* ── Boutons modales ─────────────────────────────────────────── */
+
+.modal-btn {
+  height: 28px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-mid);
+  background: var(--bg-raised);
+  color: var(--text-primary);
+  font: 12px var(--font-ui);
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+}
+
+.modal-btn:hover {
+  background: var(--bg-overlay);
+}
+
+.modal-btn:active {
+  background: var(--bg-overlay);
+}
+
+.modal-btn.confirm {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.modal-btn.confirm:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.modal-btn.danger {
+  color: var(--status-err);
+  border-color: var(--status-err);
+  background: transparent;
+}
+
+.modal-btn.danger:hover {
+  background: var(--status-err-bg);
+}
+
+.export-modal {
+  width: 420px;
+  max-height: min(90vh, 90dvh);
+  overflow-y: auto;
+}
+
+/* ── Menu contextuel ─────────────────────────────────────────── */
+
+.ctx-menu {
+  position: fixed;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  min-width: 188px;
+  padding: 4px 0;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-mid);
+  background: var(--bg-overlay);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-4px);
+  transform-origin: top left;
+  transition: opacity 80ms ease, transform 80ms ease, visibility 0s linear 80ms;
+}
+
+.ctx-menu.open {
+  pointer-events: auto;
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 80ms ease, transform 80ms ease, visibility 0s linear 0s;
+}
+
+.ctx-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 26px;
+  padding: 0 10px;
+  color: var(--text-primary);
+  cursor: pointer;
+  white-space: nowrap;
+  outline: none;
+  font: 11px var(--font-ui);
+  transition: background var(--dur) var(--ease);
+}
+
+.ctx-item:hover,
+.ctx-item:focus {
+  background: var(--accent-dim);
+}
+
+.ctx-item.danger:hover,
+.ctx-item.danger:focus {
+  background: var(--status-err-bg);
+  color: var(--status-err);
+}
+
+.ctx-item svg {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+  flex-shrink: 0;
+}
+
+.ctx-shortcut {
+  margin-left: auto;
+  padding-left: 14px;
+  font: 10px var(--font-mono);
+  color: var(--text-dim);
+}
+
+.ctx-sep {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--border-sub);
+  pointer-events: none;
+}
+
+/* ── Tooltip ─────────────────────────────────────────────────── */
+
+#zgl-tooltip {
+  position: fixed;
+  z-index: 9999;
+  display: none;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-sub);
+  background: var(--bg-overlay);
+  color: var(--text-primary);
+  font: 11px var(--font-ui);
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 80ms ease;
+}
+
+#zgl-tooltip.visible {
+  display: block;
+  opacity: 1;
+}
+
+/* ── Toast stack ─────────────────────────────────────────────── */
+/* §3 audit — seul système actif. Le singleton legacy #toast a été
+   supprimé de ui.html. Cette règle le cache par sécurité si du code
+   externe venait à le réinjecter. */
+#toast { display: none !important; }
+
+#toast-stack {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  z-index: 220;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 6px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.toast {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  min-width: 190px;
+  max-width: min(360px, calc(100vw - 32px));
+  padding: 0 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  overflow: hidden;
+  pointer-events: auto;
+  box-shadow: var(--shadow-md);
+  font-size: 13px;
+  opacity: 0;
+  transform: translateY(10px) scale(0.98);
+  /* §B.1 — entrée expressive (spring) unifiée */
+  transition: opacity var(--motion-quick), transform var(--motion-spring);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.toast.hiding {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.toast-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+}
+
+.toast-msg {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* §10.3 — barre de presets d'export */
+.exp-preset-bar {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 8px 0;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.exp-preset-bar input {
+  padding: 5px 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-input);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: 12px var(--font-ui);
+}
+.exp-preset-btn {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-panel-alt);
+  color: var(--text-secondary);
+  font: 12px var(--font-ui);
+  cursor: pointer;
+}
+.exp-preset-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+/* §9.4 — compteur de toasts identiques regroupés */
+.toast-count {
+  flex-shrink: 0;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.18);
+  font: 600 10px var(--font-mono);
+  line-height: 1.4;
+}
+
+.toast-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.24;
+  animation: toastProgress var(--toast-duration, 2000ms) linear forwards;
+  transform-origin: left;
+}
+
+@keyframes toastProgress {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+.toast.ok {
+  color: var(--status-ok);
+  border-color: var(--status-ok);
+  background: var(--status-ok-bg);
+}
+
+.toast.warn {
+  color: var(--status-warn);
+  border-color: var(--status-warn);
+  background: var(--status-warn-bg);
+}
+
+.toast.err,
+.toast.error {
+  color: var(--status-err);
+  border-color: var(--status-err);
+  background: var(--status-err-bg);
+}
+
+/* ── Notes et liens ──────────────────────────────────────────── */
+
+.st-note {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.st-note a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.st-note a:hover {
+  text-decoration: underline;
+}
+
+/* ── Welcome cards ───────────────────────────────────────────── */
+
+.welcome-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 10px 12px;
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--t-fast), background var(--t-fast);
+}
+
+.welcome-card:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-hover);
+}
+
+.welcome-card:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.welcome-card-icon {
+  font-size: 16px;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.welcome-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+}
+
+.welcome-card-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}

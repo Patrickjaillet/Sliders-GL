@@ -1,0 +1,1530 @@
+/* ============================================================
+   Z-GL — layout.css
+   Style : Dark IDE · Terminal-Chic · 800×450
+   ============================================================
+
+   Structure :
+   ┌──────────────────────────────────────────────────────┐
+   │  #titlebar  24px — Tauri seulement (.tauri body)    │
+   ├──────────┬──────────────────────────────┬────────────┤
+   │ #sidebar │   #viewport-zone (pasteboard) │ #inspector │
+   │  200px   │   ┌───────────────────┐       │  200px     │
+   │          │   │  .cw  800×450px   │       │            │
+   │          │   │  (fixed canvas)   │       │            │
+   │          │   └───────────────────┘       │            │
+   └──────────┴──────────────────────────────┴────────────┘
+   │  #toolbar  28px  (bas — style VS Code)               │
+   └──────────────────────────────────────────────────────┘
+   Pasteboard (#viewport-zone): --bg-app + dot-grid, scrollable
+   when window < sidebar+800+inspector.
+   ============================================================ */
+
+
+/* ══════════════════════════════════════════════
+   BASE HTML / BODY
+   ══════════════════════════════════════════════ */
+
+html {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+body {
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-void);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Titlebar natif Tauri (24px en haut) */
+.tauri-titlebar {
+  display: none;       /* caché en mode web */
+  height: var(--titlebar-h);
+  flex-shrink: 0;
+  order: 0;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+}
+body.tauri .tauri-titlebar { display: flex; align-items: center; padding: 0 8px; }
+
+/* Désactivation temporaire des transitions (utilisé par init.js) */
+html.no-transition,
+html.no-transition * {
+  transition: none !important;
+}
+
+
+/* ══════════════════════════════════════════════
+   ÉLÉMENTS DÉCORATIFS SUPPRIMÉS
+   Les classes sont conservées pour ne pas casser
+   le HTML existant — elles ne s'affichent plus.
+   ══════════════════════════════════════════════ */
+
+.ui-noise,
+.ui-ornaments,
+.viewport-fx {
+  display: none;
+}
+
+/* SVG paths ornementaux — masqués sans retirer le HTML */
+.ambient-ring,
+.ambient-flow,
+.ambient-trace,
+.viewport-beam,
+.viewport-ring,
+.viewport-trace,
+.viewport-halo,
+.panel-orbit,
+.panel-signal,
+.panel-grid {
+  display: none;
+}
+
+
+/* ══════════════════════════════════════════════
+   TOOLBAR BASSE (#toolbar — était <header>)
+   ══════════════════════════════════════════════ */
+
+#toolbar {
+  height: var(--hh);
+  min-height: var(--hh);
+  flex-shrink: 0;
+  order: 3;                            /* visually last — après .layout */
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 6px;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-mid);
+  z-index: 10;
+  position: relative;
+}
+
+/* Séparateur vertical dans la toolbar */
+.vsep,
+.sep {
+  width: 1px;
+  height: 14px;
+  flex-shrink: 0;
+  background: var(--border-sub);
+  margin: 0 2px;
+}
+
+/* Spacer flexible */
+.sp {
+  flex: 1;
+}
+
+/* Ancien statusbar — fusionné dans la toolbar via order */
+.app-footer,
+.app-statusbar {
+  order: 2;
+  flex-shrink: 0;
+}
+
+
+/* ══════════════════════════════════════════════
+   GRILLE PRINCIPALE
+   3 colonnes : sidebar | viewport | inspector
+   ══════════════════════════════════════════════ */
+
+.layout {
+  display: grid;
+  grid-template-columns: var(--sw) 1fr 0px;
+  grid-template-rows: 1fr;
+  flex: 1;
+  order: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bg-void);
+  gap: 1px;                   /* séparateurs via couleur de fond */
+  position: relative;
+  z-index: 1;
+}
+
+/* Inspecteur ouvert (colonne droite) */
+.layout.inspector-open {
+  grid-template-columns: var(--sw) 1fr var(--iw);
+}
+
+/* Mode plein écran viewport */
+.layout.vp-fullscreen {
+  grid-template-columns: 0 1fr 0px;
+}
+
+.layout.vp-fullscreen.inspector-open {
+  grid-template-columns: 0 1fr var(--iw);
+}
+
+.layout.vp-fullscreen .panel,
+.layout.vp-fullscreen #sidebar {
+  display: none;
+  pointer-events: none;
+}
+
+.layout.vp-fullscreen .right,
+.layout.vp-fullscreen #viewport-zone {
+  grid-column: 1 / 3;
+}
+
+.layout.vp-fullscreen.inspector-open .right,
+.layout.vp-fullscreen.inspector-open #viewport-zone {
+  grid-column: 1 / 3;
+}
+
+
+/* ══════════════════════════════════════════════
+   PANNEAU LATÉRAL GAUCHE (#sidebar / .panel)
+   ══════════════════════════════════════════════ */
+
+.panel,
+#sidebar {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg-surface);
+  min-width: 0;
+}
+
+/* .ph et .ph-title définis dans sliders.css (28px, bg-void, border-sub) */
+
+/* Corps scrollable du panneau */
+.sw {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  contain: layout style paint;
+  /* Fix sliders invisibles au démarrage (Tauri/WebView2) :
+     content-visibility:auto saute le rendu du contenu hors-écran. Quand buildUI()
+     injecte les sliders via innerHTML au démarrage SANS reflow ultérieur, WebView2
+     garde le contenu « non rendu » → sliders invisibles tant qu'on ne tape pas dans
+     l'éditeur (ce qui déclenche un reflow). Le shader par défaut n'en déclenche pas,
+     d'où le bug. La liste de sliders est petite : l'optimisation n'apporte rien ici.
+     On force donc le rendu avec 'visible'. */
+  content-visibility: visible;
+  contain-intrinsic-size: auto 480px;
+}
+
+/* Scrollbar du panneau */
+.sw::-webkit-scrollbar,
+.midi-body::-webkit-scrollbar,
+.cerr-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sw::-webkit-scrollbar-track,
+.midi-body::-webkit-scrollbar-track,
+.cerr-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sw::-webkit-scrollbar-thumb,
+.midi-body::-webkit-scrollbar-thumb,
+.cerr-body::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+  border-radius: 3px;
+}
+
+.sw::-webkit-scrollbar-thumb:hover,
+.midi-body::-webkit-scrollbar-thumb:hover,
+.cerr-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.22);
+}
+
+/* Bouton de panneau (ex : Apply, Parse) */
+/* shared base with .ebn — see editor.css */
+.pb {
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm, 4px);
+  border: 1px solid var(--status-ok-border);
+  background: var(--status-ok-bg);
+  color: var(--status-ok);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+
+.pb:hover {
+  background: #C8EFC8;
+  border-color: var(--status-ok);
+}
+
+.pb.warn {
+  border-color: var(--status-warn-border);
+  background: var(--status-warn-bg);
+  color: var(--status-warn);
+}
+
+.pb.warn:hover {
+  background: #FFE99A;
+  border-color: var(--status-warn);
+}
+
+
+/* ══════════════════════════════════════════════
+   ZONE CENTRE — viewport + éditeur
+   (#viewport-zone / .right)
+   ══════════════════════════════════════════════ */
+
+/* ── Pasteboard: the infinite desk around the fixed canvas ── */
+.right,
+#viewport-zone {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;                  /* scrollbars when window < sidebar+800+inspector */
+  position: relative;
+  /* compositor-style dot grid pasteboard */
+  background-color: var(--bg-app);
+  background-image: radial-gradient(circle, var(--border-sub) 1px, transparent 1px);
+  background-size: 20px 20px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-mid) transparent;
+  min-width: 0;
+  align-items: center;             /* centre the monitor horizontally */
+  /* justify-content omitted intentionally — overflow:auto requires content to
+     start from top. Vertical centering of .cw is handled by margin:auto so
+     it only kicks in when the zone is taller than the canvas + editor. */
+  gap: 0;
+}
+
+/* ══════════════════════════════════════════════
+   §2.3 — MODE CODE FOCUS (Ctrl+Shift+F)
+   L'éditeur occupe l'espace, le canvas devient une
+   vignette flottante (coin haut-droit).
+   ══════════════════════════════════════════════ */
+
+.right.code-focus .cw {
+  /* In code-focus the monitor shrinks to a floating thumbnail (top-right).
+     Only the visual presentation scales — the canvas attribute stays 800x450.
+     JS sets --cw-scale on this element via initPasteboardObserver. */
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 200px;
+  height: 112px;   /* 200 / (16/9) = 112.5 — exact 16:9 at 800x450 ratio */
+  min-height: 0;
+  flex: none;
+  z-index: 30;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-popup);
+  transform: scale(1);           /* reset any pasteboard scale-fit */
+  transform-origin: top right;
+  overflow: hidden;
+}
+
+.right.code-focus .cw canvas#glc {
+  width: 800px;
+  height: 450px;
+  transform: scale(0.25);        /* 200/800 = 0.25 — display-only, GL stays 800x450 */
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+.right.code-focus .splitter {
+  display: none;
+}
+
+.right.code-focus #editorZone {
+  flex: 1 1 auto !important;
+  height: auto !important;
+}
+
+
+/* ══════════════════════════════════════════════
+   §2.2 — BARRE DE DOCK DES PANNEAUX (taskbar)
+   ══════════════════════════════════════════════ */
+
+.panel-dock {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  height: 28px;
+  padding: 0 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: var(--bg-panel-alt);
+  border-top: 1px solid var(--border);
+  scrollbar-width: thin;
+}
+
+.panel-dock.empty {
+  display: none;
+}
+
+.panel-dock-title {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.panel-dock-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+  padding: 0 4px 0 8px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent);
+  background: var(--accent-light);
+  color: var(--accent-hover);
+  font: 500 11px/1 var(--font-ui);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+
+.panel-dock-chip:hover {
+  background: var(--accent-muted);
+  border-color: var(--accent-hover);
+}
+
+.panel-dock-chip .pdc-close {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.panel-dock-chip:hover .pdc-close {
+  opacity: 1;
+}
+
+/* Phase P — accent subtil par catégorie de panneau (doc/create/debug) */
+.panel-dock-chip[data-panel-cat="doc"] {
+  border-color: var(--buf-a);
+  background: rgba(79,163,255,0.10);
+  color: var(--buf-a);
+}
+.panel-dock-chip[data-panel-cat="doc"]:hover { background: rgba(79,163,255,0.18); }
+
+.panel-dock-chip[data-panel-cat="create"] {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent-hover);
+}
+
+.panel-dock-chip[data-panel-cat="debug"] {
+  border-color: var(--buf-c);
+  background: rgba(255,154,60,0.10);
+  color: var(--buf-c);
+}
+.panel-dock-chip[data-panel-cat="debug"]:hover { background: rgba(255,154,60,0.18); }
+
+
+/* ══════════════════════════════════════════════
+   §3.4 — BARRE DE NAVIGATION DES PASSES (breadcrumb)
+   ══════════════════════════════════════════════ */
+
+.pass-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  min-height: 26px;
+  padding: 0 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: var(--bg-panel-alt);
+  border-top: 1px solid var(--border);
+  scrollbar-width: thin;
+}
+
+.pass-nav.empty {
+  display: none;
+}
+
+.pass-nav-title {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.pass-nav-node {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 19px;
+  padding: 0 8px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+  font: 500 11px/1 var(--font-ui);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
+}
+
+.pass-nav-node:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.pass-nav-node.active {
+  border-color: var(--accent);
+  color: var(--text-primary);
+  background: var(--accent-light);
+}
+
+.pass-nav-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pass-nav-in {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+.pass-nav-in i {
+  font-style: normal;
+  font-weight: 600;
+}
+
+
+/* ══════════════════════════════════════════════
+   PHASE 4 — OUTILS CANVAS
+   ══════════════════════════════════════════════ */
+
+/* 4.1 — HUD repliable */
+.cw.hud-off .hud,
+.cw.hud-off .hud-l {
+  display: none;
+}
+/* HUD masqué automatiquement en mode présentation */
+body.pres-mode .hud,
+body.pres-mode .hud-l {
+  display: none;
+}
+
+/* 4.2 — Overlay 2D de guides (au-dessus du canvas, sous les pills) */
+.canvas-guides {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* 4.3 — Zoom : le canvas peut déborder, on masque le surplus */
+.cw.zoomed canvas#glc {
+  cursor: grab;
+}
+
+/* 4.4 — Flash "Copied!" */
+.canvas-flash {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  z-index: 8;
+  padding: 8px 18px;
+  border-radius: var(--radius);
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font: 600 14px var(--font-ui);
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--t-fast), transform var(--t-fast);
+}
+.canvas-flash.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* 4.5 — Comparaison avant/après */
+.canvas-compare {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: none;
+  overflow: hidden;
+}
+.canvas-compare.open {
+  display: block;
+}
+.canvas-compare .cc-ref {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+.canvas-compare .cc-split {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #fff;
+  transform: translateX(-1px);
+  cursor: ew-resize;
+}
+.canvas-compare .cc-handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  color: #000;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+.canvas-compare .cc-label {
+  position: absolute;
+  top: 8px;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font: 600 10px var(--font-mono);
+  letter-spacing: 0.05em;
+}
+.canvas-compare .cc-label-ref  { left: 8px; }
+.canvas-compare .cc-label-live { right: 8px; }
+
+/* 5.2 — Menu contextuel canvas */
+.canvas-ctx {
+  position: fixed;
+  z-index: 250;
+  min-width: 180px;
+  padding: 4px;
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-popup);
+  display: flex;
+  flex-direction: column;
+}
+.canvas-ctx-item {
+  text-align: left;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font: 13px var(--font-ui);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.canvas-ctx-item:hover {
+  background: var(--bg-hover);
+}
+
+
+/* ══════════════════════════════════════════════
+   UI v2 — Manipulation directe & découvrabilité
+   ══════════════════════════════════════════════ */
+
+/* §A.1 — Gizmos de position sur le canvas */
+.canvas-gizmo-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+.canvas-gizmo {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.85);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.5);
+  cursor: grab;
+  pointer-events: auto;
+  transition: transform var(--motion-quick);
+}
+.canvas-gizmo::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: #fff;
+}
+.canvas-gizmo:hover { transform: scale(1.25); }
+.canvas-gizmo.dragging { cursor: grabbing; transform: scale(1.3); }
+
+/* §A.3 — HUD de scrub de valeur */
+.zgl-scrub-hud {
+  position: fixed;
+  z-index: 9500;
+  display: none;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-tooltip);
+  color: var(--text-inverse, #fff);
+  font: 600 12px var(--font-mono);
+  pointer-events: none;
+  box-shadow: var(--shadow-md);
+}
+
+/* §A.2 — Popover de sélection de couleur */
+.zgl-color-pop {
+  position: fixed;
+  z-index: 9500;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px;
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-popup);
+}
+.zgl-color-pop input[type="color"] {
+  width: 36px;
+  height: 26px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  cursor: pointer;
+}
+.zgl-color-pop button {
+  height: 26px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-panel-alt);
+  color: var(--text-secondary);
+  font: 11px var(--font-ui);
+  cursor: pointer;
+}
+.zgl-color-pop button:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+/* §D.1 — Overlay which-key */
+.which-key {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition: opacity var(--motion-smooth);
+}
+.which-key.open { opacity: 1; }
+.wk-card {
+  width: min(860px, 94vw);
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 16px 18px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-popup);
+  transform: translateY(10px) scale(0.99);
+  transition: transform var(--motion-spring);
+}
+.which-key.open .wk-card { transform: translateY(0) scale(1); }
+.wk-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.wk-hint { font-size: 11px; color: var(--text-dim); font-weight: 400; }
+.wk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px 22px;
+}
+.wk-group-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.wk-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 2px 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.wk-row kbd {
+  flex-shrink: 0;
+  min-width: 96px;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-app);
+  color: var(--text-primary);
+  font: 11px var(--font-mono);
+}
+
+/* ── Fixed 800×450 composition monitor (compositor-style) ── */
+.cw {
+  /* Fixed logical size — never re-sized by CSS or JS window resize */
+  width: 800px;
+  height: 450px;
+  flex-shrink: 0;
+  flex-grow: 0;
+
+  /* Crisp 1px composition-panel border */
+  outline: 1px solid var(--border-strong);
+  outline-offset: 0;
+
+  /* Margin: 20px on all sides; auto on top/bottom centres the monitor
+     vertically in the pasteboard when no editor panel is visible below. */
+  margin: auto 20px 20px;
+
+  position: relative;
+  overflow: hidden;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Scale-to-fit when the available pasteboard column is narrower than 840px
+     (800 + 2×20 margin). JS sets --cw-scale and adds .scale-fit; the canvas
+     #glc attribute stays 800×450 so no GL resize is ever fired. */
+  max-width: calc(100% - 40px);  /* leave room for 20px margin on each side */
+}
+
+/* Canvas WebGL — fills the fixed .cw exactly, never scaled by CSS */
+canvas#glc {
+  width: 800px;
+  height: 450px;
+  display: block;
+  transform: translateZ(0);
+  will-change: transform;
+  image-rendering: pixelated;  /* prevent browser interpolation on the GPU output */
+}
+
+/* Scale-to-fit: JS sets --cw-scale via pasteboard-resize observer when the
+   available column is narrower than 840px (800 + 2×20 margin).
+   The canvas#glc attribute stays 800×450 — only the visual wrapper shrinks.
+   Logical coordinates never change; no GL resize event is fired. */
+.cw.scale-fit {
+  transform: scale(var(--cw-scale, 1));
+  transform-origin: top center;
+  /* Prevent the scaled element from pushing scrollbars */
+  margin-top: calc(20px + (450px * var(--cw-scale, 1) - 450px) / 2);
+  margin-bottom: calc(20px + (450px * var(--cw-scale, 1) - 450px) / 2);
+}
+
+/* Overlay bas du viewport — FPS, résolution, pass actif, erreur */
+.vp-overlay-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background: rgba(13,15,20,0.85);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.vp-fps {
+  font: 10px var(--font-mono);
+  color: var(--text-dim);
+}
+.vp-fps.good  { color: var(--accent); }
+.vp-fps.warn  { color: var(--warn); }
+.vp-fps.bad   { color: var(--error); }
+
+.vp-err {
+  font-size: 10px;
+  color: var(--error);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
+}
+
+.vp-pass-name {
+  font: 10px var(--font-mono);
+  color: var(--text-dim);
+  margin-left: auto;
+}
+
+/* HUD overlay (FPS, résolution, temps) — coin viewport */
+.hud,
+.hud-l {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.hud {
+  top: 10px;
+  right: 10px;
+  align-items: flex-end;
+}
+
+.hud-l {
+  top: 10px;
+  left: 10px;
+}
+
+/* Pills HUD (FPS, résolution, temps) */
+.pill {
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  background: rgba(13,15,20,0.80);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-dim);
+  font: 10px var(--font-mono);
+  display: inline-flex;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.wgpu-pill {
+  color: var(--accent);
+  border-color: rgba(57,255,106,0.2);
+}
+
+/* Phase R — FPS color thresholds + click affordance (opens perf inspector).
+   .hud-l sets pointer-events:none on the container — re-enable it on the pill
+   itself, or the click handler below would never fire. */
+#fpspill {
+  cursor: pointer;
+  pointer-events: auto;
+}
+#fpspill.fps-good { color: var(--accent); }
+#fpspill.fps-warn { color: var(--warn); }
+#fpspill.fps-bad  { color: var(--error); }
+
+/* Phase R — pause + scrub mode highlight (.hud has the same pointer-events:none) */
+#tpill {
+  cursor: pointer;
+  pointer-events: auto;
+}
+#tpill.scrub-active {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+/* ── Phase R — Time scrubber bar (revealed on hover near canvas bottom) ── */
+
+.vp-scrubber-bar {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  height: 22px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(13,15,20,0.85);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.cw:hover .vp-scrubber-bar,
+.vp-scrubber-bar.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.vp-scrub-t {
+  flex-shrink: 0;
+  font: 10px var(--font-mono);
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.vp-scrub-range {
+  flex: 1;
+  height: 2px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.vp-scrub-reset {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.vp-scrub-reset:hover {
+  background: var(--bg-raised);
+  color: var(--text-primary);
+}
+
+/* Bouton toggle viewport (plein écran) */
+.vp-toggle-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+
+.vp-toggle-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+
+/* ══════════════════════════════════════════════
+   SPLITTER (resize éditeur / viewport)
+   ══════════════════════════════════════════════ */
+
+.splitter {
+  height: 6px;
+  position: relative;
+  z-index: 10;
+  cursor: row-resize;
+  flex-shrink: 0;
+  background: var(--bg-app);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Indicateur de poignée (3 points) */
+.splitter::before {
+  content: '···';
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-disabled);
+  line-height: 1;
+  user-select: none;
+}
+
+.splitter:hover {
+  background: var(--bg-hover);
+}
+
+.splitter:hover::before,
+.splitter.dragging::before {
+  color: var(--accent);
+}
+
+.splitter.dragging {
+  background: var(--accent-light);
+  border-color: var(--accent);
+}
+
+
+/* ══════════════════════════════════════════════
+   OVERLAY LIBRARY (tiroir latéral droit)
+   ══════════════════════════════════════════════ */
+
+.lib-overlay {
+  position: fixed;
+  inset: calc(var(--titlebar-h, 32px) + var(--hh)) 0 0 0;
+  z-index: 90;
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity  var(--duration-normal) var(--ease-silk),
+    visibility var(--duration-normal) var(--ease-silk);
+}
+
+.lib-overlay.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Tiroir library */
+.lib-drawer {
+  width: min(460px, calc(100vw - 16px));
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-popup);
+  transform: translateX(12px);
+  transition:
+    transform var(--duration-normal) var(--ease-silk),
+    opacity   var(--duration-normal) var(--ease-silk);
+}
+
+.lib-overlay.open .lib-drawer {
+  transform: translateX(0);
+}
+
+
+/* ══════════════════════════════════════════════
+   PANNEAU INSPECTEUR (colonne droite)
+   ══════════════════════════════════════════════ */
+
+.inspector,
+#inspector {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-surface);
+  min-width: 0;
+  position: relative;
+}
+
+.inspector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  height: 28px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+
+.inspector-title {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.inspector-close {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+.inspector-close:hover {
+  background: var(--bg-raised);
+  color: var(--text-primary);
+}
+
+.inspector-body {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ── Phase Q — Inspector contextuel : panes perf/pass/slider/uniform ───── */
+
+.insp-pane {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 10px 12px;
+  gap: 2px;
+}
+
+.insp-pane.hidden {
+  display: none;
+}
+
+/* Le mode perf garde son padding existant (géré par .perf-section) */
+#insp-perf {
+  padding: 0;
+}
+
+/* Transition douce entre modes (§B.2-style) */
+.inspector.insp-switching .insp-pane:not(.hidden) {
+  animation: inspSwitch 80ms ease-out;
+}
+@keyframes inspSwitch {
+  from { opacity: 0; transform: translateX(4px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.insp-section-title {
+  font: 600 11px var(--font-ui);
+  color: var(--text-primary);
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border-sub);
+}
+
+.insp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 0;
+  font: 11px var(--font-mono);
+}
+
+.insp-k {
+  color: var(--text-dim);
+}
+
+.insp-v {
+  color: var(--text-primary);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.insp-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--text-ghost);
+  font: 11px var(--font-mono);
+  padding: 20px;
+}
+
+.insp-edit-channels-btn,
+.insp-edit-range-btn {
+  margin-top: 8px;
+  align-self: flex-start;
+}
+
+.insp-uniform-md {
+  font: 12px/1.6 var(--font-mono);
+  color: var(--text-primary);
+}
+.insp-uniform-md code {
+  background: var(--bg-raised);
+  border-radius: var(--radius-sm);
+  padding: 0 4px;
+  color: var(--accent);
+}
+
+/* Bouton perf actif quand inspecteur ouvert */
+.layout.inspector-open #perfBtn {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+
+/* ══════════════════════════════════════════════
+   Z-INDEX GLOBAL (superpositions)
+   ══════════════════════════════════════════════ */
+
+#toolbar      { z-index: 10; }
+.layout       { z-index: 1;  }
+.modal-overlay{ z-index: 100; }
+.ctx-menu     { z-index: 200; }
+#toast-stack  { z-index: 300; }
+.lib-overlay  { z-index: 90;  }
+.perf-pop     { z-index: 50;  }
+
+
+/* ══════════════════════════════════════════════
+   CONTEXTE DE STACKING — EN-TÊTES DE ZONES
+   Ces classes partageaient position:relative z-index:1
+   dans l'ancien layout.css pour passer au-dessus des
+   pseudo-éléments ::before/::after (supprimés).
+   ══════════════════════════════════════════════ */
+
+.ph,
+.eb,
+.perf-pop-title {
+  position: relative;
+  z-index: 1;
+}
+
+/* fps-spark-svg — règle minimale de placement */
+.fps-spark-svg {
+  display: inline-flex;
+  align-items: center;
+}
+
+
+/* ══════════════════════════════════════════════
+   MODE EMBED (iframe / headless)
+   ══════════════════════════════════════════════ */
+
+body.embed-mode #toolbar,
+body.embed-mode .panel,
+body.embed-mode #sidebar,
+body.embed-mode .splitter,
+body.embed-mode .ez,
+body.embed-mode .tl-bar,
+body.embed-mode .ch-section,
+body.embed-mode #appStatusBar {
+  display: none !important;
+}
+
+body.embed-mode .layout {
+  grid-template-columns: 0 1fr 0;
+  height: 100dvh;
+}
+
+body.embed-mode .right,
+body.embed-mode #viewport-zone {
+  grid-column: 1 / -1;
+}
+
+body.embed-mode .cw {
+  /* In embed mode the fixed monitor stays 800×450 centred in the pasteboard;
+     no flex override needed — pasteboard already fills the viewport. */
+}
+
+
+/* ══════════════════════════════════════════════
+   STATUSBAR (barre de statut basse)
+   ══════════════════════════════════════════════ */
+
+.app-footer,
+#appStatusBar {
+  display: flex;
+  align-items: center;
+  height: 22px;
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  background: var(--bg-surface);
+  padding: 0 8px;
+  gap: 8px;
+}
+
+.app-footer-copy {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-ghost);
+  letter-spacing: 0.03em;
+  user-select: none;
+}
+
+
+/* ══════════════════════════════════════════════
+   BARRE DE STATUT (§1.3 roadmap UI/UX)
+   3 zones : état compilation · curseur · perf
+   ══════════════════════════════════════════════ */
+
+.app-statusbar {
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 10px;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+
+.sb-zone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.sb-left   { flex: 1 1 0; justify-content: flex-start; }
+.sb-center { flex: 0 0 auto; justify-content: center; }
+.sb-right  { flex: 1 1 0; justify-content: flex-end; }
+
+/* Le badge de statut est plus discret dans la barre du bas */
+.app-statusbar .status-badge {
+  height: 18px;
+  padding: 0 6px;
+  border: none;
+  background: transparent;
+}
+
+.app-statusbar .fps-spark-svg {
+  height: 18px;
+  width: 90px;
+}
+
+.app-statusbar .curpos,
+.app-statusbar .fps,
+.app-statusbar .sb-res {
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.app-statusbar .sb-sep {
+  color: var(--text-disabled);
+  font-size: 11px;
+}
+
+/* §6.5 — indicateur mode daltonisme dans la barre de statut */
+.sb-cb {
+  display: inline-flex;
+  align-items: center;
+  height: 16px;
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent);
+  background: var(--accent-light);
+  color: var(--accent-hover);
+  font: 600 10px/1 var(--font-mono);
+  letter-spacing: 0.03em;
+  cursor: pointer;
+}
+.sb-cb[hidden] { display: none; }
+.sb-cb:hover { border-color: var(--accent-hover); }
+
+
+/* ══════════════════════════════════════════════
+   PHASE 7 — Sparklines uniforms (7.2) + badge complexité (7.3)
+   ══════════════════════════════════════════════ */
+
+.sl-spark {
+  margin-left: auto;
+  width: 60px;
+  height: 14px;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+/* bouton icône dans l'en-tête du panneau (toggle sparklines) */
+.ph-icon-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.ph-icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.ph-icon-btn.active { color: var(--accent); border-color: var(--accent); }
+
+.cx-badge {
+  font-variant-numeric: tabular-nums;
+  cursor: default;
+  transition: opacity .25s, max-width .25s;
+  overflow: hidden;
+}
+.cx-badge.cx-hidden { opacity: 0; max-width: 0; padding: 0; }
+.cx-badge.cx-low  { color: var(--status-ok); }
+.cx-badge.cx-mid  { color: var(--status-warn); }
+.cx-badge.cx-high { color: var(--status-err); }
+
+
+/* ══════════════════════════════════════════════
+   PHASE 8 — Responsive (8.1)
+   ══════════════════════════════════════════════ */
+
+/* Header icon-only sous 720px : masque les libellés texte */
+@media (max-width: 720px) {
+  header .hb { padding: 0 7px; }
+  header .hb .hb-label,
+  header .file-menu-btn .fmenu-name,
+  header .tools-more-btn,
+  header .layout-preset-btn { font-size: 0; }
+  header .hb svg { margin: 0; }
+}
+
+/* Sous 900px : panneau latéral plus étroit, inspecteur en overlay */
+@media (max-width: 900px) {
+  :root { --pw: 220px; --iw: 220px; }
+  .layout.inspector-open { grid-template-columns: var(--pw) 1fr 0; }
+  .layout.inspector-open .inspector {
+    position: fixed;
+    top: calc(var(--titlebar-h, 0px) + var(--hh));
+    right: 0;
+    bottom: 24px;
+    z-index: 60;
+    box-shadow: var(--shadow-popup);
+  }
+}
+
+/* Sous 640px : pile mono-colonne — panneau masqué (accessible via plein écran) */
+@media (max-width: 640px) {
+  .layout { grid-template-columns: 0 1fr 0; }
+  .layout .panel { display: none; }
+  .layout .right { grid-column: 1 / -1; }
+}
+
+/* Compteur d'erreurs — visible même quand le panneau est replié */
+.sb-errcount {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--status-err-border);
+  background: var(--status-err-bg);
+  color: var(--status-err);
+  font: 600 11px/1 var(--font-mono);
+  letter-spacing: 0.03em;
+  cursor: pointer;
+}
+
+.sb-errcount[hidden] { display: none; }
+
+.sb-errcount:hover {
+  border-color: var(--status-err);
+}
+
+/* Teinte la barre entière en cas d'erreur de compilation */
+.app-statusbar.err {
+  background: var(--status-err-bg);
+  border-top-color: var(--status-err-border);
+}

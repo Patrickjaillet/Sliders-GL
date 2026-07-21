@@ -1,0 +1,87 @@
+/* ============================================================
+   Z-GL — reset.css
+   Style : Dark IDE · Terminal-Chic
+   ============================================================ */
+
+:root {
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin:  0;
+  padding: 0;
+}
+
+/* ── Boutons ── */
+button {
+  background: none;
+  border:     none;
+  cursor:     pointer;
+  font:       inherit;
+  color:      inherit;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+/* ── Inputs ── */
+input,
+select,
+textarea {
+  font:  inherit;
+  color: inherit;
+}
+
+/* Supprime les flèches sur input number */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+/* ── Liens ── */
+a {
+  color:           var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ── Sélection de texte ── */
+::selection {
+  background: var(--bg-selected);
+  color:      var(--text-primary);
+}
+
+/* ── Listes ── */
+ul,
+ol {
+  list-style: none;
+}
+
+/* ── Images ── */
+img,
+svg {
+  display:   block;
+  max-width: 100%;
+}
+
+/* ── Focus visible — repris dans accessibility.css ── */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline:        2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius:  var(--radius-sm);
+}

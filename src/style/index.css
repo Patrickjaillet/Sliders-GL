@@ -1,0 +1,49 @@
+/* ═══════════════════════════════════════════════════════════════
+   Z-GL — style/index.css
+   Point d'entrée CSS — Phase 8 Architecture finale
+   ═══════════════════════════════════════════════════════════════
+
+   Structure Phase 8 ✓ :
+     tokens.css     — variables CSS, palette, motion     [Phase 1 ✓]
+     reset.css      — normalisation de base              [Phase 1 ✓]
+     typography.css — familles, tailles, variants        [Phase 1 ✓]
+     layout.css     — grille, panels, splitter           [Phase 1 ✓]
+     animations.css — @keyframes globaux                 [Phase 1 ✓]
+     sliders.css    — slider custom canvas               [Phase 2 ✓]
+     header.css     — header, boutons SVG, badges        [Phase 3 ✓]
+     editor.css     — éditeur, pass tabs                 [Phase 4 ✓]
+     panels.css     — MIDI, perf, channels               [Phase 4 ✓]
+     modals.css     — modal system, context menu, toasts [Phase 5 ✓]
+
+   Règles Phase 8 appliquées dans tous les modules :
+     ✓ will-change: transform, opacity (jamais "all")
+     ✓ transform: translateZ(0) sur sliders, canvas, panel
+     ✓ box-shadow → filter:drop-shadow sur éléments haute fréquence
+     ✓ contain: strict + content-visibility: auto sur .sw
+     ✓ contain: layout style sur .sr (rows)
+   ─────────────────────────────────────────────────────────────── */
+
+/* Phase 1 — Fondations ✓ */
+@import './tokens.css';
+@import './fonts.css';
+@import './reset.css';
+@import './scrollbars.css';
+@import './typography.css';
+@import './layout.css';
+@import './animations.css';
+
+/* Phase 2 — Sliders ultra-performants ✓ */
+@import './sliders.css';
+
+/* Phase 3 — Header SVG Redesign ✓ */
+@import './header.css';
+
+/* Phase 4 — Panel Sliders Redesign ✓ */
+@import './editor.css';
+@import './panels.css';
+
+/* Phase 5 — Modales & Overlays ✓ */
+@import './modals.css';
+
+/* Phase 7.3 — Accessibility (focus rings, SR support, zoom UI) */
+@import './accessibility.css';

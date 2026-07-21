@@ -1,0 +1,83 @@
+{
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "apply": "Apply",
+    "save": "Save",
+    "load": "Load",
+    "delete": "Delete",
+    "close": "Close",
+    "open": "Open",
+    "export": "Export",
+    "import": "Import",
+    "settings": "Settings",
+    "help": "Help",
+    "about": "About"
+  },
+  "menu": {
+    "file": "File",
+    "edit": "Edit",
+    "view": "View",
+    "tools": "Tools",
+    "help": "Help"
+  },
+  "toolbar": {
+    "play": "Play",
+    "pause": "Pause",
+    "stop": "Stop",
+    "screenshot": "Screenshot",
+    "fullscreen": "Fullscreen",
+    "perf": "Performance",
+    "library": "Library",
+    "share": "Share",
+    "export": "Export"
+  },
+  "viewport": {
+    "resolution": "Resolution",
+    "fps": "FPS",
+    "time": "Time",
+    "delta": "Delta"
+  },
+  "editor": {
+    "shader": "Shader",
+    "multipass": "Multipass",
+    "webgpu": "WebGPU",
+    "hlsl": "HLSL",
+    "wgsl": "WGSL",
+    "isf": "ISF"
+  },
+  "colorblindness": {
+    "title": "Color Blindness Mode",
+    "mode": "Simulation Mode",
+    "none": "Normal",
+    "protanopia": "Protanopia (red)",
+    "deuteranopia": "Deuteranopia (green)",
+    "tritanopia": "Tritanopia (blue)",
+    "overlay": "Show overlay",
+    "status": "Current mode",
+    "red": "Red",
+    "green": "Green",
+    "blue": "Blue",
+    "yellow": "Yellow",
+    "cyan": "Cyan",
+    "magenta": "Magenta"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "dark": "Dark",
+    "light": "Light",
+    "highContrast": "High Contrast",
+    "oledBlack": "OLED Black",
+    "solarized": "Solarized",
+    "catppuccin": "Catppuccin",
+    "custom": "Custom"
+  },
+  "errors": {
+    "compileError": "Compilation Error",
+    "runtimeError": "Runtime Error",
+    "networkError": "Network Error",
+    "fileError": "File Error"
+  }
+}

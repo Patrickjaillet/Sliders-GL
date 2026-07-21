@@ -1,0 +1,1024 @@
+.ez {
+  position: relative;
+  border-top: 1px solid var(--border-sub);
+  display: flex;
+  flex-direction: column;
+  min-height: 96px;
+  flex-shrink: 0;
+  overflow: visible;
+  background: var(--bg-surface);
+}
+
+.eb {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 8px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-sub);
+  background: var(--bg-surface);
+}
+
+.el {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.esp {
+  flex: 1;
+}
+
+/* shared base with .pb — see layout.css */
+.ebn {
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm, 4px);
+  border: 1px solid var(--border);
+  background: var(--bg-app);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  cursor: pointer;
+  transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
+}
+
+.ebn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.ebn.hi {
+  background: var(--accent);
+  color: var(--text-inverse);
+  border-color: var(--accent);
+}
+
+.ebn.hi:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.ebn.active {
+  color: var(--accent-hover);
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+#mc {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+}
+
+/* .snippets-menu, .snip-item, .snip-tag removed (10.1) — dropdown absorbed into snippet library */
+
+.cerr-wrap {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  z-index: 12;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--status-err);
+  background: var(--status-err-bg);
+  box-shadow: var(--shadow-md);
+  transition: max-height 200ms ease, border-color 200ms ease;
+}
+
+.cerr-wrap.visible {
+  max-height: 300px;
+}
+
+.cerr-wrap.visible .cerr-count {
+  animation: pulse-dot 1.3s ease-in-out infinite;
+}
+
+.cerr-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--status-err);
+  color: var(--status-err);
+  cursor: pointer;
+  user-select: none;
+}
+
+.cerr-header:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.cerr-count {
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--status-err);
+  background: var(--status-err-bg);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.cerr-toggle {
+  margin-left: auto;
+  transition: transform var(--t-fast);
+}
+
+.cerr-wrap.collapsed .cerr-toggle {
+  transform: rotate(180deg);
+}
+
+.cerr-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px 10px;
+}
+
+.cerr-line {
+  display: flex;
+  gap: 10px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--status-err);
+  cursor: pointer;
+  transition: background var(--t-fast);
+}
+
+.cerr-line:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.cerr-lineno {
+  min-width: 36px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+}
+
+.cerr-msg {
+  flex: 1;
+  font-size: 12px;
+  word-break: break-word;
+}
+
+/* §G.3 — annotations « anatomie du shader » (décorations inline Monaco) */
+.anatomy-note {
+  color: var(--accent) !important;
+  opacity: 0.7;
+  font-style: italic;
+  font-size: 0.92em;
+}
+
+/* §G.2 — explication déterministe sous l'erreur */
+.cerr-explain {
+  margin: 2px 0 6px 26px;
+  padding: 4px 8px;
+  border-left: 2px solid var(--status-warn);
+  background: var(--status-warn-bg);
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.45;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.cerr-raw {
+  padding: 6px 4px 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border);
+  word-break: break-word;
+}
+
+.pass-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+  padding: 4px 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-app);
+}
+
+.pass-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.pass-tabs::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background: var(--border-strong);
+}
+
+.pass-tab,
+.ptab-add {
+  position: relative;
+  min-height: 28px;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pass-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: var(--radius);
+  transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast);
+}
+
+.pass-tab:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: var(--bg-hover);
+}
+
+.pass-tab.active {
+  color: var(--accent-hover);
+  border-color: var(--accent);
+  background: var(--accent-light);
+  font-weight: 500;
+}
+
+/* ── Per-buffer accent colors when active ── */
+#ptab-bufA.active { color: var(--buf-a); border-color: var(--buf-a); background: rgba(79,163,255,0.08); }
+#ptab-bufB.active { color: var(--buf-b); border-color: var(--buf-b); background: rgba(57,255,106,0.08); }
+#ptab-bufC.active { color: var(--buf-c); border-color: var(--buf-c); background: rgba(255,154,60,0.08); }
+#ptab-bufD.active { color: var(--buf-d); border-color: var(--buf-d); background: rgba(192,132,252,0.08); }
+
+/* ── Disabled pass (not yet enabled) ──
+   --text-ghost is intentionally the app's lowest-contrast text token, used
+   here for a genuinely disabled control (WCAG exempts inactive UI components
+   from the normal text-contrast requirement) — the buffer tab labels
+   (Buf A/B/C/D, Cube, Sound, Comp) all start disabled until the user enables
+   them. Don't stack extra opacity on top of it; the color alone conveys the
+   dimmed/disabled state. */
+.pass-tab:not(.enabled) {
+  color: var(--text-ghost);
+  cursor: not-allowed;
+}
+.pass-tab:not(.enabled):hover {
+  color: var(--text-dim);
+  border-color: var(--border);
+  background: var(--bg-panel);
+}
+
+.pass-tab.enabled:not(.active) {
+  color: var(--text-primary);
+}
+
+/* ── Compile-in-progress badge ── */
+.pass-tab.compiling {
+  position: relative;
+}
+.pass-tab.compiling::after {
+  content: '·';
+  position: absolute;
+  bottom: 1px;
+  right: 3px;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--accent);
+  animation: compilePulseTab 400ms ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes compilePulseTab {
+  0%   { transform: scale(0.8); opacity: 0.5; }
+  50%  { transform: scale(1.2); opacity: 1;   }
+  100% { transform: scale(1);   opacity: 0.7; }
+}
+
+.pass-tab .ptab-close {
+  margin-left: 6px;
+  color: var(--text-disabled);
+  opacity: 0;
+  transition: opacity var(--t-fast), color var(--t-fast);
+}
+
+.pass-tab:hover .ptab-close {
+  opacity: 1;
+}
+
+.pass-tab .ptab-close:hover {
+  color: var(--status-err);
+}
+
+.ptab-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast);
+}
+
+.ptab-add:hover {
+  color: var(--status-ok);
+  border-color: var(--status-ok);
+  background: var(--status-ok-bg);
+}
+
+/* P2.15 — Wire panel dashboard styling */
+.wire-panel { padding: 0; }
+.wire-header {
+  padding: 6px 12px; font-size: 10px; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--text-secondary);
+  border-bottom: 1px solid var(--border); background: var(--bg-panel);
+}
+.wire-entry {
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 12px; font-size: 10px; color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,.04));
+}
+.wire-entry-arrow { color: var(--accent, #7b6fff); }
+.wire-empty { padding: 8px 12px; font-size: 10px; color: var(--text-secondary); font-style: italic; }
+
+.wire-panel {
+  position: relative;
+  display: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-app);
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-height: 0;
+}
+
+.wire-panel.open {
+  display: block;
+}
+
+.ng-empty {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-disabled);
+  padding: 14px 16px;
+}
+
+.ng-canvas {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ng-svg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.ng-node {
+  position: absolute;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-panel);
+  box-sizing: border-box;
+  user-select: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.ng-node-head {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--bg-app);
+  border-bottom: 1px solid var(--border);
+}
+
+.ng-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ng-label {
+  flex: 1;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+}
+
+.ng-edit-btn {
+  background: none;
+  border: none;
+  padding: 0 2px;
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+}
+
+.ng-edit-btn:hover {
+  color: var(--accent);
+}
+
+.ng-ch-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px 0 2px;
+  gap: 5px;
+}
+
+.ng-ch-lbl {
+  font-size: 8px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  width: 18px;
+}
+
+.ng-ch-src {
+  font-size: 8px;
+  font-family: var(--font-mono);
+  opacity: 0.85;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ng-port {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-strong);
+  flex-shrink: 0;
+  transition: transform 0.12s, border-color 0.12s;
+}
+
+.ng-port-out {
+  position: absolute;
+  right: -6px;
+  transform: translateY(-50%);
+  cursor: crosshair;
+  z-index: 4;
+  border-color: var(--border-strong);
+}
+
+.ng-port-out:hover,
+.ng-port-dragging {
+  transform: translateY(-50%) scale(1.35);
+  border-color: var(--accent);
+}
+
+.ng-port-in {
+  cursor: default;
+  margin-left: -6px;
+}
+
+.ng-port-connected {
+  border-color: var(--accent);
+}
+
+.ng-port-drop-target {
+  cursor: crosshair;
+  animation: ngPulse 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes ngPulse {
+  from { transform: scale(1); }
+  to   { transform: scale(1.5); border-color: var(--accent); }
+}
+
+.ng-node-foot {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-app);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.ng-fd-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1px 5px;
+  font-size: 8px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+  transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.ng-capture-btn {
+  flex-shrink: 0;
+  margin-left: 2px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 10px;
+  padding: 0 3px;
+  height: 16px;
+  cursor: pointer;
+  line-height: 1;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+
+.ng-capture-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+.ng-res-select {
+  flex-shrink: 0;
+  margin-left: 4px;
+  background: var(--bg-app);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 8px;
+  font-family: var(--font-mono);
+  padding: 1px 2px;
+  cursor: pointer;
+  height: 16px;
+}
+
+.ng-res-select:hover {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.ng-fd-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.ng-fd-active {
+  border-color: var(--accent);
+  color: var(--accent-hover);
+  background: var(--accent-light);
+}
+
+.ng-fd-active:hover {
+  background: var(--accent-light);
+  color: var(--accent-hover);
+}
+
+.ng-fd-icon {
+  font-size: 10px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.wire-toggle,
+.wire-btn {
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-app);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
+}
+
+.wire-toggle:hover,
+.wire-toggle.on {
+  border-color: var(--status-ok);
+  color: var(--status-ok);
+  background: var(--status-ok-bg);
+}
+
+.wire-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
+/* ── Monaco theme overrides ─────────────────────────────────────────────── */
+
+.monaco-editor .margin { background: var(--bg-surface) !important; }
+.monaco-editor, .monaco-editor-background { background: var(--bg-surface) !important; }
+
+/* Error line decoration */
+.errorLineHighlight { background: rgba(239,68,68,0.08) !important; border-left: 2px solid #EF4444 !important; }
+.errorGlyph::before { content: '\26D4'; color: #EF4444; font-size: 11px; font-style: normal; }
+.errorInlineMsg { color: #F87171 !important; font-style: italic; opacity: 0.78; font-size: 0.88em; pointer-events: none; }
+
+/* Inlay hints */
+.monaco-editor .inlay-hint { color: #4D5566 !important; font-size: 10px !important; font-family: 'JetBrains Mono', monospace !important; }
+
+/* Scrollbar */
+.monaco-scrollable-element > .scrollbar > .slider { background: rgba(255,255,255,0.12) !important; border-radius: 3px !important; }
+.monaco-scrollable-element > .scrollbar > .slider:hover { background: rgba(255,255,255,0.22) !important; }
+
+/* ── Command Palette ─────────────────────────────────────────────────────── */
+
+.zcp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 14vh;
+  background: rgba(0, 0, 0, 0.60);
+  backdrop-filter: blur(2px);
+  animation: toast-in 120ms ease;
+}
+
+.zcp-box {
+  display: flex;
+  flex-direction: column;
+  width: min(640px, 92vw);
+  max-height: 68vh;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-mid);
+  background: var(--bg-overlay);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  overflow: hidden;
+}
+
+.zcp-input {
+  flex-shrink: 0;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 16px;
+  border: none;
+  border-bottom: 1px solid var(--border-sub);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.zcp-input::placeholder {
+  color: var(--text-ghost);
+}
+
+.zcp-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.zcp-list::-webkit-scrollbar { width: 4px; }
+.zcp-list::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background: var(--border-strong);
+}
+
+.zcp-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+}
+
+.zcp-item:hover,
+.zcp-item.zcp-active {
+  background: var(--accent-dim);
+}
+
+.zcp-lbl {
+  flex: 1;
+  color: var(--text-dim);
+  font: 12px var(--font-ui);
+}
+
+.zcp-item.zcp-active .zcp-lbl,
+.zcp-item:hover .zcp-lbl {
+  color: var(--text-primary);
+}
+
+.zcp-detail {
+  flex-shrink: 0;
+  color: var(--text-dim);
+  font: 11px var(--font-ui);
+}
+
+.zcp-kbd {
+  flex-shrink: 0;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-sub);
+  background: var(--bg-raised);
+  color: var(--text-dim);
+  font: 10px var(--font-mono);
+  white-space: nowrap;
+}
+
+.zcp-sep {
+  height: 1px;
+  margin: 4px 8px;
+  background: var(--border-sub);
+}
+.zcp-item.zcp-recent .zcp-lbl::before {
+  content: '↻ ';
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+.zcp-empty {
+  padding: 24px 20px;
+  color: var(--text-ghost);
+  font: 12px var(--font-ui);
+  text-align: center;
+}
+/* §I.3 — état vide plus accueillant */
+.zcp-empty::before {
+  content: '⌕';
+  display: block;
+  font-size: 22px;
+  opacity: 0.5;
+  margin-bottom: 6px;
+}
+
+/* §H.4 — cases à cocher confort dans le panneau Settings */
+.settings-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.settings-check input { accent-color: var(--accent); }
+.settings-check:hover { color: var(--text-primary); }
+
+/* ── WGSL Preview split layout ──────────────────────────────────────────── */
+
+.ez-split {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ez-split #mc {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0%;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* ── Sound pane tab ──────────────────────────────────────────────────────── */
+
+.ptab-sound {
+  border-color: var(--status-warn);
+  color: var(--text-secondary);
+}
+
+.ptab-sound.active {
+  border-color: var(--status-warn);
+  color: var(--status-warn);
+  background: var(--status-warn-bg);
+}
+
+.ptab-sound.enabled:not(.active) {
+  color: var(--status-warn);
+}
+
+#soundMc {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+#soundPane .compute-pane-label {
+  color: var(--status-warn);
+}
+
+/* F-7.1 — Compute pass tabs */
+.ptab-compute {
+  border-color: #c084fc;
+  color: var(--text-secondary);
+}
+
+.ptab-compute.active {
+  border-color: #c084fc;
+  color: #c084fc;
+  background: rgba(192, 132, 252, 0.12);
+}
+
+.ptab-compute.enabled:not(.active) {
+  color: #c084fc;
+}
+
+[id^="computePane-"] .compute-pane-label {
+  color: #c084fc;
+}
+
+[id^="computePane-"] .compute-badge--running {
+  color: #c084fc;
+  font-size: 9px;
+}
+
+.compute-pane {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  background: var(--bg-panel);
+}
+
+.compute-pane-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  height: 28px;
+  background: var(--bg-app);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.compute-pane-label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--status-ok);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.compute-pane-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.compute-badge {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.compute-dispatch-btn,
+.compute-autorun-btn {
+  flex-shrink: 0;
+}
+
+.compute-autorun-btn.active {
+  color: var(--status-ok);
+  border-color: var(--status-ok);
+  background: var(--status-ok-bg);
+}
+
+.compute-output-bar {
+  padding: 3px 8px;
+  background: var(--bg-app);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#computeMc {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+/* ── P1.2 — ↻ apply button + ⋯ more dropdown ─────────────────── */
+
+.eb-apply {
+  font-size: 11px;
+  padding: 0 10px;
+  height: 24px;
+  margin-right: 4px;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent, #7b6fff);
+  background: var(--accent, #7b6fff);
+  color: var(--text-inverse, #fff);
+  cursor: pointer;
+  font-weight: 600;
+  transition: background var(--t-fast), border-color var(--t-fast);
+  flex-shrink: 0;
+}
+
+.eb-apply:hover {
+  background: var(--accent-hover, #6c5fff);
+  border-color: var(--accent-hover, #6c5fff);
+}
+
+.eb-more-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.eb-more-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 9999;
+  background: var(--bg-panel, #1e2030);
+  border: 1px solid var(--border, #2a2d40);
+  border-radius: var(--radius, 6px);
+  padding: 4px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.5);
+  flex-direction: column;
+  gap: 2px;
+  min-width: 100px;
+}
+
+.eb-more-menu.open {
+  display: flex;
+}
+
+.eb-more-menu .ebn {
+  width: 100%;
+  text-align: left;
+}
+
+/* ── P1.3 — dirty state indicator on pass tab ────────────────── */
+
+.pass-tab {
+  position: relative;
+}
+
+.pass-tab.dirty::after {
+  content: '●';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 6px;
+  color: var(--accent, #7b6fff);
+  line-height: 1;
+}
+
+/* ── P1.6 — pass-tabs scroll arrows ──────────────────────────── */
+
+.pass-tabs-wrap {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-app);
+  overflow: hidden;
+}
+
+.pass-tabs-wrap .pass-tabs {
+  flex: 1;
+  border-bottom: none;
+}
+
+.ptab-scroll-btn {
+  flex-shrink: 0;
+  width: 22px;
+  border: none;
+  background: var(--bg-app);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 14px;
+  border-right: 1px solid var(--border);
+  opacity: .7;
+  transition: opacity var(--t-fast);
+}
+
+.ptab-scroll-btn:last-child {
+  border-right: none;
+  border-left: 1px solid var(--border);
+}
+
+.ptab-scroll-btn:hover {
+  opacity: 1;
+  color: var(--text-primary);
+}

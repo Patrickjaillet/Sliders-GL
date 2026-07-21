@@ -1,0 +1,243 @@
+/* ============================================================
+   Z-GL — Design Tokens
+   Style : professional motion-graphics compositor
+   Viewport : 800x450 px (fixed)
+   ============================================================ */
+
+:root {
+
+  /* ============================================================
+     FONTS
+     ============================================================ */
+
+  --font-ui:    'Inter', system-ui, sans-serif;
+  --font-prose: 'Inter', system-ui, sans-serif;
+  --font-mono:  'JetBrains Mono', 'Cascadia Code', monospace;
+
+
+  /* ============================================================
+     SURFACES
+     ============================================================ */
+
+  --bg-void:      #1E1E1E;  /* application background, pasteboard */
+  --bg-surface:   #2B2B2B;  /* panels (Project, Effect Controls) */
+  --bg-raised:    #323232;  /* panel headers, alternating rows */
+  --bg-overlay:   #3C3C3C;  /* inputs, buttons */
+
+  /* aliases consumed throughout the codebase */
+  --bg-app:       var(--bg-void);
+  --bg-panel:     var(--bg-surface);
+  --bg-panel-alt: var(--bg-raised);
+  --bg-hover:     #454545;
+  --bg-active:    rgba(14,99,156,0.20);
+  --bg-selected:  rgba(74,144,226,0.15);
+  --bg-highlight: rgba(74,144,226,0.15);
+  --bg-input:     var(--bg-overlay);
+  --bg-tooltip:   var(--bg-overlay);
+
+  /* short aliases */
+  --bg2: var(--bg-surface);
+  --bg3: var(--bg-void);
+  --bg4: var(--bg-raised);
+  --hover: var(--bg-hover);
+
+
+  /* ============================================================
+     BORDERS
+     ============================================================ */
+
+  --border-sub:    rgba(255,255,255,0.14);  /* Phase 4 — was 0.05, nearly invisible; still a hairline, now perceptible */
+  --border-mid:    #464646;
+  --border-hot:    #4A90E2;
+
+  /* aliases */
+  --border:        var(--border-mid);
+  --border-strong: #5A5A5A;
+  --border-focus:  var(--border-hot);
+  --border-input:  var(--border-mid);
+  --border-faint:  var(--border-sub);
+
+  /* short aliases */
+  --b1: var(--border-mid);
+  --b2: var(--border-strong);
+  --b3: var(--border-hot);
+  --bd: var(--border-mid);
+
+
+  /* ============================================================
+     TEXT
+     ============================================================ */
+
+  --text-primary:  #E6E6E6;  /* main text — AAA contrast on #2B2B2B */
+  --text-dim:      #B4B4B4;  /* secondary labels */
+  --text-ghost:    #7A7A7A;  /* disabled state */
+  --text-mono:     #D0D0D0;  /* numeric values */
+  --text-code:     #C3E88D;  /* inline GLSL code */
+
+  /* aliases */
+  --text-secondary:   var(--text-dim);
+  --text-disabled:    var(--text-ghost);
+  --text-inverse:     #000000;
+  --text-tooltip:     var(--text-primary);
+  --text-placeholder: var(--text-ghost);
+
+  /* short aliases */
+  --t1: var(--text-primary);
+  --t2: var(--text-dim);
+  --t3: var(--text-ghost);
+  --fg:  var(--text-primary);
+  --fg2: var(--text-dim);
+  --font: var(--font-mono);
+
+  /* prose aliases */
+  --prose-mid: var(--text-dim);
+  --prose-lo:  var(--text-ghost);
+
+
+  /* ============================================================
+     ACCENT — compositor selection blue
+     ============================================================ */
+
+  --accent:     #4A90E2;
+  --accent-dim: rgba(74,144,226,0.18);
+
+  /* aliases */
+  --accent-hover: #6FA8EA;
+  --accent-light: var(--accent-dim);
+  --accent-muted: var(--accent-dim);
+
+  --accent-r: 74;
+  --accent-g: 144;
+  --accent-b: 226;
+
+
+  /* ============================================================
+     FUNCTIONAL STATES
+     ============================================================ */
+
+  --warn:  #E5A93C;
+  --error: #E5484D;
+  --err:   var(--error);
+
+  /* status aliases */
+  --status-ok:          var(--accent);
+  --status-ok-bg:       rgba(74,144,226,0.10);
+  --status-ok-border:   rgba(74,144,226,0.30);
+
+  --status-warn:        var(--warn);
+  --status-warn-bg:     rgba(229,169,60,0.12);
+  --status-warn-border: rgba(229,169,60,0.35);
+
+  --status-err:         var(--error);
+  --status-err-bg:      rgba(229,72,77,0.10);
+  --status-err-border:  rgba(229,72,77,0.30);
+
+  --status-run:         var(--accent);
+  --status-run-bg:      rgba(74,144,226,0.10);
+
+  /* short aliases */
+  --ac:  var(--accent);
+  --ac3: var(--accent);
+  --ac4: var(--warn);
+
+
+  /* ============================================================
+     BUFFER COLORS (GLSL passes A/B/C/D)
+     ============================================================ */
+
+  --buf-a: #4FA3FF;
+  --buf-b: #4A90E2;
+  --buf-c: #E5A93C;
+  --buf-d: #C084FC;
+
+
+  /* ============================================================
+     SHADOWS
+     ============================================================ */
+
+  --shadow-sm:    0 1px 2px rgba(0,0,0,0.40);
+  --shadow-md:    0 2px 8px rgba(0,0,0,0.55);
+  --shadow-popup: 0 8px 24px rgba(0,0,0,0.65), 0 1px 4px rgba(0,0,0,0.45);
+
+  /* aliases */
+  --shadow-panel: var(--shadow-md);
+
+
+  /* ============================================================
+     GEOMETRY
+     ============================================================ */
+
+  --radius-sm:  3px;
+  --radius:     3px;
+  --radius-md:  6px;
+  --radius-lg:  6px;
+  --radius-tag: 3px;
+
+
+  /* ============================================================
+     TRANSITIONS
+     ============================================================ */
+
+  --dur:  120ms;
+  --ease: cubic-bezier(.25,.1,.25,1);
+
+  /* aliases */
+  --t-fast:        100ms ease;
+  --t-normal:      120ms cubic-bezier(.25,.1,.25,1);
+  --motion-quick:  120ms cubic-bezier(.25,.1,.25,1);
+  --motion-smooth: 200ms cubic-bezier(.25,.1,.25,1);
+  --motion-spring: 300ms cubic-bezier(.25,.1,.25,1);
+  --ease-standard: cubic-bezier(.25,.1,.25,1);
+  --ease-spring:   cubic-bezier(.25,.1,.25,1);
+  --ease-snap:     var(--ease);
+  --ease-silk:     var(--ease);
+  --duration-fast:   100ms;
+  --duration-normal: 120ms;
+  --duration-slow:   200ms;
+
+
+  /* ============================================================
+     LAYOUT DIMENSIONS — 800x450 fixed
+     ============================================================ */
+
+  --hh: 28px;   /* bottom toolbar */
+  --sw: 280px;  /* left sidebar */
+  --iw: 200px;  /* right inspector */
+
+  /* aliases */
+  --pw: var(--sw);
+
+  /* titlebar (Tauri) */
+  --titlebar-h:              24px;
+  --titlebar-bg:             var(--bg-surface);
+  --titlebar-fg:             var(--text-primary);
+  --titlebar-border:         var(--border-mid);
+  --titlebar-font-size:      12px;
+  --titlebar-icon-size:      10px;
+  --titlebar-btn-hover-bg:   var(--bg-raised);
+  --titlebar-close-hover-bg: var(--error);
+  --titlebar-close-hover-fg: #FFFFFF;
+
+
+  /* ============================================================
+     SPARK ALIASES (sparkline / uniform widgets)
+     ============================================================ */
+
+  --spark:          var(--accent);
+  --spark-hot:      var(--error);
+  --spark-go:       var(--accent);
+  --spark-warm:     var(--warn);
+  --spark-rgb:      var(--accent-r), var(--accent-g), var(--accent-b);
+  --spark-hot-rgb:  229, 72, 77;
+  --spark-go-rgb:   var(--accent-r), var(--accent-g), var(--accent-b);
+  --spark-warm-rgb: 229, 169, 60;
+
+
+  /* ============================================================
+     LEGACY ALIASES — kept because they are consumed in the code
+     ============================================================ */
+
+  --inp:      var(--bg-overlay);
+  --lavender: var(--accent);
+  --mauve:    var(--accent);
+}

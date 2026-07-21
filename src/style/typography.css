@@ -1,0 +1,267 @@
+/* ============================================================
+   Z-GL — typography.css
+   Style : professional motion-graphics compositor
+   ============================================================
+
+   Segoe UI à toutes les tailles — aucune police décorative.
+   Toutes les classes existantes sont conservées pour éviter
+   de casser les fichiers JS/HTML qui les utilisent.
+
+   Changements clés :
+   - letter-spacing 0.18em + uppercase supprimé des labels UI
+     → remplacé par font-weight 600 + taille 11px
+   - font-prose → font-ui (plus de Sora/Syne)
+   - Valeurs numériques → font-mono (Cascadia Code/Consolas)
+   ============================================================ */
+
+/* ══════════════════════════════════════════════
+   BASE
+   ══════════════════════════════════════════════ */
+
+html,
+body {
+  font-family:    var(--font-ui);
+  font-size:      13px;
+  line-height:    1.45;
+  color:          var(--text-primary);
+  /* Rendu texte Windows — pas d'antialiasing webkit */
+  -webkit-font-smoothing:  auto;
+  -moz-osx-font-smoothing: auto;
+  font-feature-settings: 'liga' 0;
+}
+
+
+/* ══════════════════════════════════════════════
+   UTILITAIRES TAILLE
+   (classes utilisées dans le JS / HTML existant)
+   ══════════════════════════════════════════════ */
+
+.text-7  { font-size:  7px; }
+.text-8  { font-size:  8px; }
+.text-9  { font-size:  9px; }
+.text-10 { font-size: 10px; }
+.text-11 { font-size: 11px; }
+.text-12 { font-size: 12px; }
+.text-13 { font-size: 13px; }
+.text-16 { font-size: 16px; }
+.text-22 { font-size: 22px; }
+
+
+/* ══════════════════════════════════════════════
+   FAMILLES UTILITAIRES
+   ══════════════════════════════════════════════ */
+
+.font-ui,
+.font-display,
+.font-prose {
+  font-family: var(--font-ui);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+
+/* ══════════════════════════════════════════════
+   LOGO / NOM APP
+   ══════════════════════════════════════════════ */
+
+.logo {
+  font-family:    var(--font-ui);
+  font-size:      13px;
+  font-weight:    700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color:          var(--text-primary);
+}
+
+
+/* ══════════════════════════════════════════════
+   TITRES DE PANNEAUX ET SECTIONS
+   ══════════════════════════════════════════════ */
+
+/* Titres de panneau (ex : "MIDI", "Channels", "Library") */
+.ph-title,
+.ch-head-title,
+.perf-pop-title,
+.perf-section-title,
+.lib-section-title,
+.panel-title {
+  font-family:    var(--font-ui);
+  font-size:      11px;
+  font-weight:    600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color:          var(--text-secondary);
+}
+
+/* Titres de modales (niveau h3) */
+.modal h3,
+.modal-title,
+.lib-head-title,
+.es-title {
+  font-family:    var(--font-ui);
+  font-size:      14px;
+  font-weight:    600;
+  letter-spacing: 0;
+  color:          var(--text-primary);
+}
+
+
+/* ══════════════════════════════════════════════
+   BOUTONS ET CONTRÔLES INTERACTIFS
+   (labels lisibles — uppercase allégé)
+   ══════════════════════════════════════════════ */
+
+.hb,
+.pb,
+.ebn,
+.perf-opt,
+.modal-btn {
+  font-family:    var(--font-ui);
+  font-size:      12px;
+  font-weight:    400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Étiquettes de groupes / éléments de liste */
+.el,
+.sh {
+  font-family:    var(--font-ui);
+  font-size:      12px;
+  font-weight:    400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Label de modale */
+.modal-label {
+  font-family:    var(--font-ui);
+  font-size:      12px;
+  font-weight:    500;
+  color:          var(--text-secondary);
+}
+
+
+/* ══════════════════════════════════════════════
+   TEXTES SECONDAIRES ET NOTES
+   ══════════════════════════════════════════════ */
+
+.sn,
+.s-hint,
+.status-badge,
+.toast,
+.pc-name,
+.perf-note,
+.st-note,
+.exp-note,
+.perf-timebar-label,
+.perf-timebar-val,
+.cerr-header,
+.cerr-line,
+.pass-tab,
+.ptab-add {
+  font-family: var(--font-ui);
+  font-size:   12px;
+  color:       var(--text-secondary);
+}
+
+
+/* ══════════════════════════════════════════════
+   VALEURS NUMÉRIQUES ET CODE (monospace)
+   ══════════════════════════════════════════════ */
+
+/* Valeurs à chiffres alignés — tabular nums */
+.sv,
+.fps,
+.curpos,
+.perf-budget-ms,
+.perf-budget-sub,
+.perf-budget-label,
+.perf-label,
+.ch-index,
+.exp-label,
+.ctx-shortcut {
+  font-family:           var(--font-mono);
+  font-size:             11px;
+  font-variant-numeric:  tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  color:                 var(--text-secondary);
+}
+
+/* Chiffres haute lisibilité (ex : FPS counter, temps) */
+.fps,
+.sv {
+  font-size:   12px;
+  color:       var(--text-primary);
+}
+
+
+/* ══════════════════════════════════════════════
+   INPUTS ET SELECTS
+   ══════════════════════════════════════════════ */
+
+.modal-input,
+.lib-search,
+.lib-tag,
+.lib-st-input,
+.ch-url-input,
+.exp-select,
+.perf-sel {
+  font-family: var(--font-ui);
+  font-size:   12px;
+  color:       var(--text-primary);
+}
+
+
+/* ══════════════════════════════════════════════
+   NOUVEAUX UTILITAIRES (système de design)
+   ══════════════════════════════════════════════ */
+
+/* Étiquette de section (header de groupe dans un panneau) */
+.label-section {
+  font-family:    var(--font-ui);
+  font-size:      11px;
+  font-weight:    600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color:          var(--text-secondary);
+}
+
+/* Valeur numérique inline (slider, input) */
+.value-mono {
+  font-family:           var(--font-mono);
+  font-size:             11px;
+  font-variant-numeric:  tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  color:                 var(--text-secondary);
+}
+
+/* Texte de code inline dans l'UI */
+.code-inline {
+  font-family:      var(--font-mono);
+  font-size:        11px;
+  background:       var(--bg-app);
+  border:           1px solid var(--border);
+  border-radius:    var(--radius-sm);
+  padding:          1px 4px;
+  color:            var(--text-primary);
+}
+
+/* Texte désactivé */
+.text-disabled {
+  color: var(--text-disabled);
+}
+
+/* Texte succès / erreur / warning inline */
+.text-ok   { color: var(--status-ok);   }
+.text-err  { color: var(--status-err);  }
+.text-warn { color: var(--status-warn); }
+
+/* Troncature avec ellipsis */
+.text-truncate {
+  overflow:      hidden;
+  white-space:   nowrap;
+  text-overflow: ellipsis;
+}

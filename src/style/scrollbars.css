@@ -1,0 +1,42 @@
+/* ============================================================
+   Z-GL — scrollbars.css
+   Style : Dark IDE · 6px slim · theme-aware
+   ============================================================ */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.12) transparent;
+}
+
+::-webkit-scrollbar {
+  width:  6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.22);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Masquer la scrollbar sur les listes de tabs (navigation horizontale) */
+.pass-tabs::-webkit-scrollbar,
+.ce-var-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.pass-tabs,
+.ce-var-tabs {
+  scrollbar-width: none;
+}

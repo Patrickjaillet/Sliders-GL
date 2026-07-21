@@ -1,0 +1,42 @@
+<!-- HLSL Preview Panel  (HLSL → WGSL / GLSL dual output)
+     Drop this fragment into the editor split layout alongside #wgslPane.
+     Hidden by default; toggled via toggleHLSLPreview(). -->
+
+<div id="hlslPreviewPane" hidden
+     style="flex:1;display:flex;flex-direction:column;min-width:300px;max-width:50%;
+            border-left:1px solid #2a2d32;overflow:hidden;">
+
+  <!-- Panel header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;
+              padding:4px 8px;background:#1a1d22;border-bottom:1px solid #2a2d32;
+              flex-shrink:0;user-select:none;gap:8px;">
+
+    <!-- Left: title -->
+    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+      <span style="font-size:11px;font-weight:600;color:#ccc;letter-spacing:.03em;">
+        HLSL Preview
+      </span>
+      <span style="font-size:10px;color:#555;">SPIR-V pipeline</span>
+    </div>
+
+    <!-- Centre: tab switcher -->
+    <div style="display:flex;gap:2px;">
+      <button id="hlslTabGLSL"
+              style="font-size:10px;padding:2px 8px;border:1px solid #333;border-radius:3px;
+                     background:#232630;color:#999;cursor:pointer;transition:background .15s;"
+              title="Show GLSL ES 3.00 output">GLSL</button>
+      <button id="hlslTabWGSL"
+              style="font-size:10px;padding:2px 8px;border:1px solid #333;border-radius:3px;
+                     background:#232630;color:#999;cursor:pointer;transition:background .15s;"
+              title="Show WGSL output">WGSL</button>
+    </div>
+
+    <!-- Right: status -->
+    <span id="hlslPreviewStatus"
+          style="font-size:10px;color:#666;font-style:italic;flex-shrink:0;"></span>
+  </div>
+
+  <!-- Read-only Monaco editor mounts here -->
+  <div id="hlslPreviewMc" style="flex:1 1 0;min-height:100px;"></div>
+
+</div>

@@ -1,0 +1,1326 @@
+<body>
+<a class="skip-link" href="#mc">Skip to editor</a>
+<div id="titlebar" class="tauri-titlebar" aria-hidden="true">
+  <img src="/icon-light-32x32.png" width="14" height="14" alt="" style="-webkit-app-region:no-drag">
+  <span class="text-12" style="font-weight:600; color:var(--text-primary); margin-left:6px">Z-GL Shadertoy</span>
+</div>
+
+<!-- ═══════════════════════════════ PHASE 3: SVG SPRITE ══════ -->
+<!-- Sprite SVG inline — toutes les icônes définies ici, utilisées
+     via <use href="#icon-xxx"> dans les boutons du header.        -->
+<!-- Fix 6.1–6.3 — Harmonisation du sprite SVG :
+     • icon-perf redessiné en engrenage à 6 dents (n'utilise plus le tracé de icon-sun)
+     • icon-sun conservé, tracé soleil inchangé
+     • icon-taa ajouté (vitesse / flèche circulaire ouverte) pour taaVelSummary
+     • icon-plugin, icon-terminal, icon-clear convertis de fill → stroke pour cohérence
+-->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <defs>
+    <!-- Engrenage 16px — 6 dents sur couronne, cercle central — Fix 6.1 -->
+    <symbol id="icon-perf" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
+        d="M8 1.5v1.8M8 12.7v1.8
+           M1.5 8h1.8M12.7 8h1.8
+           M3.4 3.4l1.27 1.27M11.33 11.33l1.27 1.27
+           M12.6 3.4l-1.27 1.27M4.67 11.33l-1.27 1.27
+           M8 4.5V3M8 11.5V13
+           M4.5 8H3M11.5 8H13"/>
+    </symbol>
+
+    <!-- Grille 2×2 avec coin supérieur-droit détaché -->
+    <symbol id="icon-library" viewBox="0 0 16 16">
+      <rect x="1.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <rect x="1.5" y="9.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <rect x="9.5" y="9.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <!-- coin détaché -->
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"
+        d="M9.5 5.5h3M12.5 2.5v3"/>
+    </symbol>
+
+    <!-- Logo "ST" stylisé en path -->
+    <symbol id="icon-st" viewBox="0 0 16 16">
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
+        d="M2 4h5M4.5 4v8M9 12c1 0 2-.5 2-1.5S10 9 9 9s-2-.4-2-1.5S8 6 9 6h3"/>
+    </symbol>
+
+    <!-- Prise jack 6.35mm vue de côté -->
+    <symbol id="icon-midi" viewBox="0 0 16 16">
+      <line x1="2" y1="8" x2="9" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <rect x="9" y="5.5" width="2" height="5" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <rect x="11" y="6.5" width="3" height="3" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <line x1="5" y1="6" x2="5" y2="10" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+      <line x1="7" y1="5.5" x2="7" y2="10.5" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+    </symbol>
+
+    <!-- Flèche vers le bas avec plateau horizontal (export) -->
+    <symbol id="icon-export" viewBox="0 0 16 16">
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
+        d="M8 2v8M5 7l3 3 3-3"/>
+      <line x1="3" y1="13" x2="13" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- Nœud avec 3 connexions (graphe share) -->
+    <symbol id="icon-share" viewBox="0 0 16 16">
+      <circle cx="13" cy="3" r="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <circle cx="13" cy="13" r="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <circle cx="3"  cy="8" r="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <line x1="4.4"  y1="7.1"  x2="11.5" y2="3.7"  stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="4.4"  y1="8.9"  x2="11.5" y2="12.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- Deux rectangles arrondis (pause) -->
+    <symbol id="icon-pause" viewBox="0 0 16 16">
+      <rect x="3"  y="3" width="4" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <rect x="9" y="3" width="4" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    </symbol>
+
+    <!-- Triangle play -->
+    <symbol id="icon-play" viewBox="0 0 16 16">
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"
+        d="M4 2.5l9 5.5-9 5.5z"/>
+    </symbol>
+
+    <!-- Losange avec trait horizontal (timeline) -->
+    <symbol id="icon-timeline" viewBox="0 0 16 16">
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"
+        d="M8 2l4 6-4 6-4-6z"/>
+      <line x1="2" y1="8" x2="12" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- 4 coins qui s'écartent (fullscreen) -->
+    <symbol id="icon-fullscreen" viewBox="0 0 16 16">
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
+        d="M1.5 5.5V2h3.5M9.5 2h3.5v3.5M14.5 10.5V14H11M6.5 14H3v-3.5"/>
+    </symbol>
+
+    <!-- Soleil (thème clair) — Fix 6.1: tracé distinct de icon-perf (pas de cercle central rempli) -->
+    <symbol id="icon-sun" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <path stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+        d="M8 1v2M8 13v2M1 8h2M13 8h2
+           M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42
+           M11.53 4.47l1.42-1.42M3.05 12.95l1.42-1.42"/>
+    </symbol>
+
+    <!-- Lune (thème sombre) -->
+    <symbol id="icon-moon" viewBox="0 0 16 16">
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"
+        d="M12.5 9.5A6 6 0 016.5 3.5a6 6 0 000 9 6 6 0 006-3z"/>
+    </symbol>
+
+    <!-- Flèche circulaire fermée (apply+parse) -->
+    <symbol id="icon-refresh" viewBox="0 0 16 16">
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
+        d="M13.5 8A5.5 5.5 0 112.5 8"/>
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
+        d="M13.5 4v4h-4"/>
+    </symbol>
+
+    <!-- Haut-parleur (sound feedback) -->
+    <symbol id="icon-sound" viewBox="0 0 16 16">
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
+        d="M3 6H1v4h2l4 3V3L3 6z"/>
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"
+        d="M11 5.5a3.5 3.5 0 010 5M13 3.5a6 6 0 010 9"/>
+    </symbol>
+
+    <!-- TAA velocity source — flèche circulaire ouverte (Fix 6.2: remplace icon-perf pour taaVelSummary) -->
+    <symbol id="icon-taa" viewBox="0 0 16 16">
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
+        d="M12.5 8A4.5 4.5 0 113.5 8"/>
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
+        d="M12.5 5v3h-3"/>
+      <line x1="6" y1="8" x2="10" y2="8" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+    </symbol>
+
+    <!-- Fiche plugin — converti fill→stroke pour cohérence (Fix 6.3) -->
+    <symbol id="icon-plugin" viewBox="0 0 16 16">
+      <rect x="2" y="4" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
+        d="M6 2v2M10 2v2"/>
+      <line x1="5.5" y1="9" x2="10.5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="8" cy="7" r="1" stroke="currentColor" stroke-width="1.2" fill="none"/>
+    </symbol>
+
+    <!-- Terminal — converti fill→stroke pour cohérence (Fix 6.3) -->
+    <symbol id="icon-terminal" viewBox="0 0 16 16">
+      <rect x="1.5" y="1.5" width="13" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
+        d="M4 5.5l2.5 2.5L4 10.5"/>
+      <line x1="8" y1="10.5" x2="12" y2="10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- Corbeille (clear) — converti fill→stroke pour cohérence (Fix 6.3) -->
+    <symbol id="icon-clear" viewBox="0 0 16 16">
+      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
+        d="M2.5 4h11M5 4V2.5h6V4M4 4l.75 9.5h6.5L12 4"/>
+      <line x1="6.5" y1="6.5" x2="6.5" y2="11.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="9.5" y1="6.5" x2="9.5" y2="11.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<footer id="toolbar">
+  <div class="vsep"></div>
+
+  <!-- Phase 1.2: File menu -->
+  <div class="file-menu-wrap" id="fileMenuWrap">
+    <button class="hb file-menu-btn" id="fileMenuBtn" data-action="toggleFileMenu" aria-haspopup="true" aria-expanded="false" aria-label="File menu" title="Project — click for File menu">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+        <path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+          d="M2 2h4l1.5 1.5H11v7H2V2z"/>
+      </svg>
+      <span class="fmenu-name" id="projectName">Untitled</span><span class="fmenu-dirty" id="projectDirty" hidden title="Unsaved changes">●</span>
+    </button>
+    <div class="file-menu-popup" id="fileMenuPopup" role="menu" aria-label="File operations" hidden>
+      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="newProject">
+        <span class="fmenu-icon" aria-hidden="true">◻</span> New Project
+        <span class="fmenu-shortcut">Ctrl+N</span>
+      </button>
+      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="openProject">
+        <span class="fmenu-icon" aria-hidden="true">↑</span> Open Project…
+        <span class="fmenu-shortcut">Ctrl+O</span>
+      </button>
+      <div class="fmenu-sep" role="separator"></div>
+      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="saveProject">
+        <span class="fmenu-icon" aria-hidden="true">💾</span> Save Project
+        <span class="fmenu-shortcut">Ctrl+S</span>
+      </button>
+      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="saveProjectAs">
+        <span class="fmenu-icon" aria-hidden="true">💾</span> Save Project As…
+        <span class="fmenu-shortcut">Ctrl+Shift+S</span>
+      </button>
+      <div class="fmenu-sep" role="separator"></div>
+      <button class="fmenu-item" role="menuitemcheckbox" tabindex="-1" data-action="toggleWatchFile" id="watchFileItem" aria-checked="false">
+        <span class="fmenu-icon" aria-hidden="true">👁</span> Watch File
+      </button>
+      <div class="fmenu-sep" role="separator"></div>
+      <!-- MRU list rendered here by JS -->
+      <div id="fmenuMruSection" style="display:none">
+        <div class="fmenu-section-title">Recent Projects</div>
+        <div id="fmenuMruList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- §1.3 roadmap UI/UX : badge de statut, position curseur et FPS
+       déplacés vers la barre de statut en bas (#appStatusBar). -->
+
+  <button class="hb taa-vel-summary" id="taaVelSummary" data-action="toggleTAAVelSource"
+          title="TAA — velocity source (click to cycle: Auto / None / active pass). Full settings in Perf panel."
+          aria-label="TAA velocity source: Auto" style="margin-left:4px;padding:0 6px">
+    <svg class="icon-mini" aria-hidden="true"><use href="#icon-taa"/></svg>
+    <span id="taaVelSummaryText" style="font-size:9px;margin-left:2px">TAA</span>
+  </button>
+
+  <div class="vsep"></div>
+
+  <!-- 3.1: Boutons avec icônes SVG inline -->
+  <button class="hb" data-action="togglePerfPanel" id="perfBtn"
+          title="Performance settings" aria-label="Open performance settings">
+    <svg><use href="#icon-perf"/></svg> perf
+  </button>
+
+  <button class="hb" data-action="openLibrary" id="libBtn" aria-label="Open shader library">
+    <svg><use href="#icon-library"/></svg> library
+  </button>
+
+  <button class="hb" data-action="openSTModal"
+          title="Import from ShaderToy" aria-label="Import shader from ShaderToy">
+    <svg><use href="#icon-st"/></svg> ShaderToy
+  </button>
+
+  <button class="hb" data-action="openExportModal" id="exportBtn" aria-label="Open export dialog">
+    <svg><use href="#icon-export"/></svg> export
+  </button>
+
+  <button class="hb" data-action="shareLink" id="shareBtn"
+          title="Copy share link" aria-label="Copy share link">
+    <svg><use href="#icon-share"/></svg> share
+  </button>
+
+  <button class="hb" data-action="togglePause" id="pbtn" aria-label="Toggle pause rendering">
+    <svg id="pauseIcon"><use href="#icon-pause"/></svg> pause
+  </button>
+
+  <button class="hb" data-action="toggleFullscreenVP" id="vpfbtn"
+          title="F11" aria-label="Toggle fullscreen viewport">
+    <svg><use href="#icon-fullscreen"/></svg><span class="hb-label">fullscreen</span>
+  </button>
+
+  <!-- §1.2 — Outils épinglés (configurables via clic droit dans le menu Tools) -->
+  <div class="pinned-tools" id="pinnedTools" role="toolbar" aria-label="Pinned tools"></div>
+
+  <!-- ── Tools overflow menu ─────────────────────────────────────────────── -->
+  <!-- Regroupe les outils avancés (debug, AI, rendu spécialisé, séquenceur…) -->
+  <!-- afin d'éviter l'overflow silencieux de la toolbar sur < 1600 px.       -->
+  <div class="tools-more-wrap" id="toolsMoreWrap">
+    <button class="hb tools-more-btn" id="toolsMoreBtn"
+            aria-haspopup="true" aria-expanded="false"
+            aria-label="More tools"
+            title="More tools">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+        <circle cx="2"    cy="6.5" r="1.3" fill="currentColor"/>
+        <circle cx="6.5"  cy="6.5" r="1.3" fill="currentColor"/>
+        <circle cx="11"   cy="6.5" r="1.3" fill="currentColor"/>
+      </svg>
+      tools
+    </button>
+
+    <div class="tools-more-popup" id="toolsMorePopup" role="menu" aria-label="Advanced tools" hidden>
+
+      <!-- ── Rendering ──────────────────────── -->
+      <div class="tmenu-section-title">Rendering</div>
+
+      <button class="tmenu-item" id="popoutViewportBtn"
+              role="menuitem" tabindex="-1"
+              title="Pop out viewport into a second window (for live performance / dual monitor)"
+              aria-label="Pop out viewport to a second window">
+        <svg width="14" height="14" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+          <rect x="1" y="2" width="8" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/>
+          <rect x="6" y="6" width="6" height="5" rx="1" stroke="currentColor" stroke-width="1.2" fill="var(--bg-panel)"/>
+        </svg>
+        <span class="tmenu-label">Pop-out Viewport</span>
+      </button>
+
+      <button class="tmenu-item" id="colorblindnessToggleBtn"
+              role="menuitem" tabindex="-1"
+              title="Color Blindness Mode — Protanopia, Deuteranopia, Tritanopia simulation (Ctrl+Shift+B)"
+              aria-label="Toggle color blindness mode panel">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1" fill="none"/>
+          <circle cx="5" cy="6" r="1.5" fill="#ff0000"/>
+          <circle cx="9" cy="6" r="1.5" fill="#00ff00"/>
+          <circle cx="7" cy="9" r="1.5" fill="#0000ff"/>
+        </svg>
+        <span class="tmenu-label">Color Blindness</span>
+        <span class="tmenu-shortcut">Ctrl+Shift+B</span>
+      </button>
+
+      <!-- Settings removed from Tools menu (P1.4) — accessible via Ctrl+, and header button -->
+
+      <button class="tmenu-item" id="shaderDocsBtn"
+              role="menuitem" tabindex="-1"
+              title="Documentation GLSL/WGSL/HLSL — press F1 on a function to see its doc"
+              aria-label="Open shader documentation">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <rect x="2" y="1" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.1" fill="none"/>
+          <line x1="4.5" y1="4.5" x2="9.5" y2="4.5" stroke="currentColor" stroke-width="1"/>
+          <line x1="4.5" y1="7" x2="9.5" y2="7" stroke="currentColor" stroke-width="1"/>
+          <line x1="4.5" y1="9.5" x2="7.5" y2="9.5" stroke="currentColor" stroke-width="1"/>
+          <circle cx="9.5" cy="9.5" r="1" fill="var(--accent,#7b6fff)"/>
+        </svg>
+        <span class="tmenu-label">Docs</span>
+        <span class="tmenu-shortcut">F1</span>
+      </button>
+
+      <button class="tmenu-item" id="workspaceToggleBtn"
+              role="menuitem" tabindex="-1"
+              title="Workspace multi-projets — explorateur de projets, auto-save, thumbnails (Ctrl+Shift+W)"
+              aria-label="Toggle workspace panel">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <rect x="1" y="2" width="6" height="10" rx="1.2" stroke="currentColor" stroke-width="1.1" fill="none"/>
+          <rect x="8" y="2" width="5" height="4.5" rx="1" stroke="currentColor" stroke-width="1.1" fill="none"/>
+          <rect x="8" y="7.5" width="5" height="4.5" rx="1" stroke="currentColor" stroke-width="1.1" fill="none"/>
+          <line x1="2.5" y1="5" x2="5.5" y2="5" stroke="currentColor" stroke-width="0.9" opacity="0.6"/>
+          <line x1="2.5" y1="7" x2="5.5" y2="7" stroke="currentColor" stroke-width="0.9" opacity="0.6"/>
+          <line x1="2.5" y1="9" x2="4.5" y2="9" stroke="currentColor" stroke-width="0.9" opacity="0.6"/>
+        </svg>
+        <span class="tmenu-label">Workspace</span>
+        <span class="tmenu-shortcut">Ctrl+Shift+W</span>
+      </button>
+
+      <button class="tmenu-item" id="lutLibToggleBtn"
+              role="menuitem" tabindex="-1"
+              title="LUT Library — 50+ built-in LUTs + 1D editor (Ctrl+Shift+L)"
+              aria-label="Toggle LUT Library panel">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <rect x="1" y="2" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.1" fill="none"/>
+          <rect x="3" y="4" width="2" height="6" rx="0.5" fill="#ff4444" opacity="0.85"/>
+          <rect x="6" y="4" width="2" height="6" rx="0.5" fill="#44ff44" opacity="0.85"/>
+          <rect x="9" y="4" width="2" height="6" rx="0.5" fill="#4488ff" opacity="0.85"/>
+        </svg>
+        <span class="tmenu-label">LUT Lib</span>
+        <span class="tmenu-shortcut">Ctrl+Shift+L</span>
+      </button>
+
+      <button class="tmenu-item" id="rmAssistantToggleBtn"
+              role="menuitem" tabindex="-1"
+              title="Ray Marching Assistant — auto-detect raymarch/SDF, sliders for MAX_STEPS/MAX_DIST/SURF_DIST/EPSILON (Ctrl+Shift+M)"
+              aria-label="Toggle Ray Marching Assistant">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <line x1="2" y1="7" x2="12" y2="7" stroke="currentColor" stroke-width="1.2"/>
+          <circle cx="12" cy="7" r="1.5" fill="var(--accent)" stroke="none"/>
+          <path d="M2 4 Q7 7 2 10" stroke="currentColor" stroke-width="1" fill="none"/>
+          <circle cx="7" cy="7" r="1" fill="currentColor"/>
+        </svg>
+        <span class="tmenu-label">RayMarch</span>
+        <span class="tmenu-shortcut">Ctrl+Shift+M</span>
+      </button>
+
+      <button class="tmenu-item" id="sdfVizToggleBtn"
+              role="menuitem" tabindex="-1"
+              title="SDF Visualizer — iso-distance colorization of the viewport"
+              aria-label="Toggle SDF Visualizer">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.2" fill="none"/>
+          <circle cx="7" cy="7" r="3" stroke="var(--accent)" stroke-width="1" fill="none" stroke-dasharray="1.5 1.5"/>
+          <circle cx="7" cy="7" r="1.2" fill="var(--accent)"/>
+        </svg>
+        <span class="tmenu-label">SDF Viz</span>
+      </button>
+
+      <button class="tmenu-item" id="sdfComposerToggleBtn"
+              role="menuitem" tabindex="-1"
+              title="SDF Composer — visual SDF builder with live preview"
+              aria-label="Toggle SDF Composer">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <rect x="2" y="2" width="4" height="4" rx="1" stroke="var(--accent)" stroke-width="1.2" fill="none"/>
+          <circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.2" fill="none"/>
+          <rect x="2" y="8" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/>
+          <line x1="8" y1="7" x2="12" y2="7" stroke="var(--accent)" stroke-width="1.2"/>
+          <line x1="10" y1="5" x2="10" y2="9" stroke="var(--accent)" stroke-width="1.2"/>
+        </svg>
+        <span class="tmenu-label">SDF Comp</span>
+      </button>
+
+      <div class="tmenu-sep" role="separator"></div>
+
+      <!-- ── Perform ────────────────────────── -->
+      <div class="tmenu-section-title">Perform</div>
+
+      <button class="tmenu-item" id="presModeBtn"
+              role="menuitem" tabindex="-1"
+              data-action="togglePresentation"
+              title="Presentation mode — hides the entire UI (F)"
+              aria-label="Toggle presentation mode">
+        <svg width="14" height="14" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+          <rect x="1" y="1" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.4"/>
+          <circle cx="6.5" cy="6.5" r="2" stroke="currentColor" stroke-width="1.3"/>
+        </svg>
+        <span class="tmenu-label">Present</span>
+        <span class="tmenu-shortcut">F</span>
+      </button>
+
+      <div class="tmenu-sep" role="separator"></div>
+
+      <div class="tmenu-section-title">Import local</div>
+
+      <!-- ── Phase 18.2 — Import fichiers locaux ──── -->
+      <button class="tmenu-item" id="openLocalShaderBtn"
+              role="menuitem" tabindex="-1"
+              title="Open local shader file (.glsl .wgsl .hlsl .frag .vert .comp .isf .json)"
+              aria-label="Open local shader file"
+              onclick="import('./src/ui/editor.js').then(m => m.openLocalShaderFile())">
+        <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4">
+          <rect x="2" y="3" width="12" height="10" rx="1.5"/>
+          <path d="M5 3V2h6v1"/>
+          <line x1="8" y1="6" x2="8" y2="11"/>
+          <polyline points="5.5,8.5 8,6 10.5,8.5"/>
+        </svg>
+        <span class="tmenu-label">Open Shader</span>
+      </button>
+
+      <button class="tmenu-item" id="importZipBtn"
+              role="menuitem" tabindex="-1"
+              title="Import Shadertoy ZIP archive"
+              aria-label="Import Shadertoy ZIP archive"
+              onclick="import('./src/ui/editor.js').then(m => m.openLocalZipFile())">
+        <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4">
+          <rect x="2" y="3" width="12" height="10" rx="1.5"/>
+          <line x1="6" y1="1" x2="6" y2="5"/><line x1="10" y1="1" x2="10" y2="5"/>
+          <line x1="6" y1="5" x2="6" y2="7"/><line x1="10" y1="5" x2="10" y2="7"/>
+          <line x1="6" y1="7" x2="10" y2="7"/>
+          <path d="M8 9v3M6 11l2 2 2-2"/>
+        </svg>
+        <span class="tmenu-label">Import ZIP</span>
+      </button>
+
+    </div><!-- /tools-more-popup -->
+  </div><!-- /tools-more-wrap -->
+
+  <div class="layout-preset-wrap" id="layoutPresetWrap">
+    <button class="hb layout-preset-btn" id="layoutPresetBtn"
+            data-action="toggleLayoutMenu"
+            title="Layout presets" aria-label="Layout presets" aria-expanded="false" aria-haspopup="true">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+        <rect x="1" y="1" width="4" height="11" rx="1" stroke="currentColor" stroke-width="1.4"/>
+        <rect x="7" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/>
+        <rect x="7" y="8" width="5" height="4" rx="1" stroke="currentColor" stroke-width="1.4"/>
+      </svg>
+      <span id="layoutPresetLabel">layout</span>
+    </button>
+    <div class="layout-preset-popup" id="layoutPresetPopup" role="menu" aria-label="Layout presets">
+      <button class="lp-item" role="menuitem" tabindex="-1" data-action="applyLayoutPreset" data-args="coder" data-layout-preset="coder">
+        <div class="lp-icon" aria-hidden="true">
+          <div class="lp-icon-panel" style="width:10px;height:100%"></div>
+          <div style="flex:1;border-radius:2px;background:rgba(255,255,255,0.1)"></div>
+        </div>
+        Coder
+      </button>
+      <button class="lp-item" role="menuitem" tabindex="-1" data-action="applyLayoutPreset" data-args="performer" data-layout-preset="performer">
+        <div class="lp-icon" aria-hidden="true">
+          <div style="flex:1;border-radius:2px;background:rgba(var(--spark-go-rgb),0.3)"></div>
+        </div>
+        Performer
+      </button>
+      <button class="lp-item" role="menuitem" tabindex="-1" data-action="applyLayoutPreset" data-args="animator" data-layout-preset="animator">
+        <div class="lp-icon" aria-hidden="true">
+          <div class="lp-icon-panel" style="width:8px;height:100%"></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+            <div style="flex:1;border-radius:2px;background:rgba(255,255,255,0.1)"></div>
+            <div style="height:5px;border-radius:2px;background:rgba(var(--spark-warm-rgb),0.3)"></div>
+          </div>
+        </div>
+        Animator
+      </button>
+      <button class="lp-item" role="menuitem" tabindex="-1" data-action="applyLayoutPreset" data-args="minimal" data-layout-preset="minimal">
+        <div class="lp-icon" aria-hidden="true" style="padding:0">
+          <div style="flex:1;border-radius:3px;background:rgba(var(--spark-hot-rgb),0.25)"></div>
+        </div>
+        Minimal
+      </button>
+      <div class="lp-sep"></div>
+      <div class="lp-detach-row">
+        <button class="lp-detach-btn" id="detachPanelBtn" data-action="toggleDetachPanel" title="Detach panel into a floating window" aria-label="Detach editor panel into a floating window">⊡ detach panel</button>
+      </div>
+      <div class="lp-sep"></div>
+      <div class="lp-save-row">
+        <input class="lp-save-input" id="saveLayoutInput" type="text" placeholder="Layout name…" maxlength="32" aria-label="Custom layout name">
+        <button class="lp-save-btn" id="saveLayoutBtn" title="Save current layout" aria-label="Save current layout">＋ save</button>
+      </div>
+      <div id="customLayoutsList"></div>
+    </div>
+  </div>
+
+  <button class="hb help-btn" id="helpBtn"
+          title="Help (F1)" aria-label="Open help center">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+      <circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.3"/>
+      <path d="M4.7 4.8c0-1 0.8-1.7 1.8-1.7s1.8 0.6 1.8 1.6c0 1.4-1.8 1.3-1.8 2.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      <circle cx="6.5" cy="9.6" r="0.7" fill="currentColor"/>
+    </svg>
+  </button>
+
+  </div>
+</footer>
+
+<div class="layout" id="layout">
+  <div class="panel" id="sidebar">
+    <div class="sidebar-tabs" role="tablist" aria-label="Sidebar sections">
+      <button class="sidebar-tab" type="button" role="tab" id="sbtab-uniforms" data-tab="uniforms"
+              aria-selected="true" aria-controls="sidebar-pane-uniforms" title="Uniforms (Alt+1)">⊞</button>
+      <button class="sidebar-tab" type="button" role="tab" id="sbtab-style" data-tab="style"
+              aria-selected="false" aria-controls="sidebar-pane-style" title="Style (Alt+3)">◈<span class="sidebar-tab-badge" hidden>0</span></button>
+      <button class="sidebar-tab" type="button" role="tab" id="sbtab-history" data-tab="history"
+              aria-selected="false" aria-controls="sidebar-pane-history" title="History (Alt+4)">⧗</button>
+    </div>
+    <div class="sidebar-pane" id="sidebar-pane-uniforms">
+    <div class="ph">
+      <div class="ph-title">Constants &amp; Uniforms</div>
+      <button class="pb" id="btnAddUniform" data-action="openAddUniformDialog" title="Add a new uniform variable" aria-label="Add a new uniform variable">+ uniform</button>
+      <button class="pb" id="slFilterToggleBtn" title="Toggle filter bar" aria-label="Toggle filter bar">⌕</button>
+      <div class="pb-panels-wrap">
+        <button class="pb pb-panels-toggle" id="pbPanelsToggle" title="Secondary panels" aria-label="Toggle secondary panels menu" aria-haspopup="true" aria-expanded="false">⊕ panels ▾</button>
+        <div class="pb-panels-menu" id="pbPanelsMenu" role="menu">
+          <button class="pb warn" data-action="resetSliders" title="Reset all unpinned sliders" aria-label="Reset all unpinned sliders" role="menuitem">↺ reset</button>
+          <button class="pb" data-action="randomizeUnpinnedSliders" title="Randomize every unpinned slider within its range" aria-label="Randomize unpinned sliders" role="menuitem">🎲 random</button>
+          <button class="pb" data-action="resetSliderCustomizations" title="Reset slider customizations (renamed labels, custom groups, order, manual ranges) back to auto-detected" aria-label="Reset slider customizations to auto-detected defaults" role="menuitem">⎌ custom</button>
+          <button class="pb" data-action="toggleWarpPanel" title="UV Warp: non-destructive geometric transformations" aria-label="Toggle UV warp panel" role="menuitem">〜 warp</button>
+          <button class="pb" data-action="toggleStylePanel" title="Style Layers: visual style layers" aria-label="Toggle style layers panel" role="menuitem">◈ style</button>
+          <button class="pb" data-action="toggleShapePanel" title="Shape mask: circle, polygon, star..." aria-label="Toggle shape mask panel" role="menuitem">⬡ shape</button>
+          <button class="pb" data-action="toggleFXPanel" title="FX Stack: layered post-process effects" aria-label="Toggle FX stack panel" role="menuitem">⊡ fx</button>
+          <button class="pb" data-action="togglePalettePanel" title="Global color palette: recolorization via IQ LUT" aria-label="Toggle color palette panel" role="menuitem">⬚ palette</button>
+        </div>
+      </div>
+      <button class="pb" data-action="applyAndParse" title="Ctrl+Enter / Ctrl+S" aria-label="Apply and parse shader (Ctrl+Enter)">⟳ parse</button>
+    </div>
+    <div class="sl-filter" id="slFilter" style="display:none">
+      <input type="search" id="slFilterInput" class="sl-filter-input" placeholder="Filter sliders…" aria-label="Filter sliders by name or category" spellcheck="false" autocomplete="off">
+      <button id="slFilterModified" class="sl-filter-mod" type="button" title="Show only modified sliders" aria-pressed="false">modified</button>
+    </div>
+    <div class="sw" id="sw">
+      <div class="es" id="es">
+        <div class="es-icon">◈</div>
+        <div class="es-title">Paste a ShaderToy shader</div>
+        <div class="es-sub">
+          Paste any ShaderToy code in the editor below.<br>
+          Press <span class="es-key">Ctrl+S</span> or click<br>
+          <span style="color:var(--ac3)">⟳ parse</span> to extract all constants.
+        </div>
+      </div>
+    </div>
+    <!-- Phase 3: Channels -->
+    <div class="ch-section" id="chSection">
+      <div class="ch-head" id="chHead" data-action="toggleChannelPanel" tabindex="0" role="button" aria-expanded="false" aria-controls="chBody">
+        <div class="ch-head-title">Channels (iChannel0–3)</div>
+        <span class="ch-head-arrow" id="chArrow">▾</span>
+      </div>
+      <div class="ch-body" id="chBody">
+        <!-- channel rows rendered by JS -->
+      </div>
+    </div>
+    </div>
+    <!-- Phase O — sidebar tabs: panes for embedded (docked) floating panels -->
+    <div class="sidebar-pane" id="sidebar-pane-style" hidden></div>
+    <div class="sidebar-pane" id="sidebar-pane-history" hidden></div>
+  </div>
+
+  <div class="right" id="viewport-zone">
+    <div class="cw" id="cwrap">
+      <canvas id="glc"></canvas>
+
+      <div class="hud-l">
+        <div class="pill" id="fpspill">-- FPS</div>
+      </div>
+      <div class="hud">
+        <div class="pill gpu-pill" id="gputpill" style="display:none">-- ms</div>
+        <div class="pill" id="respill">-- × --</div>
+        <div class="pill" id="tpill">t = 0.00</div>
+        <div class="pill" id="fpill">f 0</div>
+      </div>
+      <div class="perf-alert-badge" id="perfAlertBadge">⚠ SLOW &gt;16ms</div>
+      <!-- Phase R — time scrubber, revealed on hover near the bottom of the canvas -->
+      <div class="vp-scrubber-bar" id="vpScrubberBar">
+        <span class="vp-scrub-t" id="vpScrubT">t = 0.00 s</span>
+        <input type="range" id="timeScrubber" class="vp-scrub-range" min="0" max="60" step="0.01" value="0"
+               aria-label="Scrub simulation time">
+        <button id="timeScrubberReset" class="vp-scrub-reset" type="button" title="Reset time to 0" aria-label="Reset time to 0">↺</button>
+      </div>
+      <!-- 1.1: collapsible error panel -->
+      <div class="cerr-wrap" id="cerrWrap" role="status" aria-live="polite" aria-atomic="false">
+        <div class="cerr-header" data-action="toggleErrPanel" id="cerrHeader">
+          <span>⚠</span>
+          <span>Compile Error</span>
+          <span class="cerr-count" id="cerrCount">0 error</span>
+          <span class="cerr-toggle" id="cerrToggle">▲</span>
+        </div>
+        <div class="cerr-body" id="cerrBody"></div>
+      </div>
+    </div>
+    <!-- 1.2: draggable splitter -->
+    <div class="splitter" id="splitter" title="Drag to resize" tabindex="0" role="separator" aria-label="Resize editor and viewport" aria-orientation="horizontal"></div>
+    <!-- 2.4: Multi-pass tabs — P1.6: wrapped with scroll arrows -->
+    <div class="pass-tabs-wrap" id="passTabsWrap">
+      <button class="ptab-scroll-btn" id="passTabsLeft" aria-label="Scroll tabs left" hidden>‹</button>
+      <div class="pass-tabs" id="passTabs" role="tablist" aria-label="Shader passes">
+        <button class="pass-tab active enabled" id="ptab-image" role="tab" aria-selected="true" data-action="mpSwitchPass" data-args="image" title="Image pass (final output)" aria-label="Image pass (final output)">◈ Image</button>
+        <button class="pass-tab" id="ptab-bufA" role="tab" aria-selected="false" data-action="mpToggleOrSwitch" data-args="bufA" title="Buffer A — click to enable" aria-label="Buffer A — click to enable">Buf A <span class="ptab-close" data-action="mpDisablePass" data-args="bufA" title="Remove Buffer A" aria-label="Remove Buffer A">✕</span></button>
+        <button class="pass-tab" id="ptab-bufB" role="tab" aria-selected="false" data-action="mpToggleOrSwitch" data-args="bufB" title="Buffer B — click to enable" aria-label="Buffer B — click to enable">Buf B <span class="ptab-close" data-action="mpDisablePass" data-args="bufB" title="Remove Buffer B" aria-label="Remove Buffer B">✕</span></button>
+        <button class="pass-tab" id="ptab-bufC" role="tab" aria-selected="false" data-action="mpToggleOrSwitch" data-args="bufC" title="Buffer C — click to enable" aria-label="Buffer C — click to enable">Buf C <span class="ptab-close" data-action="mpDisablePass" data-args="bufC" title="Remove Buffer C" aria-label="Remove Buffer C">✕</span></button>
+        <button class="pass-tab" id="ptab-bufD" role="tab" aria-selected="false" data-action="mpToggleOrSwitch" data-args="bufD" title="Buffer D — click to enable" aria-label="Buffer D — click to enable">Buf D <span class="ptab-close" data-action="mpDisablePass" data-args="bufD" title="Remove Buffer D" aria-label="Remove Buffer D">✕</span></button>
+        <button class="pass-tab ptab-cube" id="ptab-cubeA" role="tab" aria-selected="false" data-action="mpToggleOrSwitch" data-args="cubeA" title="Cube A — textureCube output for environment mapping (click to enable)" aria-label="Cube A — textureCube output, click to enable">⬡ Cube A <span class="ptab-close" data-action="mpDisablePass" data-args="cubeA" title="Remove Cube A" aria-label="Remove Cube A">✕</span></button>
+        <button class="pass-tab ptab-cube" id="ptab-cubeB" role="tab" aria-selected="false" data-action="mpToggleOrSwitch" data-args="cubeB" title="Cube B — textureCube output for environment mapping (click to enable)" aria-label="Cube B — textureCube output, click to enable">⬡ Cube B <span class="ptab-close" data-action="mpDisablePass" data-args="cubeB" title="Remove Cube B" aria-label="Remove Cube B">✕</span></button>
+        <button class="pass-tab ptab-sound" id="ptab-sound" role="tab" aria-selected="false" data-action="mpToggleOrSwitch" data-args="sound" title="Sound — generate audio via shader, playback via AudioWorkletNode (click to enable)" aria-label="Sound pass — click to enable">♪ Sound <span class="ptab-close" data-action="mpDisablePass" data-args="sound" title="Remove Sound pass" aria-label="Remove Sound pass">✕</span></button>
+        <button class="pass-tab ptab-compute" id="ptab-compA" role="tab" aria-selected="false" data-action="mpToggleOrSwitch" data-args="compA" title="Comp A — GPGPU compute pass (ping-pong float texture, click to enable)" aria-label="Comp A — GPGPU compute, click to enable">⚙ Comp A <span class="ptab-close" data-action="mpDisablePass" data-args="compA" title="Remove Comp A" aria-label="Remove Comp A">✕</span></button>
+        <button class="pass-tab ptab-compute" id="ptab-compB" role="tab" aria-selected="false" data-action="mpToggleOrSwitch" data-args="compB" title="Comp B — GPGPU compute pass (ping-pong float texture, click to enable)" aria-label="Comp B — GPGPU compute, click to enable">⚙ Comp B <span class="ptab-close" data-action="mpDisablePass" data-args="compB" title="Remove Comp B" aria-label="Remove Comp B">✕</span></button>
+        <button class="ptab-add" data-action="mpToggleWiring" id="wireBtn" title="Show/hide wiring panel" aria-label="Show/hide wiring panel">⌥ wire</button>
+      </div>
+      <button class="ptab-scroll-btn" id="passTabsRight" aria-label="Scroll tabs right" hidden>›</button>
+    </div>
+    <!-- 2.4: Wiring panel -->
+    <div class="wire-panel" id="wirePanel"></div>
+    <div class="ez" id="editorZone">
+      <div class="eb" style="position:relative">
+        <div class="el">fragment.glsl</div>
+        <div class="esp"></div>
+        <button class="hb eb-apply" data-action="applyAndParseActive" aria-label="Apply and parse active pass" title="Apply and parse active pass (Ctrl+Enter)">↻ apply</button>
+        <button class="ebn" data-action="loadExample" aria-label="Load example shader">load example</button>
+        <button class="ebn" data-action="copyCode" aria-label="Copy shader code to clipboard">copy</button>
+        <!-- 2.1: Command palette -->
+        <button class="ebn" id="paletteBtn" data-action="openCommandPalette"
+                title="Command Palette (Ctrl+Shift+P)" aria-label="Open command palette">⌨ palette</button>
+        <!-- §7.3: shader complexity score badge -->
+        <span class="ebn cx-badge" id="complexityBadge" hidden role="status" aria-label="Shader complexity score">⚙ 0</span>
+        <!-- 9.4: Snippet / macro library -->
+        <button class="ebn" id="snippetLibBtn" data-action="toggleSnippetLibrary"
+                title="Open snippet / macro library" aria-label="Open snippet library" aria-pressed="false">snippets ✦</button>
+        <!-- F-1.2: Block Palette -->
+        <button class="ebn" id="blockPaletteBtn" data-action="toggleBlockPalette"
+                title="Block Palette — GLSL snippets drag-and-drop (Ctrl+Shift+K)" aria-label="Open block palette" aria-pressed="false">blocks ⊞</button>
+        <!-- P1.2: "…" dropdown for less-used options -->
+        <div class="eb-more-wrap">
+          <button class="ebn" id="ebMoreBtn" title="More editor options" aria-label="More editor options" aria-haspopup="true" aria-expanded="false">⋯</button>
+          <div class="eb-more-menu" id="ebMoreMenu" role="menu">
+            <!-- minimap toggle -->
+            <button class="ebn" id="minimapBtn" data-action="toggleMinimap"
+                    title="Toggle minimap" aria-label="Toggle minimap" aria-pressed="true" role="menuitem">map</button>
+            <!-- §2.3: Code focus mode toggle -->
+            <button class="ebn" id="codeFocusBtn"
+                    title="Code focus — maximize editor, shrink canvas (Ctrl+Shift+F)" aria-label="Toggle code focus mode" aria-pressed="false" role="menuitem">⛶ focus</button>
+            <!-- §3.5: inline uniform values toggle -->
+            <button class="ebn active" id="inlayValBtn"
+                    title="Show live uniform values inline (iTime, iFrame, iResolution…)" aria-label="Toggle inline uniform values" aria-pressed="true" role="menuitem">𝑥 values</button>
+          </div>
+        </div>
+        <!-- snippets ▾ button removed (10.1) — use snippets ✦ library instead -->
+        <!-- apply + parse moved to first position (P1.2) -->
+        <!-- #snippetsMenu removed (10.1) -->
+      </div>
+      <!-- GLSL editor pane -->
+      <div class="ez-split" id="ezSplit">
+        <div id="mc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inspector panel: contextual (Phase Q) — Performance / Pass / Slider / Uniform -->
+  <div class="inspector" id="inspector">
+    <div class="inspector-header">
+      <span class="inspector-title" id="inspectorTitle">Performance</span>
+      <button class="inspector-close" data-action="togglePerfPanel" aria-label="Close inspector">✕</button>
+    </div>
+    <div class="inspector-body" id="inspectorBody">
+      <div class="insp-pane" id="insp-perf">
+        <!-- perf sections moved here by JS -->
+      </div>
+      <div class="insp-pane hidden" id="insp-pass"><div class="insp-empty">No active pass.</div></div>
+      <div class="insp-pane hidden" id="insp-slider"><div class="insp-empty">Hover a slider…</div></div>
+      <div class="insp-pane hidden" id="insp-uniform"><div class="insp-empty">Hover a runtime uniform in the editor…</div></div>
+    </div>
+  </div>
+</div>
+<footer class="app-footer app-statusbar" id="appStatusBar">
+  <!-- §1.3 — Zone gauche : état de compilation + compteur d'erreurs -->
+  <div class="sb-zone sb-left">
+    <div class="status-badge ready" id="statusBadge" role="status" aria-live="polite">
+      <div class="status-dot"></div><span id="stxt">READY</span>
+    </div>
+    <button class="sb-errcount" id="sbErrCount" data-action="toggleErrPanel" hidden
+            title="Show compile errors" aria-label="Compile errors — click to show panel">0 errors</button>
+  </div>
+
+  <!-- §1.3 — Zone centre : position du curseur -->
+  <div class="sb-zone sb-center">
+    <span class="curpos" id="curpos">Ln 1, Col 1</span>
+  </div>
+
+  <!-- F-10.4 — Zone info : uniforms, compile time, GPU mem, lignes -->
+  <div class="sb-zone sb-info" id="sbInfo" aria-label="Shader statistics">
+    <span class="sb-stat" id="sbUniforms" title="Uniform count">-- ⊞</span>
+    <span class="sb-sep" aria-hidden="true">·</span>
+    <span class="sb-stat" id="sbCompile" title="Last compile time">-- ms</span>
+    <span class="sb-sep" aria-hidden="true">·</span>
+    <span class="sb-stat" id="sbLines" title="Shader lines">-- L</span>
+    <span class="sb-sep" aria-hidden="true">·</span>
+    <span class="sb-stat" id="sbPassBadge" title="Active pass — click to scroll to tab" role="button" tabindex="0">◈ Image</span>
+    <span class="sb-stat" id="sbAutoSave" hidden title="Auto-save enabled">⎌</span>
+  </div>
+
+  <!-- §1.3 — Zone droite : FPS, résolution, copyright -->
+  <div class="sb-zone sb-right">
+    <svg class="fps-spark-svg" id="fpsSpark" viewBox="0 0 90 18"
+         preserveAspectRatio="none" title="FPS history (last 90 frames)" aria-hidden="true">
+      <polyline id="fpsPolyline" points="" stroke="var(--spark-go)" opacity="0.7"/>
+    </svg>
+    <span role="status" aria-live="off" aria-atomic="true" id="fpsLive"><span class="fps" id="fps">-- fps</span></span>
+    <span class="sb-sep" aria-hidden="true">·</span>
+    <span class="sb-res" id="statusRes" title="Render resolution">-- × --</span>
+    <!-- §6.5 — indicateur du mode daltonisme actif (cliquable) -->
+    <button class="sb-cb" id="cbIndicator" hidden
+            title="Color blindness simulation — click to open panel"
+            aria-label="Color blindness simulation active"><span aria-hidden="true">👁</span> --</button>
+    <span class="sb-sep" aria-hidden="true">·</span>
+    <span class="app-footer-copy">©2026 Patrick JAILLET</span>
+  </div>
+</footer>
+<!-- §6.2 — Région d'annonce assertive pour les lecteurs d'écran (erreurs) -->
+<div id="a11y-alert" class="sr-only" role="alert" aria-live="assertive" aria-atomic="true"></div>
+<!-- Fix 1.12 — Résumé shader pour lecteurs d'écran (créé dynamiquement par shader-summary.js mais déclaré ici comme ancre) -->
+<div id="shader-summary" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+<!-- Fix 1.13 / §1.6 audit — indicateur autosave créé dynamiquement par workspace-panel.js -->
+<!-- ═══════════════════════════════ TOAST STACK (Phase 5.3) ══ -->
+<!-- Stack de toasts Phase 5 — bas-centre, pile avec stagger -->
+<div id="toast-stack" aria-live="polite" aria-atomic="false"></div>
+
+<!-- ═══════════════════════════════ CONTEXT MENU (Phase 5.2) ══ -->
+<div class="ctx-menu" id="ctxMenu" role="menu">
+  <div class="ctx-item" role="menuitem" tabindex="-1" data-action="ctxCmd" data-args="reset">
+    <svg viewBox="0 0 16 16"><path d="M3 8a5 5 0 1 0 1.5-3.5"/><polyline points="1,5 3,8 6,6"/></svg>
+    Reset to default
+  </div>
+  <div class="ctx-item" role="menuitem" tabindex="-1" data-action="ctxCmd" data-args="copy">
+    <svg viewBox="0 0 16 16"><rect x="5" y="5" width="8" height="9" rx="1.5"/><path d="M3 11V3a1 1 0 0 1 1-1h8"/></svg>
+    Copy value
+  </div>
+  <div class="ctx-item" role="menuitem" tabindex="-1" data-action="ctxCmd" data-args="setrange">
+    <svg viewBox="0 0 16 16"><line x1="2" y1="8" x2="14" y2="8"/><line x1="2" y1="5" x2="2" y2="11"/><line x1="14" y1="5" x2="14" y2="11"/></svg>
+    Set range…
+  </div>
+  <div class="ctx-sep" role="separator"></div>
+  <div class="ctx-item" role="menuitem" tabindex="-1" data-action="ctxCmd" data-args="rename">
+    <svg viewBox="0 0 16 16"><path d="M11 2l3 3-8 8H3v-3z"/><line x1="9" y1="4" x2="12" y2="7"/></svg>
+    Rename
+  </div>
+  <div class="ctx-item" role="menuitem" tabindex="-1" data-action="ctxCmd" data-args="pin">
+    <svg viewBox="0 0 16 16"><path d="M9 2l5 5-3 1-4 4-1 3-2-2 4-4L7 6z"/><line x1="2" y1="14" x2="6" y2="10"/></svg>
+    Pin / Unpin
+  </div>
+</div>
+
+<!-- Phase Y — right-click context menu on a .sh group header -->
+<div class="ctx-menu" id="groupCtxMenu" role="menu">
+  <div class="ctx-item" role="menuitem" tabindex="-1" data-action="groupCtxCmd" data-args="reset">
+    <svg viewBox="0 0 16 16"><path d="M3 8a5 5 0 1 0 1.5-3.5"/><polyline points="1,5 3,8 6,6"/></svg>
+    Reset group
+  </div>
+  <div class="ctx-item" role="menuitem" tabindex="-1" data-action="groupCtxCmd" data-args="copyjson">
+    <svg viewBox="0 0 16 16"><rect x="5" y="5" width="8" height="9" rx="1.5"/><path d="M3 11V3a1 1 0 0 1 1-1h8"/></svg>
+    Copy group as JSON
+  </div>
+  <div class="ctx-item" role="menuitem" tabindex="-1" data-action="groupCtxCmd" data-args="pinall">
+    <svg viewBox="0 0 16 16"><path d="M9 2l5 5-3 1-4 4-1 3-2-2 4-4L7 6z"/><line x1="2" y1="14" x2="6" y2="10"/></svg>
+    Pin all in group
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ SHADERTOY IMPORT (Phase 7.1) ══ -->
+<div class="modal-overlay" id="stModal" data-action="closeSTModal" aria-hidden="true">
+  <div class="modal"  style="width:380px" role="dialog" aria-modal="true" aria-labelledby="stModalTitle" tabindex="-1">
+    <div class="modal-header">
+      <h3 id="stModalTitle">Import from ShaderToy</h3>
+      <button class="modal-close" data-action="closeSTModal" aria-label="Close">
+        <svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg>
+      </button>
+    </div>
+    <div class="st-field">
+      <div class="modal-label">ShaderToy API Key</div>
+      <input class="modal-input" id="stApiKey" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+        data-input="stStoreApiKey" aria-label="ShaderToy API key">
+      <div class="st-note">Get your key at <a href="https://www.shadertoy.com/myapps" target="_blank" rel="noopener">shadertoy.com/myapps</a></div>
+      <div class="st-note" id="stKeyNotice">Security note: this key is stored unencrypted in your browser localStorage and sent to ShaderToy via URL query string.</div>
+    </div>
+    <div class="st-field">
+      <div class="modal-label" style="margin-bottom:4px">Optional proxy mode (recommended)</div>
+      <label class="st-note" style="display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" id="stUseProxy" data-change="stSetUseProxyInput" aria-label="Use backend proxy to hide API key">
+        Use backend proxy to hide key from direct ShaderToy URL requests
+      </label>
+      <input class="modal-input" id="stProxyUrl" placeholder="/api/shadertoy or https://your-proxy.example.com/shadertoy"
+        data-input="stStoreProxyUrlInput" style="margin-top:6px" aria-label="Proxy URL">
+      <div class="st-note">Proxy contract: POST JSON { shaderId, apiKey } and return ShaderToy API JSON.</div>
+    </div>
+    <div class="st-field">
+      <div class="modal-label">Shader ID or URL</div>
+      <input class="modal-input" id="stShaderId" placeholder="XsXXXX or https://www.shadertoy.com/view/XsXXXX"
+        data-keydown="Enter:doSTImport" aria-label="ShaderToy shader ID or URL">
+    </div>
+    <div class="st-field">
+      <div class="modal-label" style="margin-bottom:2px">Built-in texture mapping</div>
+      <div class="st-note">
+        Abstract, noise, and common ShaderToy textures are mapped automatically to solid-colour placeholders.
+        Assign real images in the Channels panel after import.
+      </div>
+    </div>
+    <div id="stStatus" class="text-10" style="font-family:'JetBrains Mono',monospace;color:var(--t3);min-height:16px"></div>
+    <div class="modal-actions">
+      <button class="modal-btn" data-action="closeSTModal" aria-label="Cancel import">Cancel</button>
+      <button class="modal-btn" data-action="stOpenInST" id="stOpenBtn" style="display:none" aria-label="Open shader on ShaderToy website">Open in ST ↗</button>
+      <button class="modal-btn confirm" data-action="doSTImport" id="stImportBtn" aria-label="Import shader from ShaderToy">Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ LIBRARY DRAWER (Phase 2) ══ -->
+<div class="lib-overlay" id="libOverlay" data-action="onLibOverlayClick">
+  <div class="lib-drawer" id="libDrawer">
+    <div class="lib-head">
+      <div class="lib-head-title">Shader <b>Library</b></div>
+      <button class="lib-btn accent" data-action="openSaveModal" aria-label="Save current shader to library">+ Save current</button>
+      <button class="lib-btn" data-action="openPartialPresetDialog" title="Save only selected sliders as a partial preset" aria-label="Save partial preset">⊂ Partial</button>
+      <button class="lib-close" data-action="closeLibrary" title="Close" aria-label="Close library">✕</button>
+    </div>
+    <div class="lib-toolbar">
+      <input class="lib-search" id="libSearch" placeholder="Search by name or tag…" data-input="renderLibrary" aria-label="Search shaders by name or tag">
+      <button class="lib-btn" data-action="importPreset" title="Import .json or .glsl" aria-label="Import preset from .json or .glsl file">↑ import</button>
+      <label class="lib-btn" style="cursor:pointer" title="Import file" aria-label="Import file">
+        ↑ file<input type="file" accept=".json,.glsl,.frag" style="display:none" data-change="importPresetFile" aria-label="Choose preset file to import">
+      </label>
+    </div>
+    <div class="lib-st-row">
+      <input class="lib-st-input" id="libStUrl" placeholder="shadertoy.com/view/XxxXXX or shader ID…"
+        data-keydown="Enter:libImportST" aria-label="ShaderToy URL or shader ID to import">
+      <button class="lib-btn" data-action="libImportST" title="Fetch & import from ShaderToy" aria-label="Fetch and import shader from ShaderToy">⇓ ShaderToy</button>
+    </div>
+    <div class="lib-tags" id="libTagsBar"></div>
+    <div class="lib-grid" id="libGrid"></div>
+  </div>
+</div>
+
+<!-- Save Preset Modal -->
+<div class="modal-overlay" id="saveModal" aria-hidden="true">
+  <div class="modal"  role="dialog" aria-modal="true" aria-labelledby="saveModalTitle" tabindex="-1">
+    <div class="modal-header">
+      <h3 id="saveModalTitle">Save as Preset</h3>
+      <button class="modal-close" data-action="closeSaveModal" aria-label="Close">
+        <svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg>
+      </button>
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Name</div>
+      <input class="modal-input" id="saveName" placeholder="My Shader" maxlength="60" aria-label="Preset name">
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Tags (comma-separated)</div>
+      <input class="modal-input" id="saveTags" placeholder="procedural, color, noise" aria-label="Preset tags, comma-separated">
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn" data-action="closeSaveModal" aria-label="Cancel save">Cancel</button>
+      <button class="modal-btn confirm" data-action="confirmSavePreset" aria-label="Confirm save preset">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm overwrite/load dialog -->
+<div class="modal-overlay" id="confirmModal" aria-hidden="true">
+  <div class="modal"  role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMsg" tabindex="-1">
+    <div class="modal-header">
+      <h3 id="confirmTitle">Load this shader?</h3>
+      <button class="modal-close" data-action="closeConfirmModal" aria-label="Close">
+        <svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg>
+      </button>
+    </div>
+    <p class="text-11" style="color:var(--t2);font-family:'JetBrains Mono',monospace;line-height:1.6" id="confirmMsg"></p>
+    <div class="modal-actions">
+      <button class="modal-btn" data-action="closeConfirmModal" aria-label="Cancel">Cancel</button>
+      <button class="modal-btn confirm" data-action="executeConfirm" aria-label="Confirm action">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Effect Wizard Modal -->
+<div class="modal-overlay" id="wizardModal" aria-hidden="true">
+  <div class="modal"  style="width:400px" role="dialog" aria-modal="true" aria-labelledby="wizardModalTitle" tabindex="-1">
+    <div class="modal-header">
+      <h3 id="wizardModalTitle">New Effect</h3>
+      <button class="modal-close" data-action="closeWizardModal" aria-label="Close">
+        <svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg>
+      </button>
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Name</div>
+      <input class="modal-input" id="wizardName" placeholder="My New Shader" maxlength="60" aria-label="New shader name">
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Starting template</div>
+      <select class="modal-input" id="wizardTemplate" style="cursor:pointer" aria-label="Choose starting template">
+        <optgroup label="— Essentiels —">
+          <option value="blank">Blank mainImage</option>
+          <option value="sdf">SDF Ray Marcher</option>
+          <option value="noise">fBm Noise</option>
+          <option value="color">Color Palette</option>
+        </optgroup>
+        <optgroup label="— 2D &amp; Patterns —">
+          <option value="plasma">Classic plasma</option>
+          <option value="voronoi">Animated Voronoi</option>
+          <option value="truchet">Truchet tiles</option>
+          <option value="kaleidoscope">Kaleidoscope</option>
+          <option value="metaballs">2D Metaballs</option>
+          <option value="pixelart">Pixel Art UV</option>
+        </optgroup>
+        <optgroup label="— Landscape &amp; Nature —">
+          <option value="tunnel">Infinite tunnel</option>
+          <option value="galaxy">Spiral galaxy</option>
+          <option value="fluid">Fluid domain-warp</option>
+          <option value="aurora">Northern lights</option>
+          <option value="ocean">Ocean waves</option>
+          <option value="fire">Procedural fire</option>
+          <option value="terrain">3D terrain</option>
+        </optgroup>
+        <optgroup label="— Fractal &amp; Math —">
+          <option value="mandelbrot">Mandelbrot</option>
+          <option value="hypnotic">Hypnotic spiral</option>
+        </optgroup>
+        <optgroup label="— Artistic —">
+          <option value="glitch">Glitch artifact</option>
+          <option value="matrix">Code rain</option>
+        </optgroup>
+        <optgroup label="— Advanced 3D —">
+          <option value="dna">DNA helix</option>
+          <option value="crystal">Crystal geode</option>
+          <option value="pbr_sphere">PBR sphere</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn" data-action="closeWizardModal" aria-label="Cancel new effect">Cancel</button>
+      <button class="modal-btn confirm" data-action="confirmWizard" aria-label="Create new effect">Create</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Performance Panel (Phase 6.3 — graphiques SVG) -->
+<div class="perf-pop" id="perfPop">
+  <div class="perf-pop-fx" aria-hidden="true">
+    <svg viewBox="0 0 264 420" preserveAspectRatio="none">
+      <path class="panel-orbit" d="M-12 88C32 42 90 18 158 24c42 4 72 20 118 14" />
+      <path class="panel-signal" d="M40 336c46-26 90-40 136-36 32 3 58 14 98 6" />
+      <path class="panel-grid" d="M18 116h228M18 242h228M18 366h228" />
+    </svg>
+  </div>
+  <div class="perf-pop-title">Performance</div>
+
+  <!-- 6.3: Frame budget arc + sparkline -->
+  <div class="perf-section">
+    <div class="perf-section-title">Frame budget</div>
+    <div class="perf-budget-wrap">
+      <!-- SVG arc: 0→360° selon frameTime/16.67ms -->
+      <svg class="perf-budget-svg" viewBox="0 0 40 40" id="perfBudgetSvg">
+        <circle class="perf-budget-track" cx="20" cy="20" r="15"
+          stroke-dasharray="94.25" stroke-dashoffset="0"/>
+        <circle class="perf-budget-arc" id="perfBudgetArc" cx="20" cy="20" r="15"
+          stroke-dasharray="0 94.25"/>
+        <text x="20" y="23" text-anchor="middle"
+          font="700 7px 'IBM Plex Mono',monospace"
+          fill="var(--prose-mid)" id="perfBudgetPct" style="font:700 7px 'IBM Plex Mono',monospace">0%</text>
+      </svg>
+      <div class="perf-budget-info">
+        <div class="perf-budget-ms" id="perfBudgetMs">0.0 ms</div>
+        <div class="perf-budget-sub">frame time</div>
+        <div class="perf-budget-sub" id="perfBudgetFps" style="color:var(--spark-go)">— fps</div>
+      </div>
+    </div>
+    <!-- SVG sparkline (polyline mis à jour par JS) -->
+    <div class="perf-sparkline-wrap">
+      <svg class="perf-sparkline-svg" id="perfSparklineSvg" viewBox="0 0 196 32" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--spark)" stop-opacity="0.25"/>
+            <stop offset="100%" stop-color="var(--spark)" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path class="perf-sparkline-fill" id="perfSparkFill" d="M0,32 L196,32 Z"/>
+        <polyline class="perf-sparkline-line" id="perfSparkLine" points=""/>
+      </svg>
+    </div>
+    <!-- GPU / CPU time bars -->
+    <div class="perf-timebar-wrap">
+      <div class="perf-timebar-row">
+        <span class="perf-timebar-label">GPU</span>
+        <div class="perf-timebar-track">
+          <div class="perf-timebar-fill gpu" id="perfGpuBar" style="width:0%"></div>
+        </div>
+        <span class="perf-timebar-val" id="perfGpuVal">—</span>
+      </div>
+      <div class="perf-timebar-row">
+        <span class="perf-timebar-label">CPU</span>
+        <div class="perf-timebar-track">
+          <div class="perf-timebar-fill cpu" id="perfCpuBar" style="width:0%"></div>
+        </div>
+        <span class="perf-timebar-val" id="perfCpuVal">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Renderer settings -->
+  <div class="perf-section">
+    <div class="perf-section-title">Renderer</div>
+    <div class="perf-row">
+      <span class="perf-label">FPS cap</span>
+      <div class="perf-btns">
+        <button class="perf-opt active" id="fpsOpt0" data-action="setFpsCap" data-args="0" aria-label="Unlimited FPS" aria-pressed="true">∞</button>
+        <button class="perf-opt" id="fpsOpt30" data-action="setFpsCap" data-args="30" aria-label="Cap at 30 FPS" aria-pressed="false">30</button>
+        <button class="perf-opt" id="fpsOpt60" data-action="setFpsCap" data-args="60" aria-label="Cap at 60 FPS" aria-pressed="false">60</button>
+      </div>
+    </div>
+    <!-- Phase 1.3: Render resolution presets -->
+    <div class="perf-row" style="margin-top:6px">
+      <span class="perf-label">Render res</span>
+      <div class="perf-btns perf-btns-wrap">
+        <button class="perf-opt active" data-res-preset="viewport" data-action="setRenderResolution" data-args="viewport" aria-label="Auto render resolution (match viewport)" aria-pressed="true">Auto</button>
+        <button class="perf-opt" data-res-preset="720p"   data-action="setRenderResolution" data-args="720p" aria-label="720p render resolution" aria-pressed="false">720p</button>
+        <button class="perf-opt" data-res-preset="1080p"  data-action="setRenderResolution" data-args="1080p" aria-label="1080p render resolution" aria-pressed="false">1080p</button>
+        <button class="perf-opt" data-res-preset="1440p"  data-action="setRenderResolution" data-args="1440p" aria-label="1440p render resolution" aria-pressed="false">1440p</button>
+        <button class="perf-opt" data-res-preset="2160p"  data-action="setRenderResolution" data-args="2160p" aria-label="4K render resolution" aria-pressed="false">4K</button>
+      </div>
+    </div>
+    <div class="perf-row" id="resCustomWH" style="display:none">
+      <span class="perf-label">Custom W×H</span>
+      <input type="text" class="perf-input-sm" id="resCustomInput" placeholder="1920,1080"
+        onchange="window.dispatchEvent(new CustomEvent('zgl:setCustomRes',{detail:this.value}))" aria-label="Custom render resolution, width comma height">
+    </div>
+
+    <!-- Phase 1.3: Headless screenshot -->
+    <div class="perf-row" style="margin-top:4px">
+      <span class="perf-label">Headless shot</span>
+      <button class="perf-opt" data-action="renderHeadless" data-args="1920,1080" title="Render one frame at 1920×1080 and download as PNG" aria-label="Render one frame at 1920×1080 and download as PNG">PNG ↓</button>
+    </div>
+  </div>
+
+  <div class="perf-section">
+    <div class="perf-section-title">Interface</div>
+    <div class="perf-row" style="margin-top:6px">
+      <span class="perf-label">Sound FX</span>
+      <button class="perf-opt" id="soundToggleBtn" data-action="toggleSound" title="Sound feedback: OFF" aria-label="Toggle sound feedback" aria-pressed="false">
+        <svg width="12" height="12" style="vertical-align:middle;margin-right:3px"><use href="#icon-sound"/></svg>off
+      </button>
+    </div>
+  </div>
+
+  <!-- 5.2: Profiling -->
+  <div class="perf-section">
+    <div class="perf-section-title">Profiling</div>
+    <label class="perf-check-row">
+      <input type="checkbox" id="gpuTimeCk" data-change="setGpuTimeVisible" aria-label="Show frame time in HUD">
+      <span>Show frame time</span>
+    </label>
+    <label class="perf-check-row">
+      <input type="checkbox" id="perfAlertCk" data-change="setPerfAlertEnabled" aria-label="Alert when frame time exceeds 16ms">
+      <span>Alert if &gt;16ms</span>
+    </label>
+    <!-- Phase 1.3: JS overhead + shader cache telemetry -->
+    <div class="perf-row" style="margin-top:4px">
+      <span class="perf-label">JS overhead</span>
+      <span class="perf-timebar-val" id="perfJsVal">—</span>
+    </div>
+    <div class="perf-row">
+      <span class="perf-label">Cache hit rate</span>
+      <span class="perf-timebar-val" id="perfCacheHit">—</span>
+    </div>
+    <div class="perf-row">
+      <span class="perf-label">Complexity</span>
+      <span class="perf-timebar-val" id="perfComplexityScore" title="">—</span>
+    </div>
+  </div>
+
+  <!-- Phase 1.3: WebGL capability report -->
+  <div class="perf-section">
+    <div class="perf-section-title">GPU Capabilities</div>
+    <div id="glCapsPanel" class="gl-caps-panel">
+      <span class="caps-loading">Detecting…</span>
+    </div>
+  </div>
+
+  <!-- 5.3: Post-process -->
+  <div class="perf-section">
+    <div class="perf-section-title">Post-process</div>
+    <label class="perf-check-row">
+      <input type="checkbox" id="postCk" data-change="setPostEnabled" aria-label="Enable post-process pipeline">
+      <span>Enable post-process</span>
+    </label>
+    <label class="perf-check-row" id="bloomRow" style="opacity:.45">
+      <input type="checkbox" id="bloomCk" data-change="setBloom" disabled aria-label="Enable bloom effect">
+      <span>Bloom</span>
+    </label>
+    <div class="perf-row" id="bloomStrRow" style="opacity:.45">
+      <span class="perf-label" style="flex:0 0 90px">Strength</span>
+      <input type="range" class="perf-slider" id="bloomStrR" min="0" max="2" step="0.05" value="0.5"
+        data-input="setBloomStrength" disabled aria-label="Bloom strength">
+    </div>
+    <div class="perf-row" id="bloomThreshRow" style="opacity:.45">
+      <span class="perf-label" style="flex:0 0 90px">Threshold</span>
+      <input type="range" class="perf-slider" id="bloomThreshR" min="0" max="1.5" step="0.05" value="0.6"
+        data-input="setBloomThreshold" disabled aria-label="Bloom threshold">
+    </div>
+    <div class="perf-row" id="bloomRadiusRow" style="opacity:.45">
+      <span class="perf-label" style="flex:0 0 90px">Radius</span>
+      <input type="range" class="perf-slider" id="bloomRadiusR" min="0" max="1" step="0.05" value="0.5"
+        data-input="setBloomRadius" disabled aria-label="Bloom radius">
+    </div>
+    <div class="perf-row" id="toneRow" style="opacity:.45">
+      <span class="perf-label">Tone map</span>
+      <select class="perf-sel" id="toneMapSel" data-change="setToneMapping" disabled aria-label="Tone mapping mode">
+        <option value="0">None</option>
+        <option value="1">Reinhard</option>
+        <option value="2">ACES Filmic</option>
+        <option value="3">Filmic Hable</option>
+        <option value="4">AGX</option>
+        <option value="5">Extended Reinhard</option>
+        <option value="6">Lottes</option>
+      </select>
+    </div>
+    <label class="perf-check-row" id="vigRow" style="opacity:.45">
+      <input type="checkbox" id="vignetteCk" data-change="setVignette" disabled aria-label="Enable vignette effect">
+      <span>Vignette</span>
+    </label>
+    <label class="perf-check-row" id="srgbRow" style="opacity:.45">
+      <input type="checkbox" id="srgbCk" data-change="setSRGB" disabled aria-label="Enable sRGB output">
+      <span>sRGB output</span>
+    </label>
+    <label class="perf-check-row" id="fxaaRow" style="opacity:.45">
+      <input type="checkbox" id="fxaaCk" data-change="setFXAA" disabled aria-label="Enable FXAA anti-aliasing">
+      <span>FXAA</span>
+    </label>
+    <label class="perf-check-row" id="taaRow" style="opacity:.45">
+      <input type="checkbox" id="taaCk" data-change="setTAA" disabled aria-label="Enable TAA temporal anti-aliasing">
+      <span>TAA (Temporal AA)</span>
+    </label>
+    <div class="perf-row" id="taaBlendRow" style="opacity:.45">
+      <span class="perf-label" style="flex:0 0 90px">History</span>
+      <input type="range" class="perf-slider" id="taaBlendR" min="0" max="1" step="0.01" value="0.9"
+        data-input="setTAABlend" disabled aria-label="TAA history blend factor">
+    </div>
+    <div class="perf-row" id="taaThreshRow" style="opacity:.45">
+      <span class="perf-label" style="flex:0 0 90px">Threshold</span>
+      <input type="range" class="perf-slider" id="taaThreshR" min="0" max="1" step="0.01" value="0.08"
+        data-input="setTAAThreshold" disabled aria-label="TAA rejection threshold">
+    </div>
+    <div class="perf-row" id="taaVelRow" style="opacity:.45">
+      <span class="perf-label" style="flex:0 0 90px">Vel. source</span>
+      <select class="perf-sel" id="taaVelSelect" data-change="onTAAVelChange" disabled aria-label="TAA velocity source"></select>
+      <span id="taaVelStatus" class="text-11" style="margin-left:8px;color:var(--t3)">Auto (generated)</span>
+    </div>
+    <div class="perf-row" id="taaVelScaleRow" style="opacity:.45">
+      <span class="perf-label" style="flex:0 0 90px">Vel. scale</span>
+      <input type="range" class="perf-slider" id="taaVelScaleR" min="0" max="4" step="0.01" value="1.0"
+        data-input="setTAAVelocityScale" disabled aria-label="TAA velocity scale">
+    </div>
+    <label class="perf-check-row" id="crtRow" style="opacity:.45">
+      <input type="checkbox" id="crtCk" data-change="setCRT" disabled aria-label="Enable CRT scanlines effect">
+      <span>CRT / Scanlines</span>
+    </label>
+    <div class="perf-row" id="crtBarrelRow" style="opacity:.45">
+      <span class="perf-label" style="flex:0 0 90px">Barrel</span>
+      <input type="range" class="perf-slider" id="crtBarrelR" min="0" max="0.5" step="0.01" value="0.15"
+        data-input="setCRTBarrel" disabled aria-label="CRT barrel distortion amount">
+    </div>
+    <div class="perf-row" id="crtScanlinesRow" style="opacity:.45">
+      <span class="perf-label" style="flex:0 0 90px">Scanlines</span>
+      <input type="range" class="perf-slider" id="crtScanlinesR" min="0" max="1" step="0.01" value="0.25"
+        data-input="setCRTScanlines" disabled aria-label="CRT scanlines intensity">
+    </div>
+    <div class="perf-row" id="crtAberrationRow" style="opacity:.45">
+      <span class="perf-label" style="flex:0 0 90px">Aberration</span>
+      <input type="range" class="perf-slider" id="crtAberrationR" min="0" max="0.01" step="0.0005" value="0.003"
+        data-input="setCRTAberration" disabled aria-label="CRT chromatic aberration amount">
+    </div>
+    <label class="perf-check-row" id="lutRow" style="opacity:.45">
+      <input type="checkbox" id="lutCk" data-change="setLutEnabled" disabled aria-label="Enable color grading LUT">
+      <span>Color Grading LUT</span>
+    </label>
+    <!-- Fix 2.6 — #grainCk absent → toggle du grain/noise dans le panneau perf -->
+    <label class="perf-check-row" id="grainRow" style="opacity:.45">
+      <input type="checkbox" id="grainCk" data-change="setGrainEnabled" disabled aria-label="Enable film grain effect">
+      <span>Film Grain</span>
+    </label>
+    <div class="perf-row" id="lutFileRow" style="opacity:.45">
+      <span class="perf-label" style="flex:0 0 90px">LUT File</span>
+      <label class="lut-file-btn">
+        <input type="file" id="lutFileInput" accept=".cube" data-change="loadLutFile" disabled style="display:none" aria-label="Load .cube LUT file">
+        Load .cube
+      </label>
+      <span id="lutFileName" class="text-10" style="flex:1;color:var(--t3);margin-left:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">No LUT loaded</span>
+      <button class="lut-clear-btn" data-action="clearLut" title="Clear LUT" aria-label="Clear color grading LUT">✕</button>
+    </div>
+    <div class="perf-row" id="lutStrRow" style="opacity:.45">
+      <span class="perf-label" style="flex:0 0 90px">Strength</span>
+      <input type="range" class="perf-slider" id="lutStrR" min="0" max="1" step="0.01" value="1.0"
+        data-input="setLutStrength" disabled aria-label="LUT strength">
+    </div>
+  </div>
+
+</div>
+
+<!-- Export Modal (Phase 4) -->
+<div class="modal-overlay" id="exportModal" data-action="closeExportModal" aria-hidden="true">
+  <div class="modal export-modal"  role="dialog" aria-modal="true" aria-labelledby="exportModalTitle" tabindex="-1">
+    <div class="modal-header">
+      <h3 id="exportModalTitle">Export</h3>
+      <button class="modal-close" data-action="closeExportModal" aria-label="Close">
+        <svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg>
+      </button>
+    </div>
+    <!-- tabs -->
+    <div class="export-tabs" role="tablist" aria-label="Export format">
+      <button class="export-tab active" role="tab" data-action="switchExportTab" data-args="image" aria-label="Image export" aria-selected="true">
+        <svg aria-hidden="true" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="2" width="12" height="10" rx="1"/><path d="M1 9l3-3 3 3 2-2 4 4"/><circle cx="10" cy="5" r="1.2" fill="currentColor" stroke="none"/></svg>
+        Image</button>
+      <button class="export-tab" role="tab" data-action="switchExportTab" data-args="video" aria-label="Video export" aria-selected="false">
+        <svg aria-hidden="true" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="2" width="9" height="10" rx="1"/><path d="M10 5l3-2v8l-3-2" fill="currentColor" stroke="none"/><path d="M10 5l3-2v8l-3-2z"/></svg>
+        Video</button>
+      <button class="export-tab" role="tab" data-action="switchExportTab" data-args="code" aria-label="Code export" aria-selected="false">
+        <svg aria-hidden="true" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><polyline points="4,3 1,7 4,11"/><polyline points="10,3 13,7 10,11"/></svg>
+        Code</button>
+    </div>
+
+    <!-- Image pane -->
+    <div class="export-pane active" id="exp-image">
+      <div class="exp-row">
+        <div class="exp-label">Resolution</div>
+        <select class="exp-select" id="exp-res" aria-label="Image export resolution">
+          <option value="viewport">Viewport (current)</option>
+          <option value="1280x720">1280 × 720 (HD)</option>
+          <option value="1920x1080" selected>1920 × 1080 (Full HD)</option>
+          <option value="2560x1440">2560 × 1440 (QHD)</option>
+          <option value="3840x2160">3840 × 2160 (4K)</option>
+        </select>
+      </div>
+      <label class="exp-check-row">
+        <input type="checkbox" id="exp-alpha" aria-label="Export with transparent background">
+        <span class="exp-check-label">Transparent background (alpha)</span>
+      </label>
+      <button class="exp-action-btn" data-action="exportScreenshot" id="exp-ss-btn" aria-label="Download screenshot as PNG">
+        ↓ Download PNG
+      </button>
+      <button class="exp-action-btn" style="background:var(--bg3);margin-top:0" data-action="renderExportPreview" data-args="exp-img-preview,1920x1080" aria-label="Preview first frame before exporting">
+        <span aria-hidden="true">👁</span> Preview Frame
+      </button>
+      <div id="exp-img-preview" style="margin-top:6px;min-height:0"></div>
+      <div class="exp-note">Renders an offscreen frame at the chosen resolution.<br>The live viewport is not affected.</div>
+    </div>
+
+    <!-- Video pane -->
+    <div class="export-pane" id="exp-video">
+      <div class="exp-row">
+        <div class="exp-label">Duration</div>
+        <select class="exp-select" id="exp-dur" aria-label="Video export duration">
+          <option value="5">5 seconds</option>
+          <option value="10" selected>10 seconds</option>
+          <option value="15">15 seconds</option>
+          <option value="30">30 seconds</option>
+          <option value="60">60 seconds</option>
+        </select>
+      </div>
+      <div class="exp-row">
+        <div class="exp-label">Frame rate</div>
+        <select class="exp-select" id="exp-fps" aria-label="Video export frame rate">
+          <option value="24">24 fps</option>
+          <option value="30" selected>30 fps</option>
+          <option value="60">60 fps</option>
+        </select>
+      </div>
+      <div class="exp-row">
+        <div class="exp-label">Start time</div>
+        <select class="exp-select" id="exp-tstart" aria-label="Video export start time">
+          <option value="current" selected>Current (iTime)</option>
+          <option value="0">0.0 (from start)</option>
+        </select>
+      </div>
+      <div class="exp-progress" id="exp-vprog-wrap" style="display:none">
+        <div class="exp-progress-bar" id="exp-vprog"></div>
+      </div>
+      <button class="exp-action-btn rec" data-action="toggleVideoRecord" id="exp-rec-btn" aria-label="Toggle video recording">
+        ⏺ Start Recording
+      </button>
+      <div class="exp-note">Records the live viewport via MediaRecorder.<br>Output: WebM (VP9). Audio channels are not captured.</div>
+    </div>
+
+    <!-- Code pane -->
+    <div class="export-pane" id="exp-code">
+      <div class="exp-code-row">
+        <button class="exp-code-btn" data-action="exportStandaloneHTML" aria-label="Export as standalone HTML file">⟨/⟩<br>Standalone HTML</button>
+        <button class="exp-code-btn" data-action="exportPureGLSL" aria-label="Export as pure GLSL code">◈<br>Pure GLSL</button>
+        <button class="exp-code-btn" data-action="exportMinifiedGLSL" aria-label="Export as minified GLSL code">⊡<br>Minified GLSL</button>
+        <button class="exp-code-btn" data-action="exportThreeSnippet" aria-label="Export as Three.js ShaderMaterial snippet">△<br>Three.js snippet</button>
+        <button class="exp-code-btn" data-action="exportProjectZip" id="expZipBtn" aria-label="Export full project as ZIP archive">📦<br>Project ZIP</button>
+        <button class="exp-code-btn" data-action="exportP5Sketch" aria-label="Export as p5.js sketch">🎨<br>p5.js sketch</button>
+        <button class="exp-code-btn" data-action="exportGLSLSandbox" aria-label="Export GLSL Sandbox compatible shader">🟩<br>GLSL Sandbox</button>
+        <button class="exp-code-btn" data-action="exportShaderToyFormat" aria-label="Export ShaderToy paste format">🌐<br>ShaderToy</button>
+      </div>
+      <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px">
+        <div class="text-10" style="color:var(--prose-lo);margin-bottom:6px;font-family:'JetBrains Mono',monospace">Share URL</div>
+        <div style="display:flex;gap:6px">
+          <button class="exp-action-btn" style="flex:1" data-action="shareLink" aria-label="Copy share link (single pass)">🔗 Share Link</button>
+          <button class="exp-action-btn" style="flex:1" data-action="shareLinkV2" aria-label="Copy versioned multi-pass share link">🔗 Share v2 (multi-pass)</button>
+        </div>
+      </div>
+      <div class="exp-note">Standalone HTML: self-contained file, no Monaco, no dependencies.<br>Minified GLSL: strips comments and whitespace for sharing.<br>Three.js: paste-ready ShaderMaterial · p5.js: runs in the p5 editor · GLSL Sandbox / ShaderToy: platform-compatible paste format.<br>Share v2: versioned multi-pass URL.</div>
+    </div>
+
+    <div style="margin-top:8px;text-align:right">
+      <button class="modal-btn" data-action="closeExportModal" aria-label="Close export dialog">Close</button>
+    </div>
+  </div>
+</div>

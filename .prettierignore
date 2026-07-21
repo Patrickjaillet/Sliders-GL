@@ -1,0 +1,5 @@
+node_modules
+dist
+coverage
+stoy.zip
+package-lock.json

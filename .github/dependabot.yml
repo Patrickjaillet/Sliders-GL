@@ -1,0 +1,73 @@
+# .github/dependabot.yml — Phase 12.4
+#
+# Dependabot configuration for automated dependency updates.
+# Opens PRs when newer versions of dependencies are available.
+
+version: 2
+
+updates:
+  # ── npm dependencies ─────────────────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Europe/Paris
+    open-pull-requests-limit: 8
+    labels:
+      - dependencies
+      - javascript
+    groups:
+      # Group all Vite/build tooling together
+      vite-tooling:
+        patterns:
+          - vite*
+          - rollup*
+          - '@vitejs/*'
+      # Group test tooling
+      test-tooling:
+        patterns:
+          - vitest*
+          - '@vitest/*'
+          - playwright*
+          - '@playwright/*'
+      # Group ESLint tooling
+      eslint-tooling:
+        patterns:
+          - eslint*
+          - '@eslint/*'
+          - 'eslint-*'
+      # Group Tauri
+      tauri:
+        patterns:
+          - '@tauri-apps/*'
+    ignore:
+      # Don't auto-update Three.js — breaking changes need manual review
+      - dependency-name: three
+        update-types: ['version-update:semver-major']
+      # Don't auto-update Monaco — needs integration testing
+      - dependency-name: monaco-editor
+        update-types: ['version-update:semver-major']
+
+  # ── Rust / Cargo dependencies (src-tauri) ───────────────────────────────────
+  - package-ecosystem: cargo
+    directory: /src-tauri
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:30'
+      timezone: Europe/Paris
+    open-pull-requests-limit: 4
+    labels:
+      - dependencies
+      - rust
+
+  # ── GitHub Actions ───────────────────────────────────────────────────────────
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels:
+      - dependencies
+      - github-actions
