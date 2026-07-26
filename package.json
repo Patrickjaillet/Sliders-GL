@@ -32,7 +32,7 @@
     "@shaderfrog/glsl-parser": "^7.0.1",
     "jszip": "^3.10.1",
     "monaco-editor": "^0.55.1",
-    "three": "^0.165.0"
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
