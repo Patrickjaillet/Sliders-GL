@@ -1,0 +1,37 @@
+# Internal roadmap files — never pushed to GitHub (see ROADMAP.md §5/§9)
+/ROADMAP.md
+/src/ROADMAP.md
+/roadmap-cleanup.md
+
+# Dependencies
+node_modules/
+package-lock.json.bak
+
+# Build output
+dist/
+src-tauri/target/
+src-tauri/gen/
+
+# Tauri bundles / installers
+src-tauri/installer/*.exe
+src-tauri/installer/*.msi
+
+# Tests
+test-results/
+playwright-report/
+coverage/
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Env
+.env
+.env.local

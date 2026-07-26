@@ -1,0 +1,42 @@
+/* ============================================================
+   Sliders GL — scrollbars.css
+   Style : Light workbench · 6px slim · theme-aware
+   ============================================================ */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.22) transparent;
+}
+
+::-webkit-scrollbar {
+  width:  6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.22);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.34);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Masquer la scrollbar sur les listes de tabs (navigation horizontale) */
+.pass-tabs::-webkit-scrollbar,
+.ce-var-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.pass-tabs,
+.ce-var-tabs {
+  scrollbar-width: none;
+}

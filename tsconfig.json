@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    // ── JSDoc type checking (no TypeScript files, just .js with JSDoc) ───────
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+
+    // ── Module resolution ────────────────────────────────────────────────────
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ES2022",
+
+    // ── Strictness ────────────────────────────────────────────────────────────
+    "strict": false,              // Full strict would be too noisy for a JS codebase
+    "noImplicitAny": false,       // JSDoc @type annotations are opt-in
+    "strictNullChecks": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+
+    // ── Environment ───────────────────────────────────────────────────────────
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
+
+    // ── Paths ─────────────────────────────────────────────────────────────────
+    "paths": {
+      "three": ["./node_modules/three/src/Three.d.ts"]
+    },
+
+    // ── Output ────────────────────────────────────────────────────────────────
+    "skipLibCheck": true,
+    "resolveJsonModule": true
+  },
+  "include": [
+    "src/vite-env.d.ts",
+    "src/core/**/*.js",
+    "src/shader/**/*.js",
+    "src/gl/**/*.js",
+    "src/ui/**/*.js",
+    "src/export/**/*.js",
+    "src/io/**/*.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src-tauri",
+    "**/*.test.js"
+  ]
+}

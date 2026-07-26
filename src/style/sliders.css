@@ -1,0 +1,586 @@
+/* ============================================================
+   Sliders GL — sliders.css
+   Style : Blender-inspired light/medium-gray workbench
+   Sliders : soft-range fill, hard-clamp edge feedback, hover nudge arrows
+   ============================================================ */
+
+/* ── Scrollable body du panneau sidebar ── */
+
+.sw {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  contain: layout style paint;
+  content-visibility: visible;
+  contain-intrinsic-size: auto 480px;
+}
+
+/* ── Header du panneau sidebar (barre compacte 28px) ── */
+
+.ph {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px 0 6px;
+  height: 28px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: var(--bg-void);
+  border-bottom: 1px solid var(--border-sub);
+}
+
+.ph > .pb,
+.ph > .pb-panels-wrap {
+  flex-shrink: 0;
+}
+
+.ph-title {
+  font: 600 10px/1 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Boutons du panneau (parse, reset, random, +uniform) ── */
+
+.pb {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-sub);
+  background: transparent;
+  color: var(--text-dim);
+  font: 11px var(--font-mono);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+.pb:hover {
+  background: var(--bg-raised);
+  color: var(--text-primary);
+  border-color: var(--border-mid);
+}
+
+.pb.warn {
+  color: var(--warn);
+  border-color: rgba(255,154,60,0.3);
+}
+
+.pb.warn:hover {
+  background: rgba(255,154,60,0.08);
+  color: var(--warn);
+}
+
+/* ── Menu secondary panels ──
+   .pb-panels-wrap / base .pb-panels-menu positioning live in panels.css
+   (position:fixed there — was previously duplicated here as position:absolute,
+   which got clipped invisible by .ph's overflow:hidden since this file loads
+   before panels.css and the absolute-positioning version never actually won
+   the cascade, but was confusing dead code). Only the item styling below is
+   still needed here. */
+
+.pb-panels-menu .pb {
+  height: 26px;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--border-sub);
+  padding: 0 10px;
+  justify-content: flex-start;
+  font: 11px var(--font-ui);
+}
+
+.pb-panels-menu .pb:last-child { border-bottom: none; }
+
+/* ── Filter bar ── */
+
+.sl-filter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  height: 26px;
+  background: var(--bg-void);
+  border-bottom: 1px solid var(--border-sub);
+  flex-shrink: 0;
+}
+
+.sl-filter-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font: 11px var(--font-mono);
+  padding: 0 4px;
+  outline: none;
+  min-width: 0;
+}
+
+.sl-filter-input::placeholder { color: var(--text-ghost); }
+
+.sl-filter-mod {
+  height: 18px;
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-sub);
+  background: transparent;
+  color: var(--text-dim);
+  font: 10px var(--font-mono);
+  cursor: pointer;
+}
+
+.sl-filter-mod[aria-pressed="true"] {
+  color: var(--accent);
+  border-color: var(--border-hot);
+  background: var(--accent-dim);
+}
+
+/* ── Groupe de sliders (section header) ── */
+
+.sh {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 8px 4px;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-sub);
+  font: 600 10px/1 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.sh:first-child { border-top: none; }
+
+/* Phase Y — reveal animation on group expand (see _flashGroupReveal in slider.js) */
+@keyframes groupReveal {
+  from { opacity: 0; transform: translateY(-3px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.group-reveal { animation: groupReveal 120ms ease-out; }
+
+.sh-arrow {
+  font-size: 9px;
+  transition: transform var(--dur) var(--ease);
+  margin-left: auto;
+}
+
+.sh.collapsed .sh-arrow { transform: rotate(-90deg); }
+
+.sh-ico {
+  display: inline-block;
+  width: 1em;
+  text-align: center;
+  opacity: 0.6;
+}
+
+/* Couleurs d'accent par catégorie */
+.sh[data-cat='globals'] { border-left: 2px solid var(--accent); }
+.sh[data-cat='color']   { border-left: 2px solid var(--error); }
+.sh[data-cat='camera']  { border-left: 2px solid var(--buf-a); }
+.sh[data-cat='glow']    { border-left: 2px solid var(--buf-c); }
+
+/* ── Rangée slider (.sr) ── */
+
+.sr {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 8px 0 4px;
+  gap: 6px;
+  overflow: hidden;
+  contain: layout style;
+  cursor: default;
+}
+
+/* Phase 5 — sidebar "assets panel" style: alternating row background (.row-alt
+   is assigned in slider.js's buildUI, since group headers interspersed in
+   the DOM rule out a plain CSS nth-child/nth-of-type selector here). */
+.sr.row-alt {
+  background: var(--bg-panel-alt);
+}
+
+.sr:hover {
+  background: var(--bg-raised);
+}
+
+.sr.dragging { cursor: ew-resize; }
+
+/* Slider pinné — border-left 2px accent */
+.sr.pinned {
+  border-left: 2px solid var(--accent);
+}
+
+/* Modification indicator — point après le nom */
+.sr.modified .sn::after {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  margin-left: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* ── Drag handle ── */
+
+.sr-drag {
+  flex-shrink: 0;
+  opacity: 0;
+  padding: 0 2px;
+  color: var(--text-ghost);
+  cursor: grab;
+  user-select: none;
+  font-size: 10px;
+  transition: opacity var(--dur) var(--ease);
+}
+
+.sr:hover .sr-drag { opacity: 1; }
+.sr-drag:active { cursor: grabbing; }
+
+/* ── sr-top wrapper (legacy support) ── */
+
+.sr-top {
+  display: contents;
+}
+
+/* ── Nom du slider (.sn) ── */
+
+.sn {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 11px var(--font-ui);
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+/* ── Colour / vector groups (Phase B swatch + XY pad) now carry a second,
+   always-visible row of per-channel precise sliders underneath their primary
+   compact widget (§3 "vector/color uniforms expand into individually precise
+   per-channel sliders", matching Blender's vector-property rows) — override
+   the flat 26px / overflow:hidden shared by every other `.sr` kind so that
+   second row is actually visible instead of clipped. ── */
+
+.sr-color,
+.sr-xy {
+  height: auto;
+  min-height: 26px;
+  overflow: visible;
+  flex-wrap: wrap;
+  align-items: center;
+  padding-bottom: 5px;
+}
+
+.sl-channels {
+  flex-basis: 100%;
+  display: flex;
+  gap: 5px;
+  padding-top: 3px;
+}
+
+.sl-chan {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.sl-chan-label {
+  flex-shrink: 0;
+  width: 8px;
+  text-align: center;
+  font: 700 9px var(--font-mono);
+  color: var(--text-ghost);
+}
+
+.sl-field-mini {
+  height: 18px;
+}
+
+.sl-field-mini .sv {
+  font-size: 9px;
+  padding: 0 13px 0 4px;
+}
+
+.sl-field-mini .sl-nudge {
+  width: 11px;
+  font-size: 9px;
+}
+
+/* ── Zone slider : scrubbable compositor-style value field ──
+   No separate track/handle — the field itself is the drag target. A thin
+   accent fill (--fill-pct, set from slider.js) shows the value's position
+   in [min,max]; the numeric input sits on top, right-aligned, and only
+   becomes interactive/caret-visible once focused (see .editing below). */
+
+.sl-field {
+  flex: 1;
+  position: relative;
+  height: 20px;
+  min-width: 0;
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(90deg, var(--accent-dim) var(--fill-pct, 0%), transparent var(--fill-pct, 0%)) no-repeat,
+    var(--bg-raised);
+  /* Subtle recessed-track depth (Blender's inset numeric field look) — a
+     thin top shadow reads as "cut into" the panel, distinct from the flat
+     raised nudge arrows/pin button that sit visually on top of it. */
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.10);
+  cursor: ew-resize;
+  user-select: none;
+  -webkit-user-drag: none;
+  overflow: hidden;
+  transition: outline-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+}
+
+.sl-field:hover {
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.10), inset 0 0 0 1px var(--border-mid);
+}
+
+.sl-field.active,
+.sl-field.editing {
+  outline-color: var(--border-hot);
+}
+
+/* Keyboard-only focus (Tab into the .sv input without a pointer drag) gets
+   the same visible ring as .active/.editing — :focus-within covers Tab
+   landing on the input even before the 'editing' class listener fires. */
+.sl-field:focus-within {
+  outline-color: var(--border-hot);
+}
+
+.sl-field.editing { cursor: text; }
+
+.sv.flash { animation: valueFlash 300ms ease-out; }
+
+/* ── Valeur numérique dans le champ scrub (plain slider only) ── */
+
+.sl-field .sv {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  right: auto;
+  top: auto;
+  transform: none;
+  padding: 0 16px 0 6px;
+  text-align: right;
+  /* Override the stepper/dial .sv base rule's pointer-events:none — a
+     pointerdown on the field always calls preventDefault() (see
+     _initScrubField), which already blocks native focus/text-selection
+     during a drag, so pointer-events must stay auto here for hover-wheel
+     to keep working even outside .editing. */
+  pointer-events: auto;
+}
+
+.sl-field.editing .sv {
+  color: var(--text-primary);
+}
+
+/* ── Visual clamping feedback — hard min/max edge ──
+   Flat, color-only edge bar (no glow/blur, matching the app's flat visual
+   language — see animations.css valueFlash) shown the instant a scrub drag
+   would cross the entry's hard min/max. The soft range that drives the fill
+   bar above never affects this — it's purely about the hard clamp. */
+.sl-field.clamp-min {
+  box-shadow: inset 3px 0 0 var(--error);
+}
+
+.sl-field.clamp-max {
+  box-shadow: inset -3px 0 0 var(--error);
+}
+
+/* ── Directional nudge arrows (Blender `<`/`>` hover buttons) ──
+   Hidden until the field is hovered, one at each edge; a plain click nudges
+   the value by one step without engaging the scrub drag (see _initScrubField
+   — pointerdown on a nudge button stops propagation before the field's own
+   drag handler ever sees it). */
+.sl-nudge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  margin: 0;
+  background: var(--bg-overlay);
+  color: var(--text-dim);
+  font: 11px var(--font-ui);
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity var(--dur) var(--ease), color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+
+.sl-nudge-dec { left: 0; border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.sl-nudge-inc { right: 0; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+
+.sl-field:hover .sl-nudge {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sl-nudge:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* Keep the arrows out of the way once editing/scrubbing is underway. */
+.sl-field.editing .sl-nudge,
+.sl-field.scrubbing .sl-nudge {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Valeur numérique (position absolute droite) — stepper / dial ── */
+
+.sv {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  font: 10px var(--font-mono);
+  color: var(--text-mono);
+  pointer-events: none;
+  white-space: nowrap;
+  background: transparent;
+  border: none;
+  outline: none;
+  text-align: right;
+  z-index: 1;
+  padding: 0 2px;
+}
+
+/* Editable state */
+.sv:focus {
+  background: var(--bg-overlay);
+  border-radius: var(--radius-sm);
+  pointer-events: auto;
+  outline: 1px solid var(--border-hot);
+  color: var(--text-primary);
+}
+
+/* ── Sparkline canvas (oscilloscope) ── */
+
+.sl-spark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.75;
+  z-index: 0;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Hint ── */
+
+.s-hint {
+  display: none; /* masqué dans le nouveau design compact */
+}
+
+/* ── Pin button ── */
+
+.pin-btn {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-ghost);
+  cursor: pointer;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+.sr:hover .pin-btn { opacity: 1; }
+
+.pin-btn.pinned {
+  opacity: 1;
+  color: var(--accent);
+}
+
+/* ── Pinned zone (Phase S) — section dédiée en haut du panneau ── */
+
+#pinned-zone {
+  border-bottom: 1px solid var(--border-sub);
+}
+
+.pinned-zone-header {
+  padding: 8px 8px 4px;
+  font: 9px var(--font-ui);
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+}
+
+/* ── Empty state ── */
+
+.es {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 10px;
+  padding: 32px 20px;
+  text-align: center;
+}
+
+.es-icon {
+  font-size: 20px;
+  color: var(--text-ghost);
+  line-height: 1;
+}
+
+.es-title {
+  font: 500 12px var(--font-mono);
+  color: var(--text-dim);
+}
+
+.es-sub {
+  font: 400 10px/1.6 var(--font-mono);
+  color: var(--text-ghost);
+  max-width: 220px;
+}
+
+.es-key {
+  display: inline-block;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-sm);
+  padding: 1px 5px;
+  font: 10px var(--font-mono);
+  color: var(--text-dim);
+}
+

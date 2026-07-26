@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sliders GL / ©2026 Patrick JAILLET</title>
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sliders GL / ©2026 Patrick JAILLET">
+<meta property="og:description" content="Real-time GLSL shader editor, 100% Shadertoy-compatible. Works offline.">
+<meta property="og:image" content="/icons/icon-512.png">
+
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+<!-- §1.1 FOUC prevention: suppress the initial transition flash before first paint.
+     Sliders GL ships a single light/medium-gray theme (see §2 of the roadmap) —
+     there is no theme class to branch on. -->
+<script>
+  (function(){
+    document.documentElement.classList.add('no-transition');
+    window.addEventListener('load', function() {
+      setTimeout(function(){ document.documentElement.classList.remove('no-transition'); }, 100);
+    });
+  })();
+</script>
+</head>
+<body>
+<div id="app-root">
+  <!-- ...autres éléments principaux de l'app... -->
+  <div id="editor-container"></div>
+</div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

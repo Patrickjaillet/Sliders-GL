@@ -1,0 +1,18 @@
+/* ============================================================
+   Sliders GL — fonts.css
+   Style : Dark IDE · Terminal-Chic
+   Polices : Inter (UI) + JetBrains Mono (valeurs/code)
+   ============================================================ */
+
+/* Offline-first (Roadmap §8): fonts are bundled locally via @fontsource —
+   no remote CDN fetch, works fully with network disabled. Vite resolves
+   these npm-package imports and inlines the woff2 files at build time. */
+
+/* Inter — labels, menus, titres UI */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+
+/* JetBrains Mono — valeurs numériques, code inline */
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';

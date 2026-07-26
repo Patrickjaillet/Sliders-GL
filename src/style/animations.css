@@ -1,0 +1,126 @@
+/* Sliders GL — animations fonctionnelles (Phase I) */
+
+/* ── Compilation pulse sur le bord de l'éditeur ── */
+#editorZone { position: relative; }
+#editorZone.compile-pulse-ok::after,
+#editorZone.compile-pulse-err::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  border-radius: 2px;
+}
+#editorZone.compile-pulse-ok::after  { animation: compilePulseOk  640ms ease-out; }
+#editorZone.compile-pulse-err::after { animation: compilePulseErr 640ms ease-out; }
+@keyframes compilePulseOk {
+  0%   { box-shadow: inset 0 0 0 2px var(--status-ok); opacity: 0.9; }
+  100% { box-shadow: inset 0 0 0 2px var(--status-ok); opacity: 0; }
+}
+@keyframes compilePulseErr {
+  0%   { box-shadow: inset 0 0 0 2px var(--status-err); opacity: 0.95; }
+  100% { box-shadow: inset 0 0 0 2px var(--status-err); opacity: 0; }
+}
+
+/* ── Spin — bouton parse en cours de compilation ── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.pb.parsing svg,
+.hb.parsing svg { animation: spin 600ms linear infinite; }
+
+/* ── Pulse — point de modulation slider ── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.7); }
+}
+
+/* ── Popup upward — file-menu, tools-more ── */
+@keyframes popup-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Entrée toast / command palette ── */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Sortie toast ── */
+@keyframes toast-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(8px); }
+}
+
+/* ── Barre de progression toast ── */
+@keyframes toastProgress {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+/* ── Pulse indicateur actif (MIDI, live record…) ── */
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ── Pulse badge erreur compilateur ── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ── Entrée modale ── */
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Sortie modale ── */
+@keyframes modalOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(4px); }
+}
+
+/* ── Entrée menu contextuel ── */
+@keyframes ctxIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Drift SVG signal (node graph) ── */
+@keyframes signalDrift {
+  0%   { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -96; }
+}
+
+/* ── Shimmer skeleton — library grid ── */
+@keyframes lib-shimmer {
+  0%   { background-position: -240px 0; }
+  100% { background-position: 240px  0; }
+}
+
+/* ── FPS pill flash on compile success (Phase W) ──
+   Flat color-only flash, no glow (the app's visual language is flat/crisp). */
+@keyframes fpsFlash {
+  0%   { color: var(--accent); }
+  100% { color: inherit; }
+}
+#fpspill.compile-ok { animation: fpsFlash 400ms ease-out; }
+
+/* ── Slider value flash (Phase W) ── */
+@keyframes valueFlash {
+  0%   { color: var(--accent); }
+  100% { color: var(--text-mono); }
+}
+
+/* ── Reduced motion — désactive toutes les animations décoratives ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

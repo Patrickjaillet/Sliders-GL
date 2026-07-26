@@ -1,0 +1,23 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @media (prefers-color-scheme: light) {
+      .background { fill: #242424; }
+      .track { stroke: #6B6B6B; }
+      .handle { fill: #1FA89C; }
+    }
+    @media (prefers-color-scheme: dark) {
+      .background { fill: #E2E2E2; }
+      .track { stroke: #9A9A9A; }
+      .handle { fill: #0B5650; }
+    }
+  </style>
+  <rect class="background" width="180" height="180" rx="37" />
+  <g>
+    <line class="track" x1="36" y1="62" x2="144" y2="62" stroke-width="8" stroke-linecap="round" />
+    <line class="track" x1="36" y1="90" x2="144" y2="90" stroke-width="8" stroke-linecap="round" />
+    <line class="track" x1="36" y1="118" x2="144" y2="118" stroke-width="8" stroke-linecap="round" />
+    <circle class="handle" cx="67" cy="62" r="13" />
+    <circle class="handle" cx="113" cy="90" r="13" />
+    <circle class="handle" cx="86" cy="118" r="13" />
+  </g>
+</svg>
