@@ -1,101 +1,65 @@
-# z-gl
+# Sliders GL
 
-**z-gl** is a real-time GLSL shader editor, compatible with the ShaderToy format. Write GLSL code and see the result rendered instantly in a WebGL preview.
+**Sliders GL** is a Shadertoy-compatible GLSL shader editor with a
+Blender-style interface: topbar, tool shelf, tabbed Properties editor,
+status bar, draggable/collapsible areas, and area-split gizmos — all
+reskinned in a unique light/medium-gray theme.
 
-![z-gl screenshot](docs/screenshot.png)
+![Sliders GL screenshot](docs/screenshot.png)
 
----
+## Features
 
-## Getting started
+- **Blender-identical UI architecture** — topbar with workspace tabs, tool
+  shelf, tabbed Properties editor, status bar, Outliner, and a fully
+  draggable/collapsible area layout.
+- **Ultra-professional, high-precision sliders** for every shader uniform,
+  with click-drag scrubbing, fine/coarse step modifiers, per-channel vector
+  and color controls, and full keyboard accessibility.
+- **Monaco-based GLSL editor** with syntax highlighting, inline diagnostics,
+  autocomplete, and code formatting.
+- **ShaderToy-compatible rendering** (`mainImage`, `iResolution`, `iTime`,
+  `iMouse`, channel uniforms) with direct ShaderToy import by ID or URL.
+- **Export pipeline** — current-frame image export, video recording,
+  standalone HTML export, and full project ZIP export.
+- **Shader library and preset system.**
+- **In-app Help Center** with a full reference and keyboard shortcut list.
+- **Offline-first** — all runtimes, fonts, and tooling are bundled locally;
+  zero network dependency for core functionality.
 
-### Desktop app
+## Installation (Windows 10/11)
 
-Run the installer (`.exe` on Windows) and open z-gl like any other software. Updates are offered automatically.
+Sliders GL targets **Windows 10 and Windows 11 only**.
 
----
+1. Download the latest installer (`Sliders GL Setup.exe`) from the
+   [Releases](https://github.com/Patrickjaillet/Sliders-GL/releases) page.
+2. Run the installer and follow the on-screen instructions.
+3. Launch **Sliders GL** from the Start menu or desktop shortcut.
 
-## First steps
+No additional runtime, browser, or network connection is required — the
+application works fully offline.
 
-1. **Write your shader** in the code editor (left). Syntax highlighting, autocompletion, and errors are shown live.
-2. **Watch the result** in the viewport (right) — it updates automatically, or press `Ctrl+Enter` to force a compile.
-3. **Adjust parameters** (uniforms) with the sliders generated automatically from your code.
-4. **Export or share** your creation once you're happy with it.
+### Building from source
 
----
+```sh
+npm install
+npm run tauri:build
+```
 
-## Main features
+Requires Node.js and the [Tauri](https://tauri.app) prerequisites for
+Windows. See `CONTRIBUTING.md` for the full development setup.
 
-### File & projects
-- New / Open / Save / Save As (`Ctrl+N`, `Ctrl+O`, `Ctrl+S`, `Ctrl+Shift+S`)
-- Live tracking of an externally-modified file
-- Multi-project workspace with browser, autosave, and thumbnails (`Ctrl+Shift+W`)
-- Version history (`Ctrl+Shift+Z`)
+## License
 
-### Import & library
-- Direct import from ShaderToy (paste a URL or an ID)
-- Library of ready-to-use shaders and presets
-- Built-in examples to get started quickly
+This project is licensed under the **MIT License** — see [LICENSE](LICENSE)
+for the full text.
 
-### Export & sharing
-- Screenshot (PNG), video export
-- Standalone HTML export, raw or minified GLSL
-- Export as a Three.js snippet
-- Export in ShaderToy or GLSLSandbox format
-- Export a full project as a `.zip`
-- Quick share link
+```
+SPDX-License-Identifier: MIT
+Copyright © 2026 Patrick JAILLET
+```
 
-### Advanced editing
-- Monaco-based editor (the engine behind VS Code): highlighting, autocompletion, inline errors
-- Drag-and-drop GLSL block palette (`Ctrl+Shift+K`)
-- Command palette (`Ctrl+Shift+P`)
-- Code-focus mode, fullscreen viewport (`F11`)
-- Cross-reference GLSL/WGSL/HLSL documentation on hover (`F1`)
-- Scrub numeric values directly in the code: click-and-drag on the number, `Shift` for a fine step, `Ctrl` for a coarse step
+## Contact
 
-### Uniforms & sliders
-- Sliders generated automatically for every declared uniform, styled as scrubbable After-Effects-style numeric fields
-- Pin favorite sliders, reset, randomize (`Alt+R`)
-- Ray Marching assistant: automatically detects SDF scenes and offers dedicated controls (`Ctrl+Shift+M`)
+- Email: [contact.shaderstudio@gmail.com](mailto:contact.shaderstudio@gmail.com)
+- Website: [patrickjaillet.github.io/sandefjord-software](https://patrickjaillet.github.io/sandefjord-software)
 
-### Post-processing & style
-- Stackable FX effect pile
-- Global color palette (LUT-based recoloring — over 50 LUTs available, `Ctrl+Shift+L`)
-- Warp (UV deformation) effects, style layers, and shape masks
-
-### Multi-pass
-- Manage multiple render passes
-- Visual wiring panel between passes (buffers/channels)
-
-### Comfort & accessibility
-- Color-blindness simulation: protanopia, deuteranopia, tritanopia (`Ctrl+Shift+B`)
-- Performance panel (FPS cap, resolution) (`Ctrl+Shift+G`)
-- Pop the viewport out into a second window (useful for dual-screen or live setups)
-- Presentation mode, layout presets
-
----
-
-## Useful keyboard shortcuts
-
-| Shortcut | Action |
-|---|---|
-| `Ctrl+N` / `Ctrl+O` / `Ctrl+S` | New / Open / Save |
-| `Ctrl+Enter` | Compile and apply |
-| `F11` | Viewport fullscreen |
-| `Ctrl+scroll` | Zoom the viewport |
-| `Alt+R` | Randomize unpinned sliders |
-| `Ctrl+Z` / `Ctrl+Y` | Undo / redo (sliders) |
-| `Ctrl+Shift+P` | Command palette |
-| `Ctrl+Shift+K` | GLSL block palette |
-| `Ctrl+Shift+W` | Multi-project workspace |
-| `Ctrl+Shift+B` | Color-blindness simulation |
-| `Ctrl+Shift+M` | Ray Marching assistant |
-| `Ctrl+Shift+L` | LUT library |
-| `Ctrl+Shift+G` | Performance settings |
-| `Ctrl+E` | Export an image |
-| `Alt+1` / `Alt+3` / `Alt+4` | Sidebar tabs (Uniforms / Style / History) |
-
----
-
-## Need help?
-
-A help center and a getting-started guide are available directly from the interface (help button in the toolbar).
