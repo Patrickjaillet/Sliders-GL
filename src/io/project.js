@@ -28,7 +28,11 @@ import {
   readFileBytes,
   getCliArgs,
 } from '../native/tauri.js';
-import { clearSliderCustomizations, loadCustomizations, serializeCustomizations } from '../ui/slider-customizations.js';
+import {
+  clearSliderCustomizations,
+  loadCustomizations,
+  serializeCustomizations,
+} from '../ui/slider-customizations.js';
 
 // Fix 1.4 — Tauri v2 : window.__TAURI__.fs et window.__TAURI__.path sont
 // indisponibles. Utiliser les imports ES module des plugins officiels.
@@ -48,10 +52,10 @@ async function _tauriFsReadText(path) {
 }
 
 // ── Storage keys ──────────────────────────────────────────────────────────────
-const MRU_KEY         = 'zgl_mru_v1';
-const AUTOSAVE_KEY    = 'zgl_autosave_v1';     // path in %TEMP% written by Rust
-const AUTOSAVE_DIRTY  = 'zgl_autosave_dirty';  // bool — unsaved changes exist
-const MAX_MRU         = 10;
+const MRU_KEY = 'zgl_mru_v1';
+const AUTOSAVE_KEY = 'zgl_autosave_v1'; // path in %TEMP% written by Rust
+const AUTOSAVE_DIRTY = 'sl_autosave_dirty'; // bool — unsaved changes exist
+const MAX_MRU = 10;
 
 // ── Module state ──────────────────────────────────────────────────────────────
 /** @type {{ path: string|null, name: string, dirty: boolean }} */
@@ -65,15 +69,15 @@ let _autoSaveTimer = null;
 
 /** Callbacks wired in at init time. */
 let _cb = {
-  getCode:      () => '',
-  setCode:      (_code) => {},
-  getPresets:   () => ([]),
-  getTimeline:  () => ({}),
-  setTimeline:  (_tl) => {},
-  applyShader:  (_code) => {},
-  toast:        (_msg, _type) => {},
-  confirm:      (_title, _msg, _ok) => {},
-  setTitle:     (_name) => {},
+  getCode: () => '',
+  setCode: (_code) => {},
+  getPresets: () => [],
+  getTimeline: () => ({}),
+  setTimeline: (_tl) => {},
+  applyShader: (_code) => {},
+  toast: (_msg, _type) => {},
+  confirm: (_title, _msg, _ok) => {},
+  setTitle: (_name) => {},
 };
 
 // ── Public init ───────────────────────────────────────────────────────────────
@@ -101,16 +105,20 @@ export function initProject(callbacks) {
 // ── Project metadata ──────────────────────────────────────────────────────────
 
 /** Current project name (filename without extension). */
-export function getProjectName() { return _proj.name; }
+export function getProjectName() {
+  return _proj.name;
+}
 
 /** True when there are unsaved changes. */
-export function isProjectDirty() { return _proj.dirty; }
+export function isProjectDirty() {
+  return _proj.dirty;
+}
 
 /** Mark project as having unsaved changes. Call whenever editor content changes. */
 export function markDirty() {
   if (_proj.dirty) return;
   _proj.dirty = true;
-  _cb.setTitle(_proj.name + ' •');
+  _cb.setTitle(`${_proj.name  } •`);
   safeLocalSet(AUTOSAVE_DIRTY, '1');
 }
 
@@ -125,18 +133,22 @@ function _markClean() {
 
 /** @returns {string[]} Array of up to 10 absolute paths, most-recent first. */
 export function getMruList() {
-  try { return JSON.parse(safeLocalGet(MRU_KEY, '[]')); } catch { return []; }
+  try {
+    return JSON.parse(safeLocalGet(MRU_KEY, '[]'));
+  } catch {
+    return [];
+  }
 }
 
 function _addToMru(absPath) {
-  let list = getMruList().filter(p => p !== absPath);
+  let list = getMruList().filter((p) => p !== absPath);
   list.unshift(absPath);
   if (list.length > MAX_MRU) list = list.slice(0, MAX_MRU);
   safeLocalSet(MRU_KEY, JSON.stringify(list));
 }
 
 function _removeFromMru(absPath) {
-  const list = getMruList().filter(p => p !== absPath);
+  const list = getMruList().filter((p) => p !== absPath);
   safeLocalSet(MRU_KEY, JSON.stringify(list));
 }
 
@@ -149,14 +161,20 @@ export function newProject() {
     _proj.name = 'Untitled';
     _proj.dirty = false;
     clearSliderCustomizations();
-    _cb.setCode('void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    vec2 uv = fragCoord / iResolution.xy;\n    fragColor = vec4(uv, 0.5 + 0.5 * sin(iTime), 1.0);\n}\n');
+    _cb.setCode(
+      'void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    vec2 uv = fragCoord / iResolution.xy;\n    fragColor = vec4(uv, 0.5 + 0.5 * sin(iTime), 1.0);\n}\n'
+    );
     _cb.applyShader(_cb.getCode());
     _cb.setTitle('Untitled');
     _cb.toast('New project created', 'ok');
   };
 
   if (_proj.dirty) {
-    _cb.confirm('Discard unsaved changes?', 'Create a new project? Unsaved changes will be lost.', doNew);
+    _cb.confirm(
+      'Discard unsaved changes?',
+      'Create a new project? Unsaved changes will be lost.',
+      doNew
+    );
   } else {
     doNew();
   }
@@ -175,8 +193,8 @@ export async function openProject(pathOverride) {
     const paths = await openFileDialog({
       filters: [
         { name: 'Sliders GL Projects', extensions: ['zgl'] },
-        { name: 'GLSL Shaders',  extensions: ['glsl', 'frag', 'fs'] },
-        { name: 'All Files',     extensions: ['*'] },
+        { name: 'GLSL Shaders', extensions: ['glsl', 'frag', 'fs'] },
+        { name: 'All Files', extensions: ['*'] },
       ],
     });
     if (!paths.length) return;
@@ -188,13 +206,17 @@ export async function openProject(pathOverride) {
       await _loadFromPath(filePath);
     } catch (err) {
       console.error('[project] open failed:', err);
-      _cb.toast('Failed to open project: ' + err.message, 'err');
+      _cb.toast(`Failed to open project: ${  err.message}`, 'err');
       _removeFromMru(filePath);
     }
   };
 
   if (_proj.dirty) {
-    _cb.confirm('Discard unsaved changes?', 'Open a different project? Unsaved changes will be lost.', doOpen);
+    _cb.confirm(
+      'Discard unsaved changes?',
+      'Open a different project? Unsaved changes will be lost.',
+      doOpen
+    );
   } else {
     doOpen();
   }
@@ -225,12 +247,12 @@ export async function saveProjectAs() {
     return;
   }
 
-  const suggested = (_proj.name.replace(/[^a-z0-9_\-. ]/gi, '_') || 'shader') + '.zgl';
+  const suggested = `${_proj.name.replace(/[^a-z0-9_\-. ]/gi, '_') || 'shader'  }.zgl`;
   const path = await saveFileDialog({
     defaultPath: suggested,
     filters: [
       { name: 'Sliders GL Projects', extensions: ['zgl'] },
-      { name: 'All Files',     extensions: ['*'] },
+      { name: 'All Files', extensions: ['*'] },
     ],
   });
   if (!path) return;
@@ -265,7 +287,9 @@ export async function disableWatchFile() {
   _cb.toast('File watch stopped', 'warn');
 }
 
-export function isWatchingFile() { return _watchUnlisten !== null; }
+export function isWatchingFile() {
+  return _watchUnlisten !== null;
+}
 
 // ── Auto-save ─────────────────────────────────────────────────────────────────
 
@@ -280,14 +304,18 @@ async function _doAutoSave() {
 
   try {
     const code = _cb.getCode();
-    const payload = JSON.stringify({ path: _proj.path, name: _proj.name, code,
-      savedAt: new Date().toISOString() });
+    const payload = JSON.stringify({
+      path: _proj.path,
+      name: _proj.name,
+      code,
+      savedAt: new Date().toISOString(),
+    });
     // Fix 1.4 — Tauri v2 : utiliser @tauri-apps/plugin-fs au lieu de window.__TAURI__.fs
     const tmpDir = await _tauri_appLocalDataDir();
     if (!tmpDir) return;
-    await _tauriFsWriteText(tmpDir + 'autosave.json', payload);
-    safeLocalSet(AUTOSAVE_KEY, tmpDir + 'autosave.json');
-    console.debug('[project] auto-saved to', tmpDir + 'autosave.json');
+    await _tauriFsWriteText(`${tmpDir  }autosave.json`, payload);
+    safeLocalSet(AUTOSAVE_KEY, `${tmpDir  }autosave.json`);
+    console.debug('[project] auto-saved to', `${tmpDir  }autosave.json`);
   } catch (err) {
     console.warn('[project] auto-save failed:', err);
   }
@@ -297,7 +325,7 @@ async function _tauri_appLocalDataDir() {
   try {
     // Fix 1.4 — Tauri v2 : @tauri-apps/api/path au lieu de window.__TAURI__.path
     const { appLocalDataDir } = await import('@tauri-apps/api/path');
-    return await appLocalDataDir() + '/';
+    return `${await appLocalDataDir()  }/`;
   } catch {
     return null;
   }
@@ -327,10 +355,10 @@ async function _offerCrashRecovery() {
           _proj.path = data.path || null;
           _proj.name = data.name || 'Recovered';
           _proj.dirty = true;
-          _cb.setTitle(_proj.name + ' • (recovered)');
+          _cb.setTitle(`${_proj.name  } • (recovered)`);
           _cb.toast('Session recovered — remember to save!', 'warn');
         } catch (err) {
-          _cb.toast('Recovery failed: ' + err.message, 'err');
+          _cb.toast(`Recovery failed: ${  err.message}`, 'err');
         }
       }
     );
@@ -344,7 +372,7 @@ async function _handleCliArgs() {
   try {
     const args = await getCliArgs();
     // args[0] is the binary; look for a file path argument
-    const fileArg = args.find(a => /\.(glsl|frag|fs|zgl)$/i.test(a));
+    const fileArg = args.find((a) => /\.(glsl|frag|fs|zgl)$/i.test(a));
     if (fileArg) {
       // Delay until the app is fully mounted
       setTimeout(() => openProject(fileArg), 600);
@@ -362,7 +390,10 @@ async function _handleCliArgs() {
  */
 async function _loadFromPath(filePath) {
   const ext = filePath.split('.').pop().toLowerCase();
-  const name = filePath.split(/[\\/]/).pop().replace(/\.\w+$/, '');
+  const name = filePath
+    .split(/[\\/]/)
+    .pop()
+    .replace(/\.\w+$/, '');
 
   _stopWatchFile();
   // Opening a different shader — drop any slider customizations from the
@@ -393,7 +424,9 @@ async function _loadZglBundle(filePath, name) {
       // parsed sliders pick the tweaks back up. _loadFromPath already cleared
       // the store, so a project without sliderMeta correctly stays clean.
       if (meta.sliderMeta) loadCustomizations(meta.sliderMeta);
-    } catch { /* non-fatal */ }
+    } catch {
+      /* non-fatal */
+    }
   }
 
   const tlFile = zip.file('timeline.json');
@@ -401,7 +434,9 @@ async function _loadZglBundle(filePath, name) {
     try {
       const tlData = JSON.parse(await tlFile.async('string'));
       _cb.setTimeline(tlData);
-    } catch { /* non-fatal */ }
+    } catch {
+      /* non-fatal */
+    }
   }
 
   _proj.path = filePath;
@@ -437,7 +472,10 @@ async function _loadRawGlsl(filePath, name) {
  */
 async function _writeToDisk(filePath) {
   const ext = filePath.split('.').pop().toLowerCase();
-  const name = filePath.split(/[\\/]/).pop().replace(/\.\w+$/, '');
+  const name = filePath
+    .split(/[\\/]/)
+    .pop()
+    .replace(/\.\w+$/, '');
   const code = _cb.getCode();
   const presets = await _cb.getPresets();
 
@@ -454,12 +492,19 @@ async function _writeToDisk(filePath) {
     zip.file('shader.glsl', code);
 
     const sliderMeta = serializeCustomizations();
-    zip.file('meta.json', JSON.stringify({
-      version:  '1',
-      name,
-      created:  new Date().toISOString(),
-      ...(Object.keys(sliderMeta).length > 0 ? { sliderMeta } : {}),
-    }, null, 2));
+    zip.file(
+      'meta.json',
+      JSON.stringify(
+        {
+          version: '1',
+          name,
+          created: new Date().toISOString(),
+          ...(Object.keys(sliderMeta).length > 0 ? { sliderMeta } : {}),
+        },
+        null,
+        2
+      )
+    );
 
     const tlData = _cb.getTimeline();
     if (tlData && (Object.keys(tlData.keys || {}).length > 0 || tlData.duration !== 10)) {
@@ -471,8 +516,8 @@ async function _writeToDisk(filePath) {
     }
 
     const blob = await zip.generateAsync({
-      type:               'uint8array',
-      compression:        'DEFLATE',
+      type: 'uint8array',
+      compression: 'DEFLATE',
       compressionOptions: { level: 6 },
     });
 
@@ -504,7 +549,7 @@ async function _startWatchFile(filePath) {
           _cb.applyShader(code);
           _cb.toast('Hot-reloaded from disk', 'info');
         } catch (err) {
-          _cb.toast('Watch reload failed: ' + err.message, 'err');
+          _cb.toast(`Watch reload failed: ${  err.message}`, 'err');
         }
       }, 120);
     });
@@ -519,6 +564,8 @@ async function _stopWatchFile() {
   try {
     clearTimeout(_watchUnlisten._debounce);
     await _watchUnlisten();
-  } catch { /* best-effort */ }
+  } catch {
+    /* best-effort */
+  }
   _watchUnlisten = null;
 }

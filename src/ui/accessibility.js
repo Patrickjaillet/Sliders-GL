@@ -21,12 +21,13 @@ function injectSkipLink() {
   link.textContent = 'Skip to editor';
   link.addEventListener('click', (e) => {
     e.preventDefault();
-    const target = document.getElementById('editor-container') ||
-                   document.querySelector('.monaco-editor') ||
-                   document.getElementById('editorPane');
+    const target =
+      document.getElementById('editor-container') ||
+      document.querySelector('.monaco-editor') ||
+      document.getElementById('editorPane');
     if (target) {
       target.setAttribute('tabindex', '-1');
-      (/** @type {HTMLElement} */ (target)).focus();
+      /** @type {HTMLElement} */ (target).focus();
     }
   });
 
@@ -101,10 +102,14 @@ export function announceSliderValue(id, value) {
   clearTimeout(_announceTimer);
   _announceTimer = setTimeout(() => {
     // Format to 3 decimal places max
-    const formatted = parseFloat(value).toFixed(3).replace(/\.?0+$/, '');
+    const formatted = parseFloat(value)
+      .toFixed(3)
+      .replace(/\.?0+$/, '');
     live.textContent = `${id}: ${formatted}`;
     // Clear after a moment so next update re-triggers announcement
-    setTimeout(() => { live.textContent = ''; }, 1000);
+    setTimeout(() => {
+      live.textContent = '';
+    }, 1000);
   }, 150);
 }
 
@@ -127,22 +132,19 @@ export function announceToScreenReader(message, type = 'polite') {
 // ═════════════════════════════════════════════════════════════════════════════
 
 // Zoom levels: 70% → 150% in steps
-const ZOOM_STEPS = [0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.10, 1.15, 1.20, 1.30, 1.40, 1.50];
-const ZOOM_DEFAULT = 1.00;
-const ZOOM_STORAGE_KEY = 'zgl_ui_zoom';
+const ZOOM_STEPS = [0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.3, 1.4, 1.5];
+const ZOOM_DEFAULT = 1.0;
+const ZOOM_STORAGE_KEY = 'sl_ui_zoom';
 
 let _currentZoom = ZOOM_DEFAULT;
 let _zoomIndicatorTimer = null;
 
 function _clampZoom(z) {
-  return Math.min(ZOOM_STEPS[ZOOM_STEPS.length - 1],
-         Math.max(ZOOM_STEPS[0], z));
+  return Math.min(ZOOM_STEPS[ZOOM_STEPS.length - 1], Math.max(ZOOM_STEPS[0], z));
 }
 
 function _nearestZoomStep(z) {
-  return ZOOM_STEPS.reduce((prev, curr) =>
-    Math.abs(curr - z) < Math.abs(prev - z) ? curr : prev
-  );
+  return ZOOM_STEPS.reduce((prev, curr) => (Math.abs(curr - z) < Math.abs(prev - z) ? curr : prev));
 }
 
 function _applyZoom(zoom) {
@@ -152,9 +154,8 @@ function _applyZoom(zoom) {
   document.documentElement.style.setProperty('--ui-zoom', String(_currentZoom));
 
   // Find the main app container and scale it
-  const app = document.getElementById('app') ||
-              document.getElementById('main-layout') ||
-              document.body;
+  const app =
+    document.getElementById('app') || document.getElementById('main-layout') || document.body;
 
   // Use font-size scaling as primary approach (scales em/rem-based layout)
   // Base font-size is 14px; we scale relative to that
@@ -162,7 +163,9 @@ function _applyZoom(zoom) {
   document.documentElement.style.fontSize = `${basePx * _currentZoom}px`;
 
   // Persist
-  try { localStorage.setItem(ZOOM_STORAGE_KEY, String(_currentZoom)); } catch (_) {}
+  try {
+    localStorage.setItem(ZOOM_STORAGE_KEY, String(_currentZoom));
+  } catch (_) {}
 
   // Show indicator
   _showZoomIndicator(_currentZoom);
@@ -280,5 +283,11 @@ export function initAccessibility() {
   });
 
   // Expose zoom functions globally for potential menu integration
-  window.__zgl_zoom = { in: zoomIn, out: zoomOut, reset: zoomReset, set: setUIZoom, get: getUIZoom };
+  window.__zgl_zoom = {
+    in: zoomIn,
+    out: zoomOut,
+    reset: zoomReset,
+    set: setUIZoom,
+    get: getUIZoom,
+  };
 }

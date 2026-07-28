@@ -19,7 +19,6 @@
    when window < sidebar+800+inspector.
    ============================================================ */
 
-
 /* ══════════════════════════════════════════════
    BASE HTML / BODY
    ══════════════════════════════════════════════ */
@@ -42,21 +41,24 @@ body {
 
 /* Titlebar natif Tauri (24px en haut) */
 .tauri-titlebar {
-  display: none;       /* caché en mode web */
+  display: none; /* caché en mode web */
   height: var(--titlebar-h);
   flex-shrink: 0;
   order: -1;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border);
 }
-body.tauri .tauri-titlebar { display: flex; align-items: center; padding: 0 8px; }
+body.tauri .tauri-titlebar {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
 
 /* Désactivation temporaire des transitions (utilisé par init.js) */
 html.no-transition,
 html.no-transition * {
   transition: none !important;
 }
-
 
 /* ══════════════════════════════════════════════
    ÉLÉMENTS DÉCORATIFS SUPPRIMÉS
@@ -84,7 +86,6 @@ html.no-transition * {
   display: none;
 }
 
-
 /* ══════════════════════════════════════════════
    TOPBAR (#toolbar — Blender-style topbar: workspace
    tabs + File/Edit/Render/Window/Help menus + quick icons)
@@ -94,7 +95,7 @@ html.no-transition * {
   height: var(--topbar-h, 40px);
   min-height: var(--topbar-h, 40px);
   flex-shrink: 0;
-  order: 0;                            /* right after the titlebar, above .layout */
+  order: 0; /* right after the titlebar, above .layout */
   display: flex;
   align-items: center;
   gap: 2px;
@@ -127,7 +128,6 @@ html.no-transition * {
   flex-shrink: 0;
 }
 
-
 /* ══════════════════════════════════════════════
    GRILLE PRINCIPALE
    4 colonnes : tool-shelf | sidebar | viewport | inspector
@@ -142,7 +142,7 @@ html.no-transition * {
   min-height: 0;
   overflow: hidden;
   background: var(--bg-void);
-  gap: 1px;                   /* séparateurs via couleur de fond */
+  gap: 1px; /* séparateurs via couleur de fond */
   position: relative;
   z-index: 1;
 }
@@ -178,7 +178,6 @@ html.no-transition * {
 .layout.vp-fullscreen.inspector-open #viewport-zone {
   grid-column: 1 / 4;
 }
-
 
 /* ══════════════════════════════════════════════
    TOOL SHELF (#toolShelf — Blender's "T"-panel equivalent)
@@ -240,7 +239,10 @@ html.no-transition * {
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
 }
 
 .ts-tool:hover {
@@ -261,7 +263,6 @@ html.no-transition * {
   margin: 2px 0;
   flex-shrink: 0;
 }
-
 
 /* ══════════════════════════════════════════════
    PANNEAU LATÉRAL GAUCHE (#sidebar / .panel)
@@ -329,14 +330,14 @@ html.no-transition * {
 .sw::-webkit-scrollbar-thumb,
 .midi-body::-webkit-scrollbar-thumb,
 .cerr-body::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.22);
+  background: rgba(0, 0, 0, 0.22);
   border-radius: 3px;
 }
 
 .sw::-webkit-scrollbar-thumb:hover,
 .midi-body::-webkit-scrollbar-thumb:hover,
 .cerr-body::-webkit-scrollbar-thumb:hover {
-  background: rgba(0,0,0,0.34);
+  background: rgba(0, 0, 0, 0.34);
 }
 
 /* Bouton de panneau (ex : Apply, Parse) */
@@ -352,7 +353,9 @@ html.no-transition * {
   font-size: 10px;
   font-weight: 500;
   cursor: pointer;
-  transition: background var(--t-fast), border-color var(--t-fast);
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast);
 }
 
 .pb:hover {
@@ -371,7 +374,6 @@ html.no-transition * {
   border-color: var(--status-warn);
 }
 
-
 /* ══════════════════════════════════════════════
    ZONE CENTRE — viewport + éditeur
    (#viewport-zone / .right)
@@ -381,7 +383,7 @@ html.no-transition * {
 .right,
 #viewport-zone {
   display: flex;
-  flex-direction: column;   /* .zone-row on top, JS-appended #panelDock (see
+  flex-direction: column; /* .zone-row on top, JS-appended #panelDock (see
                                panel-dock.js, which appends directly to this
                                element) as a full-width bar underneath */
   overflow: hidden;
@@ -396,14 +398,14 @@ html.no-transition * {
   flex-direction: row;
   flex: 1 1 auto;
   min-height: 0;
-  overflow: auto;                  /* scrollbars when window < sidebar+ew+800+inspector */
+  overflow: auto; /* scrollbars when window < sidebar+ew+800+inspector */
   /* compositor-style dot grid pasteboard */
   background-color: var(--bg-app);
   background-image: radial-gradient(circle, var(--border-sub) 1px, transparent 1px);
   background-size: 20px 20px;
   scrollbar-width: thin;
   scrollbar-color: var(--border-mid) transparent;
-  align-items: stretch;            /* both columns take the full available height */
+  align-items: stretch; /* both columns take the full available height */
   gap: 0;
 }
 
@@ -456,14 +458,14 @@ html.no-transition * {
   top: 8px;
   right: 8px;
   width: 200px;
-  height: 112px;   /* 200 / (16/9) = 112.5 — exact 16:9 at 800x450 ratio */
+  height: 112px; /* 200 / (16/9) = 112.5 — exact 16:9 at 800x450 ratio */
   min-height: 0;
   flex: none;
   z-index: 30;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
   box-shadow: var(--shadow-popup);
-  transform: scale(1);           /* reset any pasteboard scale-fit */
+  transform: scale(1); /* reset any pasteboard scale-fit */
   transform-origin: top right;
   overflow: hidden;
 }
@@ -471,7 +473,7 @@ html.no-transition * {
 .right.code-focus .cw canvas#glc {
   width: 800px;
   height: 450px;
-  transform: scale(0.25);        /* 200/800 = 0.25 — display-only, GL stays 800x450 */
+  transform: scale(0.25); /* 200/800 = 0.25 — display-only, GL stays 800x450 */
   transform-origin: top left;
   pointer-events: none;
 }
@@ -497,7 +499,6 @@ html.no-transition * {
   width: auto;
   max-width: none;
 }
-
 
 /* ══════════════════════════════════════════════
    §2.2 — BARRE DE DOCK DES PANNEAUX (taskbar)
@@ -545,7 +546,9 @@ html.no-transition * {
   font: 500 11px/1 var(--font-ui);
   cursor: pointer;
   white-space: nowrap;
-  transition: background var(--t-fast), border-color var(--t-fast);
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast);
 }
 
 .panel-dock-chip:hover {
@@ -563,26 +566,29 @@ html.no-transition * {
 }
 
 /* Phase P — accent subtil par catégorie de panneau (doc/create/debug) */
-.panel-dock-chip[data-panel-cat="doc"] {
+.panel-dock-chip[data-panel-cat='doc'] {
   border-color: var(--buf-a);
-  background: rgba(79,163,255,0.10);
+  background: rgba(79, 163, 255, 0.1);
   color: var(--buf-a);
 }
-.panel-dock-chip[data-panel-cat="doc"]:hover { background: rgba(79,163,255,0.18); }
+.panel-dock-chip[data-panel-cat='doc']:hover {
+  background: rgba(79, 163, 255, 0.18);
+}
 
-.panel-dock-chip[data-panel-cat="create"] {
+.panel-dock-chip[data-panel-cat='create'] {
   border-color: var(--accent);
   background: var(--accent-light);
   color: var(--accent-hover);
 }
 
-.panel-dock-chip[data-panel-cat="debug"] {
+.panel-dock-chip[data-panel-cat='debug'] {
   border-color: var(--buf-c);
-  background: rgba(255,154,60,0.10);
+  background: rgba(255, 154, 60, 0.1);
   color: var(--buf-c);
 }
-.panel-dock-chip[data-panel-cat="debug"]:hover { background: rgba(255,154,60,0.18); }
-
+.panel-dock-chip[data-panel-cat='debug']:hover {
+  background: rgba(255, 154, 60, 0.18);
+}
 
 /* ══════════════════════════════════════════════
    §3.4 — BARRE DE NAVIGATION DES PASSES (breadcrumb)
@@ -630,7 +636,10 @@ html.no-transition * {
   font: 500 11px/1 var(--font-ui);
   cursor: pointer;
   white-space: nowrap;
-  transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast),
+    color var(--t-fast);
 }
 
 .pass-nav-node:hover {
@@ -662,7 +671,6 @@ html.no-transition * {
   font-style: normal;
   font-weight: 600;
 }
-
 
 /* ══════════════════════════════════════════════
    PHASE 4 — OUTILS CANVAS
@@ -701,7 +709,9 @@ html.no-transition * {
   letter-spacing: 0.04em;
   pointer-events: none;
   opacity: 0;
-  transition: opacity var(--t-fast), transform var(--t-fast);
+  transition:
+    opacity var(--t-fast),
+    transform var(--t-fast);
 }
 .canvas-flash.show {
   opacity: 1;
@@ -762,8 +772,12 @@ html.no-transition * {
   font: 600 10px var(--font-mono);
   letter-spacing: 0.05em;
 }
-.canvas-compare .cc-label-ref  { left: 8px; }
-.canvas-compare .cc-label-live { right: 8px; }
+.canvas-compare .cc-label-ref {
+  left: 8px;
+}
+.canvas-compare .cc-label-live {
+  right: 8px;
+}
 
 /* 5.2 — Menu contextuel canvas */
 .canvas-ctx {
@@ -792,7 +806,6 @@ html.no-transition * {
   background: var(--bg-hover);
 }
 
-
 /* ══════════════════════════════════════════════
    UI v2 — Manipulation directe & découvrabilité
    ══════════════════════════════════════════════ */
@@ -812,7 +825,9 @@ html.no-transition * {
   border-radius: 50%;
   border: 2px solid #fff;
   background: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.85);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.5),
+    0 1px 4px rgba(0, 0, 0, 0.5);
   cursor: grab;
   pointer-events: auto;
   transition: transform var(--motion-quick);
@@ -824,8 +839,13 @@ html.no-transition * {
   border-radius: 50%;
   background: #fff;
 }
-.canvas-gizmo:hover { transform: scale(1.25); }
-.canvas-gizmo.dragging { cursor: grabbing; transform: scale(1.3); }
+.canvas-gizmo:hover {
+  transform: scale(1.25);
+}
+.canvas-gizmo.dragging {
+  cursor: grabbing;
+  transform: scale(1.3);
+}
 
 /* §A.3 — HUD de scrub de valeur */
 .zgl-scrub-hud {
@@ -854,7 +874,7 @@ html.no-transition * {
   border: 1px solid var(--border-strong);
   box-shadow: var(--shadow-popup);
 }
-.zgl-color-pop input[type="color"] {
+.zgl-color-pop input[type='color'] {
   width: 36px;
   height: 26px;
   border: 1px solid var(--border);
@@ -872,7 +892,10 @@ html.no-transition * {
   font: 11px var(--font-ui);
   cursor: pointer;
 }
-.zgl-color-pop button:hover { background: var(--bg-hover); color: var(--text-primary); }
+.zgl-color-pop button:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
 
 /* §D.1 — Overlay which-key */
 .which-key {
@@ -886,7 +909,9 @@ html.no-transition * {
   opacity: 0;
   transition: opacity var(--motion-smooth);
 }
-.which-key.open { opacity: 1; }
+.which-key.open {
+  opacity: 1;
+}
 .wk-card {
   width: min(860px, 94vw);
   max-height: 80vh;
@@ -899,7 +924,9 @@ html.no-transition * {
   transform: translateY(10px) scale(0.99);
   transition: transform var(--motion-spring);
 }
-.which-key.open .wk-card { transform: translateY(0) scale(1); }
+.which-key.open .wk-card {
+  transform: translateY(0) scale(1);
+}
 .wk-head {
   display: flex;
   justify-content: space-between;
@@ -908,7 +935,11 @@ html.no-transition * {
   font-weight: 600;
   color: var(--text-primary);
 }
-.wk-hint { font-size: 11px; color: var(--text-dim); font-weight: 400; }
+.wk-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 400;
+}
 .wk-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -968,7 +999,7 @@ html.no-transition * {
   /* Scale-to-fit when the available pasteboard column is narrower than 840px
      (800 + 2×20 margin). JS sets --cw-scale and adds .scale-fit; the canvas
      #glc attribute stays 800×450 so no GL resize is ever fired. */
-  max-width: calc(100% - 40px);  /* leave room for 20px margin on each side */
+  max-width: calc(100% - 40px); /* leave room for 20px margin on each side */
 }
 
 /* Canvas WebGL — fills the fixed .cw exactly, never scaled by CSS */
@@ -978,7 +1009,7 @@ canvas#glc {
   display: block;
   transform: translateZ(0);
   will-change: transform;
-  image-rendering: pixelated;  /* prevent browser interpolation on the GPU output */
+  image-rendering: pixelated; /* prevent browser interpolation on the GPU output */
 }
 
 /* Scale-to-fit: JS sets --cw-scale via pasteboard-resize observer when the
@@ -1001,7 +1032,7 @@ canvas#glc {
   left: 0;
   right: 0;
   height: 24px;
-  background: rgba(13,15,20,0.85);
+  background: rgba(13, 15, 20, 0.85);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1014,9 +1045,15 @@ canvas#glc {
   font: 10px var(--font-mono);
   color: var(--text-dim);
 }
-.vp-fps.good  { color: var(--accent); }
-.vp-fps.warn  { color: var(--warn); }
-.vp-fps.bad   { color: var(--error); }
+.vp-fps.good {
+  color: var(--accent);
+}
+.vp-fps.warn {
+  color: var(--warn);
+}
+.vp-fps.bad {
+  color: var(--error);
+}
 
 .vp-err {
   font-size: 10px;
@@ -1056,14 +1093,18 @@ canvas#glc {
   left: 10px;
 }
 
-/* Pills HUD (FPS, résolution, temps) */
+/* Pills HUD (FPS, résolution, temps) — floats over arbitrary rendered shader
+   content like the other canvas-overlay HUD elements, so it keeps its own
+   fixed dark chip background regardless of the app theme; its text must stay
+   a fixed light tone to match, not the light-theme's dark --text-dim (which
+   is meant for light panel surfaces and is unreadable here). */
 .pill {
   height: 20px;
   padding: 0 6px;
   border-radius: var(--radius-sm);
-  background: rgba(13,15,20,0.80);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: var(--text-dim);
+  background: rgba(13, 15, 20, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #c8ccd4;
   font: 10px var(--font-mono);
   display: inline-flex;
   align-items: center;
@@ -1072,7 +1113,7 @@ canvas#glc {
 
 .wgpu-pill {
   color: var(--accent);
-  border-color: rgba(57,255,106,0.2);
+  border-color: rgba(57, 255, 106, 0.2);
 }
 
 /* Phase R — FPS color thresholds + click affordance (opens perf inspector).
@@ -1082,9 +1123,20 @@ canvas#glc {
   cursor: pointer;
   pointer-events: auto;
 }
-#fpspill.fps-good { color: var(--accent); }
-#fpspill.fps-warn { color: var(--warn); }
-#fpspill.fps-bad  { color: var(--error); }
+/* Same fixed-dark HUD chip as .pill's base color above — --accent/--warn/
+   --error are tuned for the light theme's own panel surfaces and are far too
+   dark to read here, so these states use the equivalent bright dark-surface
+   colors already established for the (also intentionally dark) code editor
+   theme in editor.js. */
+#fpspill.fps-good {
+  color: #39ff6a;
+}
+#fpspill.fps-warn {
+  color: #ff9a3c;
+}
+#fpspill.fps-bad {
+  color: #ef4444;
+}
 
 /* Phase R — pause + scrub mode highlight (.hud has the same pointer-events:none) */
 #tpill {
@@ -1110,7 +1162,7 @@ canvas#glc {
   gap: 8px;
   padding: 0 8px;
   border-radius: var(--radius-sm);
-  background: rgba(13,15,20,0.85);
+  background: rgba(13, 15, 20, 0.85);
   opacity: 0;
   pointer-events: none;
   transition: opacity 120ms ease;
@@ -1171,7 +1223,9 @@ canvas#glc {
   color: var(--text-secondary);
   font-size: 12px;
   cursor: pointer;
-  transition: background var(--t-fast), border-color var(--t-fast);
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast);
 }
 
 .vp-toggle-btn:hover {
@@ -1179,7 +1233,6 @@ canvas#glc {
   border-color: var(--border-strong);
   color: var(--text-primary);
 }
-
 
 /* ══════════════════════════════════════════════
    §1 Main editor area — join into viewport
@@ -1192,7 +1245,6 @@ canvas#glc {
 .right.viewport-focus .editor-col {
   display: none;
 }
-
 
 /* ══════════════════════════════════════════════
    PANNEAU INSPECTEUR (colonne droite)
@@ -1364,8 +1416,14 @@ canvas#glc {
   animation: inspSwitch 80ms ease-out;
 }
 @keyframes inspSwitch {
-  from { opacity: 0; transform: translateX(4px); }
-  to   { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .insp-section-title {
@@ -1431,18 +1489,28 @@ canvas#glc {
   color: var(--accent);
 }
 
-
 /* ══════════════════════════════════════════════
    Z-INDEX GLOBAL (superpositions)
    ══════════════════════════════════════════════ */
 
-#toolbar      { z-index: 10; }
-.layout       { z-index: 1;  }
-.modal-overlay{ z-index: 100; }
-.ctx-menu     { z-index: 200; }
-#toast-stack  { z-index: 300; }
-.perf-pop     { z-index: 50;  }
-
+#toolbar {
+  z-index: 10;
+}
+.layout {
+  z-index: 1;
+}
+.modal-overlay {
+  z-index: 100;
+}
+.ctx-menu {
+  z-index: 200;
+}
+#toast-stack {
+  z-index: 300;
+}
+.perf-pop {
+  z-index: 50;
+}
 
 /* ══════════════════════════════════════════════
    CONTEXTE DE STACKING — EN-TÊTES DE ZONES
@@ -1463,7 +1531,6 @@ canvas#glc {
   display: inline-flex;
   align-items: center;
 }
-
 
 /* ══════════════════════════════════════════════
    MODE EMBED (iframe / headless)
@@ -1494,7 +1561,6 @@ body.embed-mode .cw {
      no flex override needed — pasteboard already fills the viewport. */
 }
 
-
 /* ══════════════════════════════════════════════
    STATUSBAR (barre de statut basse)
    ══════════════════════════════════════════════ */
@@ -1514,11 +1580,12 @@ body.embed-mode .cw {
 .app-footer-copy {
   font-family: var(--font-mono);
   font-size: 9px;
-  color: var(--text-ghost);
+  /* --text-ghost is reserved for disabled controls (WCAG-exempt) — this is
+     visible copyright text, so it needs the AA-cleared --text-dim instead. */
+  color: var(--text-dim);
   letter-spacing: 0.03em;
   user-select: none;
 }
-
 
 /* ══════════════════════════════════════════════
    BARRE DE STATUT (§1.3 roadmap UI/UX)
@@ -1529,7 +1596,9 @@ body.embed-mode .cw {
   justify-content: space-between;
   gap: 12px;
   padding: 0 10px;
-  transition: background var(--t-fast), border-color var(--t-fast);
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast);
 }
 
 .sb-zone {
@@ -1539,9 +1608,18 @@ body.embed-mode .cw {
   min-width: 0;
 }
 
-.sb-left   { flex: 1 1 0; justify-content: flex-start; }
-.sb-center { flex: 0 0 auto; justify-content: center; }
-.sb-right  { flex: 1 1 0; justify-content: flex-end; }
+.sb-left {
+  flex: 1 1 0;
+  justify-content: flex-start;
+}
+.sb-center {
+  flex: 0 0 auto;
+  justify-content: center;
+}
+.sb-right {
+  flex: 1 1 0;
+  justify-content: flex-end;
+}
 
 /* Le badge de statut est plus discret dans la barre du bas */
 .app-statusbar .status-badge {
@@ -1575,7 +1653,9 @@ body.embed-mode .cw {
 
 .sb-version {
   font: 11px var(--font-mono);
-  color: var(--text-ghost);
+  /* --text-ghost is reserved for disabled controls (WCAG-exempt) — this is
+     visible status-bar text, so it needs the AA-cleared --text-dim instead. */
+  color: var(--text-dim);
   letter-spacing: 0.02em;
   white-space: nowrap;
   cursor: default;
@@ -1595,9 +1675,12 @@ body.embed-mode .cw {
   letter-spacing: 0.03em;
   cursor: pointer;
 }
-.sb-cb[hidden] { display: none; }
-.sb-cb:hover { border-color: var(--accent-hover); }
-
+.sb-cb[hidden] {
+  display: none;
+}
+.sb-cb:hover {
+  border-color: var(--accent-hover);
+}
 
 /* ══════════════════════════════════════════════
    PHASE 7 — Sparklines uniforms (7.2) + badge complexité (7.3)
@@ -1623,20 +1706,37 @@ body.embed-mode .cw {
   cursor: pointer;
   flex-shrink: 0;
 }
-.ph-icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
-.ph-icon-btn.active { color: var(--accent); border-color: var(--accent); }
+.ph-icon-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+.ph-icon-btn.active {
+  color: var(--accent);
+  border-color: var(--accent);
+}
 
 .cx-badge {
   font-variant-numeric: tabular-nums;
   cursor: default;
-  transition: opacity .25s, max-width .25s;
+  transition:
+    opacity 0.25s,
+    max-width 0.25s;
   overflow: hidden;
 }
-.cx-badge.cx-hidden { opacity: 0; max-width: 0; padding: 0; }
-.cx-badge.cx-low  { color: var(--status-ok); }
-.cx-badge.cx-mid  { color: var(--status-warn); }
-.cx-badge.cx-high { color: var(--status-err); }
-
+.cx-badge.cx-hidden {
+  opacity: 0;
+  max-width: 0;
+  padding: 0;
+}
+.cx-badge.cx-low {
+  color: var(--status-ok);
+}
+.cx-badge.cx-mid {
+  color: var(--status-warn);
+}
+.cx-badge.cx-high {
+  color: var(--status-err);
+}
 
 /* ══════════════════════════════════════════════
    PHASE 8 — Responsive (8.1)
@@ -1644,16 +1744,25 @@ body.embed-mode .cw {
 
 /* Header icon-only sous 720px : masque les libellés texte */
 @media (max-width: 720px) {
-  header .hb { padding: 0 7px; }
+  header .hb {
+    padding: 0 7px;
+  }
   header .hb .hb-label,
   header .file-menu-btn .fmenu-name,
-  header .layout-preset-btn { font-size: 0; }
-  header .hb svg { margin: 0; }
+  header .layout-preset-btn {
+    font-size: 0;
+  }
+  header .hb svg {
+    margin: 0;
+  }
 }
 
 /* Sous 900px : panneau latéral plus étroit, inspecteur en overlay */
 @media (max-width: 900px) {
-  :root { --pw: 220px; --iw: 220px; }
+  :root {
+    --pw: 220px;
+    --iw: 220px;
+  }
 
   /* Bug fix (§1 "No empty interface space" audit): this used to declare
      only 3 explicit grid-template-columns (var(--pw) 1fr 0) while `.layout`
@@ -1669,7 +1778,9 @@ body.embed-mode .cw {
      consume an explicit column here at all: declare exactly the 3 columns
      for the 3 items that remain in flow (tool shelf, sidebar, main area),
      each using its own correct variable instead of a positional guess. */
-  .layout.inspector-open { grid-template-columns: var(--tsw) var(--pw) 1fr; }
+  .layout.inspector-open {
+    grid-template-columns: var(--tsw) var(--pw) 1fr;
+  }
 
   /* Overlay the *entire* right-hand column (Outliner + Inspector), not just
      the inner `.inspector` pane — matches toggleInspectorPanel()'s own
@@ -1691,9 +1802,15 @@ body.embed-mode .cw {
 
 /* Sous 640px : pile mono-colonne — panneau masqué (accessible via plein écran) */
 @media (max-width: 640px) {
-  .layout { grid-template-columns: 0 1fr 0; }
-  .layout .panel { display: none; }
-  .layout .right { grid-column: 1 / -1; }
+  .layout {
+    grid-template-columns: 0 1fr 0;
+  }
+  .layout .panel {
+    display: none;
+  }
+  .layout .right {
+    grid-column: 1 / -1;
+  }
 }
 
 /* Compteur d'erreurs — visible même quand le panneau est replié */
@@ -1711,7 +1828,9 @@ body.embed-mode .cw {
   cursor: pointer;
 }
 
-.sb-errcount[hidden] { display: none; }
+.sb-errcount[hidden] {
+  display: none;
+}
 
 .sb-errcount:hover {
   border-color: var(--status-err);

@@ -27,9 +27,11 @@ import {
 // Storage keys
 // ─────────────────────────────────────────────────────────────────────────────
 
-const KEY_FIRST_LAUNCH   = 'zgl_first_launch_done';
+const KEY_FIRST_LAUNCH = 'sl_first_launch_done';
 
-export function updateHelpDot() { /* no-op: what's new removed */ }
+export function updateHelpDot() {
+  /* no-op: what's new removed */
+}
 
 // ═════════════════════════════════════════════════════════════════════════════
 // §7.4.1  WELCOME SCREEN
@@ -46,7 +48,10 @@ export function maybeShowWelcomeScreen() {
 
 export function showWelcomeScreen() {
   const existing = document.getElementById('welcome-overlay');
-  if (existing) { existing.classList.add('open'); return; }
+  if (existing) {
+    existing.classList.add('open');
+    return;
+  }
 
   const overlay = document.createElement('div');
   overlay.id = 'welcome-overlay';
@@ -92,7 +97,7 @@ export function showWelcomeScreen() {
         <strong style="color:var(--t2)">F1</strong> — Help Center
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px">
-        <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t3);cursor:pointer">
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2);cursor:pointer">
           <input type="checkbox" id="welcome-skip" style="accent-color:var(--ac)">
           Don't show again
         </label>
@@ -218,14 +223,26 @@ function _createTutorialUI() {
 }
 
 function _tutorialKeyHandler(e) {
-  if (e.key === 'Escape') { _destroyTutorialUI(); return; }
-  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); _tutorialNext(); }
-  if (e.key === 'ArrowLeft') { e.preventDefault(); _tutorialPrev(); }
+  if (e.key === 'Escape') {
+    _destroyTutorialUI();
+    return;
+  }
+  if (e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    _tutorialNext();
+  }
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    _tutorialPrev();
+  }
 }
 
 function _showTutorialStep(idx) {
   const step = TUTORIAL_STEPS[idx];
-  if (!step) { _destroyTutorialUI(); return; }
+  if (!step) {
+    _destroyTutorialUI();
+    return;
+  }
 
   // Find target element
   const target = document.querySelector(step.target);
@@ -233,10 +250,10 @@ function _showTutorialStep(idx) {
   // Position highlight
   if (target && _tutorialHighlight) {
     const rect = target.getBoundingClientRect();
-    _tutorialHighlight.style.left = (rect.left - 6) + 'px';
-    _tutorialHighlight.style.top = (rect.top - 6) + 'px';
-    _tutorialHighlight.style.width = (rect.width + 12) + 'px';
-    _tutorialHighlight.style.height = (rect.height + 12) + 'px';
+    _tutorialHighlight.style.left = rect.left - 6 + 'px';
+    _tutorialHighlight.style.top = rect.top - 6 + 'px';
+    _tutorialHighlight.style.width = rect.width + 12 + 'px';
+    _tutorialHighlight.style.height = rect.height + 12 + 'px';
     _tutorialHighlight.style.opacity = '1';
   } else if (_tutorialHighlight) {
     _tutorialHighlight.style.opacity = '0';
@@ -277,7 +294,8 @@ function _showTutorialStep(idx) {
   // Position tooltip near target
   if (target) {
     const rect = target.getBoundingClientRect();
-    const vw = window.innerWidth, vh = window.innerHeight;
+    const vw = window.innerWidth,
+      vh = window.innerHeight;
 
     let top, left;
     if (step.position === 'right' || rect.left > vw / 2) {
@@ -344,65 +362,295 @@ function _destroyTutorialUI() {
 const GLSL_REFERENCE = [
   // Math
   { cat: 'Math', name: 'abs(x)', sig: 'genType abs(genType x)', desc: 'Absolute value.' },
-  { cat: 'Math', name: 'ceil(x)', sig: 'genType ceil(genType x)', desc: 'Ceiling — smallest integer ≥ x.' },
-  { cat: 'Math', name: 'clamp(x,mn,mx)', sig: 'genType clamp(genType x, genType minVal, genType maxVal)', desc: 'Clamp x between minVal and maxVal.' },
-  { cat: 'Math', name: 'floor(x)', sig: 'genType floor(genType x)', desc: 'Floor — largest integer ≤ x.' },
-  { cat: 'Math', name: 'fract(x)', sig: 'genType fract(genType x)', desc: 'Fractional part: x − floor(x).' },
-  { cat: 'Math', name: 'max(x,y)', sig: 'genType max(genType x, genType y)', desc: 'Maximum of x and y.' },
-  { cat: 'Math', name: 'min(x,y)', sig: 'genType min(genType x, genType y)', desc: 'Minimum of x and y.' },
-  { cat: 'Math', name: 'mix(x,y,a)', sig: 'genType mix(genType x, genType y, genType a)', desc: 'Linear interpolation: x*(1-a) + y*a.' },
-  { cat: 'Math', name: 'mod(x,y)', sig: 'genType mod(genType x, genType y)', desc: 'Modulo: x − y*floor(x/y).' },
-  { cat: 'Math', name: 'round(x)', sig: 'genType round(genType x)', desc: 'Round to nearest integer.' },
+  {
+    cat: 'Math',
+    name: 'ceil(x)',
+    sig: 'genType ceil(genType x)',
+    desc: 'Ceiling — smallest integer ≥ x.',
+  },
+  {
+    cat: 'Math',
+    name: 'clamp(x,mn,mx)',
+    sig: 'genType clamp(genType x, genType minVal, genType maxVal)',
+    desc: 'Clamp x between minVal and maxVal.',
+  },
+  {
+    cat: 'Math',
+    name: 'floor(x)',
+    sig: 'genType floor(genType x)',
+    desc: 'Floor — largest integer ≤ x.',
+  },
+  {
+    cat: 'Math',
+    name: 'fract(x)',
+    sig: 'genType fract(genType x)',
+    desc: 'Fractional part: x − floor(x).',
+  },
+  {
+    cat: 'Math',
+    name: 'max(x,y)',
+    sig: 'genType max(genType x, genType y)',
+    desc: 'Maximum of x and y.',
+  },
+  {
+    cat: 'Math',
+    name: 'min(x,y)',
+    sig: 'genType min(genType x, genType y)',
+    desc: 'Minimum of x and y.',
+  },
+  {
+    cat: 'Math',
+    name: 'mix(x,y,a)',
+    sig: 'genType mix(genType x, genType y, genType a)',
+    desc: 'Linear interpolation: x*(1-a) + y*a.',
+  },
+  {
+    cat: 'Math',
+    name: 'mod(x,y)',
+    sig: 'genType mod(genType x, genType y)',
+    desc: 'Modulo: x − y*floor(x/y).',
+  },
+  {
+    cat: 'Math',
+    name: 'round(x)',
+    sig: 'genType round(genType x)',
+    desc: 'Round to nearest integer.',
+  },
   { cat: 'Math', name: 'sign(x)', sig: 'genType sign(genType x)', desc: 'Sign of x: -1, 0, or 1.' },
-  { cat: 'Math', name: 'smoothstep(e0,e1,x)', sig: 'genType smoothstep(genType edge0, genType edge1, genType x)', desc: 'Smooth Hermite interpolation between 0 and 1.' },
-  { cat: 'Math', name: 'step(edge,x)', sig: 'genType step(genType edge, genType x)', desc: '0 if x < edge, else 1.' },
+  {
+    cat: 'Math',
+    name: 'smoothstep(e0,e1,x)',
+    sig: 'genType smoothstep(genType edge0, genType edge1, genType x)',
+    desc: 'Smooth Hermite interpolation between 0 and 1.',
+  },
+  {
+    cat: 'Math',
+    name: 'step(edge,x)',
+    sig: 'genType step(genType edge, genType x)',
+    desc: '0 if x < edge, else 1.',
+  },
   // Trig
   { cat: 'Trig', name: 'sin(x)', sig: 'genType sin(genType angle)', desc: 'Sine (radians).' },
   { cat: 'Trig', name: 'cos(x)', sig: 'genType cos(genType angle)', desc: 'Cosine (radians).' },
   { cat: 'Trig', name: 'tan(x)', sig: 'genType tan(genType angle)', desc: 'Tangent (radians).' },
-  { cat: 'Trig', name: 'asin(x)', sig: 'genType asin(genType x)', desc: 'Arc sine. Result in [-π/2, π/2].' },
-  { cat: 'Trig', name: 'acos(x)', sig: 'genType acos(genType x)', desc: 'Arc cosine. Result in [0, π].' },
-  { cat: 'Trig', name: 'atan(y,x)', sig: 'genType atan(genType y, genType x)', desc: 'Arc tangent of y/x using signs to determine quadrant.' },
-  { cat: 'Trig', name: 'radians(x)', sig: 'genType radians(genType degrees)', desc: 'Convert degrees to radians.' },
-  { cat: 'Trig', name: 'degrees(x)', sig: 'genType degrees(genType radians)', desc: 'Convert radians to degrees.' },
+  {
+    cat: 'Trig',
+    name: 'asin(x)',
+    sig: 'genType asin(genType x)',
+    desc: 'Arc sine. Result in [-π/2, π/2].',
+  },
+  {
+    cat: 'Trig',
+    name: 'acos(x)',
+    sig: 'genType acos(genType x)',
+    desc: 'Arc cosine. Result in [0, π].',
+  },
+  {
+    cat: 'Trig',
+    name: 'atan(y,x)',
+    sig: 'genType atan(genType y, genType x)',
+    desc: 'Arc tangent of y/x using signs to determine quadrant.',
+  },
+  {
+    cat: 'Trig',
+    name: 'radians(x)',
+    sig: 'genType radians(genType degrees)',
+    desc: 'Convert degrees to radians.',
+  },
+  {
+    cat: 'Trig',
+    name: 'degrees(x)',
+    sig: 'genType degrees(genType radians)',
+    desc: 'Convert radians to degrees.',
+  },
   // Exponential
-  { cat: 'Exponential', name: 'exp(x)', sig: 'genType exp(genType x)', desc: 'Natural exponentiation: e^x.' },
-  { cat: 'Exponential', name: 'exp2(x)', sig: 'genType exp2(genType x)', desc: 'Base-2 exponentiation: 2^x.' },
-  { cat: 'Exponential', name: 'log(x)', sig: 'genType log(genType x)', desc: 'Natural logarithm. x > 0.' },
-  { cat: 'Exponential', name: 'log2(x)', sig: 'genType log2(genType x)', desc: 'Base-2 logarithm. x > 0.' },
-  { cat: 'Exponential', name: 'pow(x,y)', sig: 'genType pow(genType x, genType y)', desc: 'x raised to the power y. x ≥ 0.' },
-  { cat: 'Exponential', name: 'sqrt(x)', sig: 'genType sqrt(genType x)', desc: 'Square root. x ≥ 0.' },
-  { cat: 'Exponential', name: 'inversesqrt(x)', sig: 'genType inversesqrt(genType x)', desc: '1/sqrt(x). x > 0.' },
+  {
+    cat: 'Exponential',
+    name: 'exp(x)',
+    sig: 'genType exp(genType x)',
+    desc: 'Natural exponentiation: e^x.',
+  },
+  {
+    cat: 'Exponential',
+    name: 'exp2(x)',
+    sig: 'genType exp2(genType x)',
+    desc: 'Base-2 exponentiation: 2^x.',
+  },
+  {
+    cat: 'Exponential',
+    name: 'log(x)',
+    sig: 'genType log(genType x)',
+    desc: 'Natural logarithm. x > 0.',
+  },
+  {
+    cat: 'Exponential',
+    name: 'log2(x)',
+    sig: 'genType log2(genType x)',
+    desc: 'Base-2 logarithm. x > 0.',
+  },
+  {
+    cat: 'Exponential',
+    name: 'pow(x,y)',
+    sig: 'genType pow(genType x, genType y)',
+    desc: 'x raised to the power y. x ≥ 0.',
+  },
+  {
+    cat: 'Exponential',
+    name: 'sqrt(x)',
+    sig: 'genType sqrt(genType x)',
+    desc: 'Square root. x ≥ 0.',
+  },
+  {
+    cat: 'Exponential',
+    name: 'inversesqrt(x)',
+    sig: 'genType inversesqrt(genType x)',
+    desc: '1/sqrt(x). x > 0.',
+  },
   // Geometry
-  { cat: 'Geometry', name: 'cross(a,b)', sig: 'vec3 cross(vec3 x, vec3 y)', desc: 'Cross product of two vec3.' },
-  { cat: 'Geometry', name: 'distance(p,q)', sig: 'float distance(genType p0, genType p1)', desc: 'Euclidean distance between two points.' },
-  { cat: 'Geometry', name: 'dot(a,b)', sig: 'float dot(genType x, genType y)', desc: 'Dot (inner) product.' },
-  { cat: 'Geometry', name: 'faceforward(n,i,r)', sig: 'genType faceforward(genType N, genType I, genType Nref)', desc: 'Return N if dot(Nref,I)<0, else -N.' },
-  { cat: 'Geometry', name: 'length(x)', sig: 'float length(genType x)', desc: 'Euclidean length of a vector.' },
-  { cat: 'Geometry', name: 'normalize(x)', sig: 'genType normalize(genType x)', desc: 'Return unit vector in same direction as x.' },
-  { cat: 'Geometry', name: 'reflect(i,n)', sig: 'genType reflect(genType I, genType N)', desc: 'Reflection of I with respect to N.' },
-  { cat: 'Geometry', name: 'refract(i,n,eta)', sig: 'genType refract(genType I, genType N, float eta)', desc: 'Refraction vector.' },
+  {
+    cat: 'Geometry',
+    name: 'cross(a,b)',
+    sig: 'vec3 cross(vec3 x, vec3 y)',
+    desc: 'Cross product of two vec3.',
+  },
+  {
+    cat: 'Geometry',
+    name: 'distance(p,q)',
+    sig: 'float distance(genType p0, genType p1)',
+    desc: 'Euclidean distance between two points.',
+  },
+  {
+    cat: 'Geometry',
+    name: 'dot(a,b)',
+    sig: 'float dot(genType x, genType y)',
+    desc: 'Dot (inner) product.',
+  },
+  {
+    cat: 'Geometry',
+    name: 'faceforward(n,i,r)',
+    sig: 'genType faceforward(genType N, genType I, genType Nref)',
+    desc: 'Return N if dot(Nref,I)<0, else -N.',
+  },
+  {
+    cat: 'Geometry',
+    name: 'length(x)',
+    sig: 'float length(genType x)',
+    desc: 'Euclidean length of a vector.',
+  },
+  {
+    cat: 'Geometry',
+    name: 'normalize(x)',
+    sig: 'genType normalize(genType x)',
+    desc: 'Return unit vector in same direction as x.',
+  },
+  {
+    cat: 'Geometry',
+    name: 'reflect(i,n)',
+    sig: 'genType reflect(genType I, genType N)',
+    desc: 'Reflection of I with respect to N.',
+  },
+  {
+    cat: 'Geometry',
+    name: 'refract(i,n,eta)',
+    sig: 'genType refract(genType I, genType N, float eta)',
+    desc: 'Refraction vector.',
+  },
   // Texture
-  { cat: 'Texture', name: 'texture(s,uv)', sig: 'gvec4 texture(gsampler2D sampler, vec2 P)', desc: 'Sample a 2D texture at UV coordinates.' },
-  { cat: 'Texture', name: 'textureLod(s,uv,lod)', sig: 'gvec4 textureLod(gsampler2D s, vec2 P, float lod)', desc: 'Sample texture at explicit mip level.' },
-  { cat: 'Texture', name: 'textureSize(s,lod)', sig: 'ivec2 textureSize(gsampler2D s, int lod)', desc: 'Return texture dimensions at given mip level.' },
+  {
+    cat: 'Texture',
+    name: 'texture(s,uv)',
+    sig: 'gvec4 texture(gsampler2D sampler, vec2 P)',
+    desc: 'Sample a 2D texture at UV coordinates.',
+  },
+  {
+    cat: 'Texture',
+    name: 'textureLod(s,uv,lod)',
+    sig: 'gvec4 textureLod(gsampler2D s, vec2 P, float lod)',
+    desc: 'Sample texture at explicit mip level.',
+  },
+  {
+    cat: 'Texture',
+    name: 'textureSize(s,lod)',
+    sig: 'ivec2 textureSize(gsampler2D s, int lod)',
+    desc: 'Return texture dimensions at given mip level.',
+  },
   // Derivatives
-  { cat: 'Derivatives', name: 'dFdx(p)', sig: 'genType dFdx(genType p)', desc: 'Partial derivative of p in x (screen space).' },
-  { cat: 'Derivatives', name: 'dFdy(p)', sig: 'genType dFdy(genType p)', desc: 'Partial derivative of p in y (screen space).' },
-  { cat: 'Derivatives', name: 'fwidth(p)', sig: 'genType fwidth(genType p)', desc: 'abs(dFdx(p)) + abs(dFdy(p)).' },
+  {
+    cat: 'Derivatives',
+    name: 'dFdx(p)',
+    sig: 'genType dFdx(genType p)',
+    desc: 'Partial derivative of p in x (screen space).',
+  },
+  {
+    cat: 'Derivatives',
+    name: 'dFdy(p)',
+    sig: 'genType dFdy(genType p)',
+    desc: 'Partial derivative of p in y (screen space).',
+  },
+  {
+    cat: 'Derivatives',
+    name: 'fwidth(p)',
+    sig: 'genType fwidth(genType p)',
+    desc: 'abs(dFdx(p)) + abs(dFdy(p)).',
+  },
   // ShaderToy uniforms
-  { cat: 'ShaderToy', name: 'iTime', sig: 'uniform float iTime', desc: 'Shader playback time in seconds.' },
-  { cat: 'ShaderToy', name: 'iResolution', sig: 'uniform vec3 iResolution', desc: 'Viewport resolution (width, height, pixel aspect ratio).' },
-  { cat: 'ShaderToy', name: 'iMouse', sig: 'uniform vec4 iMouse', desc: 'Mouse pixel coords. xy: current, zw: click.' },
-  { cat: 'ShaderToy', name: 'iFrame', sig: 'uniform int iFrame', desc: 'Shader playback frame number.' },
-  { cat: 'ShaderToy', name: 'iTimeDelta', sig: 'uniform float iTimeDelta', desc: 'Render time (seconds per frame).' },
-  { cat: 'ShaderToy', name: 'iChannel0–3', sig: 'uniform sampler2D iChannel0', desc: 'Input textures. Audio, video, webcam, noise, or images.' },
-  { cat: 'ShaderToy', name: 'iDate', sig: 'uniform vec4 iDate', desc: 'Year, month, day, time in seconds.' },
-  { cat: 'ShaderToy', name: 'iSampleRate', sig: 'uniform float iSampleRate', desc: 'Sound sample rate (typically 44100).' },
-  { cat: 'ShaderToy', name: 'iChannelResolution', sig: 'uniform vec3 iChannelResolution[4]', desc: 'Resolution of each input channel texture.' },
+  {
+    cat: 'ShaderToy',
+    name: 'iTime',
+    sig: 'uniform float iTime',
+    desc: 'Shader playback time in seconds.',
+  },
+  {
+    cat: 'ShaderToy',
+    name: 'iResolution',
+    sig: 'uniform vec3 iResolution',
+    desc: 'Viewport resolution (width, height, pixel aspect ratio).',
+  },
+  {
+    cat: 'ShaderToy',
+    name: 'iMouse',
+    sig: 'uniform vec4 iMouse',
+    desc: 'Mouse pixel coords. xy: current, zw: click.',
+  },
+  {
+    cat: 'ShaderToy',
+    name: 'iFrame',
+    sig: 'uniform int iFrame',
+    desc: 'Shader playback frame number.',
+  },
+  {
+    cat: 'ShaderToy',
+    name: 'iTimeDelta',
+    sig: 'uniform float iTimeDelta',
+    desc: 'Render time (seconds per frame).',
+  },
+  {
+    cat: 'ShaderToy',
+    name: 'iChannel0–3',
+    sig: 'uniform sampler2D iChannel0',
+    desc: 'Input textures. Audio, video, webcam, noise, or images.',
+  },
+  {
+    cat: 'ShaderToy',
+    name: 'iDate',
+    sig: 'uniform vec4 iDate',
+    desc: 'Year, month, day, time in seconds.',
+  },
+  {
+    cat: 'ShaderToy',
+    name: 'iSampleRate',
+    sig: 'uniform float iSampleRate',
+    desc: 'Sound sample rate (typically 44100).',
+  },
+  {
+    cat: 'ShaderToy',
+    name: 'iChannelResolution',
+    sig: 'uniform vec3 iChannelResolution[4]',
+    desc: 'Resolution of each input channel texture.',
+  },
 ];
 
-const GLSL_CATEGORIES = [...new Set(GLSL_REFERENCE.map(e => e.cat))];
+const GLSL_CATEGORIES = [...new Set(GLSL_REFERENCE.map((e) => e.cat))];
 
 let _glslRefOpen = false;
 
@@ -442,7 +690,7 @@ export function openGLSLReference() {
           style="flex:1" aria-label="Search GLSL reference" autocomplete="off">
         <select id="glsl-ref-cat" class="modal-input" style="width:130px" aria-label="Filter by category">
           <option value="">All categories</option>
-          ${GLSL_CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('')}
+          ${GLSL_CATEGORIES.map((c) => `<option value="${c}">${c}</option>`).join('')}
         </select>
       </div>
       <div id="glsl-ref-list" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:3px" role="list" aria-label="GLSL function list">
@@ -461,13 +709,19 @@ export function openGLSLReference() {
   function renderList() {
     const q = search.value.toLowerCase();
     const cat = catSel.value;
-    const entries = GLSL_REFERENCE.filter(e =>
-      (!cat || e.cat === cat) &&
-      (!q || e.name.toLowerCase().includes(q) || e.desc.toLowerCase().includes(q) || e.sig.toLowerCase().includes(q))
+    const entries = GLSL_REFERENCE.filter(
+      (e) =>
+        (!cat || e.cat === cat) &&
+        (!q ||
+          e.name.toLowerCase().includes(q) ||
+          e.desc.toLowerCase().includes(q) ||
+          e.sig.toLowerCase().includes(q))
     );
 
     list.innerHTML = entries.length
-      ? entries.map(e => `
+      ? entries
+          .map(
+            (e) => `
           <div style="padding:8px;background:var(--bg2);border-radius:6px;border:1px solid var(--b1)" role="listitem">
             <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:2px">
               <code style="font-size:12px;font-family:var(--font-mono);color:var(--spark);font-weight:600">${e.name}</code>
@@ -475,7 +729,9 @@ export function openGLSLReference() {
             </div>
             <div style="font-size:10px;font-family:var(--font-mono);color:var(--t2);margin-bottom:3px">${e.sig}</div>
             <div style="font-size:11px;color:var(--t2)">${e.desc}</div>
-          </div>`).join('')
+          </div>`
+          )
+          .join('')
       : `<div style="color:var(--t3);font-size:12px;text-align:center;padding:20px">No matches for "${search.value}"</div>`;
   }
 
@@ -484,7 +740,9 @@ export function openGLSLReference() {
   renderList();
 
   panel.querySelector('#glsl-ref-close').addEventListener('click', closeGLSLReference);
-  panel.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeGLSLReference(); });
+  panel.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeGLSLReference();
+  });
 
   requestAnimationFrame(() => {
     panel.classList.add('open');
@@ -505,7 +763,6 @@ export function closeGLSLReference() {
 export function initGLSLReferenceShortcut() {
   initHelpCenter();
 }
-
 
 // ═════════════════════════════════════════════════════════════════════════════
 // §  KEYBOARD SHORTCUTS PANEL
@@ -531,7 +788,10 @@ const SHORTCUTS = [
 
 export function showShortcutsPanel() {
   const existing = document.getElementById('shortcuts-overlay');
-  if (existing) { existing.classList.add('open'); return; }
+  if (existing) {
+    existing.classList.add('open');
+    return;
+  }
 
   const overlay = document.createElement('div');
   overlay.id = 'shortcuts-overlay';
@@ -549,11 +809,13 @@ export function showShortcutsPanel() {
         </button>
       </div>
       <div style="overflow-y:auto;flex:1;display:grid;grid-template-columns:1fr 1fr;gap:4px">
-        ${SHORTCUTS.map(s => `
+        ${SHORTCUTS.map(
+          (s) => `
           <div style="padding:5px 8px;background:var(--bg2);border-radius:5px;border:1px solid var(--b1)">
             <code style="font-size:10px;font-family:var(--font-mono);color:var(--spark);display:block">${s.key}</code>
             <span style="font-size:11px;color:var(--t2)">${s.action}</span>
-          </div>`).join('')}
+          </div>`
+        ).join('')}
       </div>
       <div style="display:flex;justify-content:flex-end;margin-top:8px">
         <button class="modal-btn confirm" id="shortcuts-ok">Close</button>
@@ -569,7 +831,9 @@ export function showShortcutsPanel() {
 
   overlay.querySelector('#shortcuts-close').addEventListener('click', close);
   overlay.querySelector('#shortcuts-ok').addEventListener('click', close);
-  overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  overlay.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') close();
+  });
 
   requestAnimationFrame(() => {
     overlay.classList.add('open');

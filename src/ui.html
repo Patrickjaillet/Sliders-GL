@@ -1,851 +1,1808 @@
 <body>
-<a class="skip-link" href="#mc">Skip to editor</a>
-<div id="titlebar" class="tauri-titlebar" aria-hidden="true">
-  <img src="/icon-dark-32x32.png" width="14" height="14" alt="" style="-webkit-app-region:no-drag">
-  <span class="text-12" style="font-weight:600; color:var(--text-primary); margin-left:6px">Sliders GL</span>
-</div>
+  <a class="skip-link" href="#mc">Skip to editor</a>
+  <div id="titlebar" class="tauri-titlebar" aria-hidden="true">
+    <img
+      src="/icon-dark-32x32.png"
+      width="14"
+      height="14"
+      alt=""
+      style="-webkit-app-region: no-drag"
+    />
+    <span class="text-12" style="font-weight: 600; color: var(--text-primary); margin-left: 6px"
+      >Sliders GL</span
+    >
+  </div>
 
-<!-- ═══════════════════════════════ PHASE 3: SVG SPRITE ══════ -->
-<!-- Sprite SVG inline — toutes les icônes définies ici, utilisées
+  <!-- ═══════════════════════════════ PHASE 3: SVG SPRITE ══════ -->
+  <!-- Sprite SVG inline — toutes les icônes définies ici, utilisées
      via <use href="#icon-xxx"> dans les boutons du header.        -->
-<!-- Fix 6.1–6.3 — Harmonisation du sprite SVG :
+  <!-- Fix 6.1–6.3 — Harmonisation du sprite SVG :
      • icon-sun conservé, tracé soleil inchangé
      • icon-plugin, icon-terminal, icon-clear convertis de fill → stroke pour cohérence
 -->
-<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
-  <defs>
+  <svg xmlns="http://www.w3.org/2000/svg" style="display: none" aria-hidden="true">
+    <defs>
+      <!-- Logo "ST" stylisé en path -->
+      <symbol id="icon-st" viewBox="0 0 16 16">
+        <path
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M2 4h5M4.5 4v8M9 12c1 0 2-.5 2-1.5S10 9 9 9s-2-.4-2-1.5S8 6 9 6h3"
+        />
+      </symbol>
 
-    <!-- Logo "ST" stylisé en path -->
-    <symbol id="icon-st" viewBox="0 0 16 16">
-      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
-        d="M2 4h5M4.5 4v8M9 12c1 0 2-.5 2-1.5S10 9 9 9s-2-.4-2-1.5S8 6 9 6h3"/>
-    </symbol>
+      <!-- Prise jack 6.35mm vue de côté -->
+      <symbol id="icon-midi" viewBox="0 0 16 16">
+        <line
+          x1="2"
+          y1="8"
+          x2="9"
+          y2="8"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+        <rect
+          x="9"
+          y="5.5"
+          width="2"
+          height="5"
+          rx="1"
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+        />
+        <rect
+          x="11"
+          y="6.5"
+          width="3"
+          height="3"
+          rx="1.5"
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+        />
+        <line
+          x1="5"
+          y1="6"
+          x2="5"
+          y2="10"
+          stroke="currentColor"
+          stroke-width="1"
+          stroke-linecap="round"
+          opacity="0.5"
+        />
+        <line
+          x1="7"
+          y1="5.5"
+          x2="7"
+          y2="10.5"
+          stroke="currentColor"
+          stroke-width="1"
+          stroke-linecap="round"
+          opacity="0.5"
+        />
+      </symbol>
 
-    <!-- Prise jack 6.35mm vue de côté -->
-    <symbol id="icon-midi" viewBox="0 0 16 16">
-      <line x1="2" y1="8" x2="9" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      <rect x="9" y="5.5" width="2" height="5" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <rect x="11" y="6.5" width="3" height="3" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <line x1="5" y1="6" x2="5" y2="10" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
-      <line x1="7" y1="5.5" x2="7" y2="10.5" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
-    </symbol>
+      <!-- Flèche vers le bas avec plateau horizontal (export) -->
+      <symbol id="icon-export" viewBox="0 0 16 16">
+        <path
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M8 2v8M5 7l3 3 3-3"
+        />
+        <line
+          x1="3"
+          y1="13"
+          x2="13"
+          y2="13"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+      </symbol>
 
-    <!-- Flèche vers le bas avec plateau horizontal (export) -->
-    <symbol id="icon-export" viewBox="0 0 16 16">
-      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
-        d="M8 2v8M5 7l3 3 3-3"/>
-      <line x1="3" y1="13" x2="13" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    </symbol>
+      <!-- Deux rectangles arrondis (pause) -->
+      <symbol id="icon-pause" viewBox="0 0 16 16">
+        <rect
+          x="3"
+          y="3"
+          width="4"
+          height="10"
+          rx="1.5"
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+        />
+        <rect
+          x="9"
+          y="3"
+          width="4"
+          height="10"
+          rx="1.5"
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+        />
+      </symbol>
 
-    <!-- Deux rectangles arrondis (pause) -->
-    <symbol id="icon-pause" viewBox="0 0 16 16">
-      <rect x="3"  y="3" width="4" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <rect x="9" y="3" width="4" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-    </symbol>
+      <!-- Triangle play -->
+      <symbol id="icon-play" viewBox="0 0 16 16">
+        <path
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          stroke-linejoin="round"
+          d="M4 2.5l9 5.5-9 5.5z"
+        />
+      </symbol>
 
-    <!-- Triangle play -->
-    <symbol id="icon-play" viewBox="0 0 16 16">
-      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"
-        d="M4 2.5l9 5.5-9 5.5z"/>
-    </symbol>
+      <!-- Losange avec trait horizontal (timeline) -->
+      <symbol id="icon-timeline" viewBox="0 0 16 16">
+        <path
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          stroke-linejoin="round"
+          d="M8 2l4 6-4 6-4-6z"
+        />
+        <line
+          x1="2"
+          y1="8"
+          x2="12"
+          y2="8"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+      </symbol>
 
-    <!-- Losange avec trait horizontal (timeline) -->
-    <symbol id="icon-timeline" viewBox="0 0 16 16">
-      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"
-        d="M8 2l4 6-4 6-4-6z"/>
-      <line x1="2" y1="8" x2="12" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    </symbol>
+      <!-- 4 coins qui s'écartent (fullscreen) -->
+      <symbol id="icon-fullscreen" viewBox="0 0 16 16">
+        <path
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M1.5 5.5V2h3.5M9.5 2h3.5v3.5M14.5 10.5V14H11M6.5 14H3v-3.5"
+        />
+      </symbol>
 
-    <!-- 4 coins qui s'écartent (fullscreen) -->
-    <symbol id="icon-fullscreen" viewBox="0 0 16 16">
-      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
-        d="M1.5 5.5V2h3.5M9.5 2h3.5v3.5M14.5 10.5V14H11M6.5 14H3v-3.5"/>
-    </symbol>
-
-    <!-- Soleil (thème clair) — Fix 6.1: tracé distinct de icon-perf (pas de cercle central rempli) -->
-    <symbol id="icon-sun" viewBox="0 0 16 16">
-      <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <path stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-        d="M8 1v2M8 13v2M1 8h2M13 8h2
+      <!-- Soleil (thème clair) — Fix 6.1: tracé distinct de icon-perf (pas de cercle central rempli) -->
+      <symbol id="icon-sun" viewBox="0 0 16 16">
+        <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none" />
+        <path
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          d="M8 1v2M8 13v2M1 8h2M13 8h2
            M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42
-           M11.53 4.47l1.42-1.42M3.05 12.95l1.42-1.42"/>
-    </symbol>
+           M11.53 4.47l1.42-1.42M3.05 12.95l1.42-1.42"
+        />
+      </symbol>
 
-    <!-- Lune (thème sombre) -->
-    <symbol id="icon-moon" viewBox="0 0 16 16">
-      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"
-        d="M12.5 9.5A6 6 0 016.5 3.5a6 6 0 000 9 6 6 0 006-3z"/>
-    </symbol>
+      <!-- Lune (thème sombre) -->
+      <symbol id="icon-moon" viewBox="0 0 16 16">
+        <path
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          stroke-linecap="round"
+          d="M12.5 9.5A6 6 0 016.5 3.5a6 6 0 000 9 6 6 0 006-3z"
+        />
+      </symbol>
 
-    <!-- Flèche circulaire fermée (apply+parse) -->
-    <symbol id="icon-refresh" viewBox="0 0 16 16">
-      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
-        d="M13.5 8A5.5 5.5 0 112.5 8"/>
-      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
-        d="M13.5 4v4h-4"/>
-    </symbol>
+      <!-- Flèche circulaire fermée (apply+parse) -->
+      <symbol id="icon-refresh" viewBox="0 0 16 16">
+        <path
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M13.5 8A5.5 5.5 0 112.5 8"
+        />
+        <path
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M13.5 4v4h-4"
+        />
+      </symbol>
 
-    <!-- Haut-parleur (sound feedback) -->
-    <symbol id="icon-sound" viewBox="0 0 16 16">
-      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
-        d="M3 6H1v4h2l4 3V3L3 6z"/>
-      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"
-        d="M11 5.5a3.5 3.5 0 010 5M13 3.5a6 6 0 010 9"/>
-    </symbol>
+      <!-- Haut-parleur (sound feedback) -->
+      <symbol id="icon-sound" viewBox="0 0 16 16">
+        <path
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M3 6H1v4h2l4 3V3L3 6z"
+        />
+        <path
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          stroke-linecap="round"
+          d="M11 5.5a3.5 3.5 0 010 5M13 3.5a6 6 0 010 9"
+        />
+      </symbol>
 
-    <!-- Fiche plugin — converti fill→stroke pour cohérence (Fix 6.3) -->
-    <symbol id="icon-plugin" viewBox="0 0 16 16">
-      <rect x="2" y="4" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
-        d="M6 2v2M10 2v2"/>
-      <line x1="5.5" y1="9" x2="10.5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      <circle cx="8" cy="7" r="1" stroke="currentColor" stroke-width="1.2" fill="none"/>
-    </symbol>
+      <!-- Fiche plugin — converti fill→stroke pour cohérence (Fix 6.3) -->
+      <symbol id="icon-plugin" viewBox="0 0 16 16">
+        <rect
+          x="2"
+          y="4"
+          width="12"
+          height="10"
+          rx="1.5"
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+        />
+        <path
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M6 2v2M10 2v2"
+        />
+        <line
+          x1="5.5"
+          y1="9"
+          x2="10.5"
+          y2="9"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+        <circle cx="8" cy="7" r="1" stroke="currentColor" stroke-width="1.2" fill="none" />
+      </symbol>
 
-    <!-- Terminal — converti fill→stroke pour cohérence (Fix 6.3) -->
-    <symbol id="icon-terminal" viewBox="0 0 16 16">
-      <rect x="1.5" y="1.5" width="13" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
-        d="M4 5.5l2.5 2.5L4 10.5"/>
-      <line x1="8" y1="10.5" x2="12" y2="10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    </symbol>
+      <!-- Terminal — converti fill→stroke pour cohérence (Fix 6.3) -->
+      <symbol id="icon-terminal" viewBox="0 0 16 16">
+        <rect
+          x="1.5"
+          y="1.5"
+          width="13"
+          height="13"
+          rx="1.5"
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+        />
+        <path
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M4 5.5l2.5 2.5L4 10.5"
+        />
+        <line
+          x1="8"
+          y1="10.5"
+          x2="12"
+          y2="10.5"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+      </symbol>
 
-    <!-- Corbeille (clear) — converti fill→stroke pour cohérence (Fix 6.3) -->
-    <symbol id="icon-clear" viewBox="0 0 16 16">
-      <path stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
-        d="M2.5 4h11M5 4V2.5h6V4M4 4l.75 9.5h6.5L12 4"/>
-      <line x1="6.5" y1="6.5" x2="6.5" y2="11.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-      <line x1="9.5" y1="6.5" x2="9.5" y2="11.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-    </symbol>
-  </defs>
-</svg>
+      <!-- Corbeille (clear) — converti fill→stroke pour cohérence (Fix 6.3) -->
+      <symbol id="icon-clear" viewBox="0 0 16 16">
+        <path
+          stroke="currentColor"
+          stroke-width="1.5"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M2.5 4h11M5 4V2.5h6V4M4 4l.75 9.5h6.5L12 4"
+        />
+        <line
+          x1="6.5"
+          y1="6.5"
+          x2="6.5"
+          y2="11.5"
+          stroke="currentColor"
+          stroke-width="1.2"
+          stroke-linecap="round"
+        />
+        <line
+          x1="9.5"
+          y1="6.5"
+          x2="9.5"
+          y2="11.5"
+          stroke="currentColor"
+          stroke-width="1.2"
+          stroke-linecap="round"
+        />
+      </symbol>
+    </defs>
+  </svg>
 
-<header id="toolbar" class="topbar">
-  <!-- Workspace tabs (left) -->
-  <div class="ws-tabs" id="workspaceTabs" role="tablist" aria-label="Workspaces">
-    <button class="ws-tab active" type="button" role="tab" data-ws-target="uniforms" aria-selected="true">Editor</button>
-    <button class="ws-tab" type="button" role="tab" data-ws-target="render" aria-selected="false">Shading</button>
-    <button class="ws-tab" type="button" role="tab" data-ws-target="export" aria-selected="false">Layout</button>
-  </div>
+  <header id="toolbar" class="topbar">
+    <!-- Workspace tabs (left) -->
+    <div class="ws-tabs" id="workspaceTabs" role="tablist" aria-label="Workspaces">
+      <button
+        class="ws-tab active"
+        type="button"
+        role="tab"
+        data-ws-target="uniforms"
+        aria-selected="true"
+      >
+        Editor
+      </button>
+      <button class="ws-tab" type="button" role="tab" data-ws-target="render" aria-selected="false">
+        Shading
+      </button>
+      <button class="ws-tab" type="button" role="tab" data-ws-target="export" aria-selected="false">
+        Layout
+      </button>
+    </div>
 
-  <div class="vsep"></div>
+    <div class="vsep"></div>
 
-  <!-- Phase 1.2: File menu -->
-  <div class="file-menu-wrap" id="fileMenuWrap">
-    <button class="hb file-menu-btn" id="fileMenuBtn" data-action="toggleFileMenu" aria-haspopup="true" aria-expanded="false" aria-label="File menu" title="Project — click for File menu">
-      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-        <path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-          d="M2 2h4l1.5 1.5H11v7H2V2z"/>
-      </svg>
-      <span class="fmenu-name" id="projectName">Untitled</span><span class="fmenu-dirty" id="projectDirty" hidden title="Unsaved changes">●</span>
+    <!-- Phase 1.2: File menu -->
+    <div class="file-menu-wrap" id="fileMenuWrap">
+      <button
+        class="hb file-menu-btn"
+        id="fileMenuBtn"
+        data-action="toggleFileMenu"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-label="File menu"
+        title="Project — click for File menu"
+      >
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M2 2h4l1.5 1.5H11v7H2V2z"
+          />
+        </svg>
+        <span class="fmenu-name" id="projectName">Untitled</span
+        ><span class="fmenu-dirty" id="projectDirty" hidden title="Unsaved changes">●</span>
+      </button>
+      <div
+        class="file-menu-popup"
+        id="fileMenuPopup"
+        role="menu"
+        aria-label="File operations"
+        hidden
+      >
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="newProject">
+          <span class="fmenu-icon" aria-hidden="true">◻</span> New Project
+          <span class="fmenu-shortcut">Ctrl+N</span>
+        </button>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="openProject">
+          <span class="fmenu-icon" aria-hidden="true">↑</span> Open Project…
+          <span class="fmenu-shortcut">Ctrl+O</span>
+        </button>
+        <div class="fmenu-sep" role="separator"></div>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="saveProject">
+          <span class="fmenu-icon" aria-hidden="true">💾</span> Save Project
+          <span class="fmenu-shortcut">Ctrl+S</span>
+        </button>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="saveProjectAs">
+          <span class="fmenu-icon" aria-hidden="true">💾</span> Save Project As…
+          <span class="fmenu-shortcut">Ctrl+Shift+S</span>
+        </button>
+        <div class="fmenu-sep" role="separator"></div>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="openExportModal">
+          <span class="fmenu-icon" aria-hidden="true">⇩</span> Export…
+        </button>
+        <div class="fmenu-sep" role="separator"></div>
+        <button
+          class="fmenu-item"
+          role="menuitemcheckbox"
+          tabindex="-1"
+          data-action="toggleWatchFile"
+          id="watchFileItem"
+          aria-checked="false"
+        >
+          <span class="fmenu-icon" aria-hidden="true">👁</span> Watch File
+        </button>
+        <div class="fmenu-sep" role="separator"></div>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-menu-action="exit">
+          <span class="fmenu-icon" aria-hidden="true">⏻</span> Exit
+        </button>
+        <div class="fmenu-sep" role="separator"></div>
+        <!-- MRU list rendered here by JS -->
+        <div id="fmenuMruSection" style="display: none">
+          <div class="fmenu-section-title">Recent Projects</div>
+          <div id="fmenuMruList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit menu -->
+    <div class="tb-menu-wrap" id="editMenuWrap">
+      <button
+        class="hb tb-menu-btn"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-label="Edit menu"
+      >
+        Edit
+      </button>
+      <div class="tb-menu-popup" role="menu" aria-label="Edit operations" hidden>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="slUndo">
+          <span class="fmenu-icon" aria-hidden="true">↶</span> Undo
+          <span class="fmenu-shortcut">Ctrl+Z</span>
+        </button>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="slRedo">
+          <span class="fmenu-icon" aria-hidden="true">↷</span> Redo
+          <span class="fmenu-shortcut">Ctrl+Y</span>
+        </button>
+        <div class="fmenu-sep" role="separator"></div>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="resetSliders">
+          <span class="fmenu-icon" aria-hidden="true">↺</span> Reset Sliders
+        </button>
+        <div class="fmenu-sep" role="separator"></div>
+        <button
+          class="fmenu-item"
+          role="menuitem"
+          tabindex="-1"
+          data-action="switchSidebarTab"
+          data-args="settings"
+        >
+          <span class="fmenu-icon" aria-hidden="true">⚙</span> Preferences…
+        </button>
+      </div>
+    </div>
+
+    <!-- Render menu -->
+    <div class="tb-menu-wrap" id="renderMenuWrap">
+      <button
+        class="hb tb-menu-btn"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-label="Render menu"
+      >
+        Render
+      </button>
+      <div class="tb-menu-popup" role="menu" aria-label="Render operations" hidden>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="applyAndParse">
+          <span class="fmenu-icon" aria-hidden="true">⟳</span> Run
+          <span class="fmenu-shortcut">Ctrl+Enter</span>
+        </button>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="togglePause">
+          <span class="fmenu-icon" aria-hidden="true">⏸</span> Pause / Resume
+        </button>
+        <div class="fmenu-sep" role="separator"></div>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-menu-action="res720p">
+          <span class="fmenu-icon" aria-hidden="true">▤</span> Resolution 720p
+        </button>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-menu-action="res1080p">
+          <span class="fmenu-icon" aria-hidden="true">▤</span> Resolution 1080p
+        </button>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-menu-action="res4k">
+          <span class="fmenu-icon" aria-hidden="true">▤</span> Resolution 4K
+        </button>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-menu-action="resCustom">
+          <span class="fmenu-icon" aria-hidden="true">▤</span> Custom Resolution…
+        </button>
+        <div class="fmenu-sep" role="separator"></div>
+        <button
+          class="fmenu-item"
+          role="menuitemcheckbox"
+          tabindex="-1"
+          data-menu-action="togglePrevFrame"
+          aria-checked="false"
+        >
+          <span class="fmenu-icon" aria-hidden="true">⟲</span> Feedback (Previous Frame)
+        </button>
+      </div>
+    </div>
+
+    <!-- Window menu -->
+    <div class="tb-menu-wrap" id="windowMenuWrap">
+      <button
+        class="hb tb-menu-btn"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-label="Window menu"
+      >
+        Window
+      </button>
+      <div class="tb-menu-popup" role="menu" aria-label="Window operations" hidden>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="toggleInspectorPanel">
+          <span class="fmenu-icon" aria-hidden="true">▥</span> Toggle Inspector Panel
+        </button>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="toggleFullscreenVP">
+          <span class="fmenu-icon" aria-hidden="true">⛶</span> Toggle Fullscreen Viewport
+          <span class="fmenu-shortcut">F11</span>
+        </button>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="toggleCodeFocus">
+          <span class="fmenu-icon" aria-hidden="true">⛶</span> Code Focus Mode
+          <span class="fmenu-shortcut">Ctrl+Shift+F</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Help menu -->
+    <div class="tb-menu-wrap" id="helpMenuWrap">
+      <button
+        class="hb tb-menu-btn"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-label="Help menu"
+      >
+        Help
+      </button>
+      <div class="tb-menu-popup" role="menu" aria-label="Help operations" hidden>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="openHelpCenter">
+          <span class="fmenu-icon" aria-hidden="true">?</span> Help Center
+          <span class="fmenu-shortcut">F1</span>
+        </button>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="showShortcutsPanel">
+          <span class="fmenu-icon" aria-hidden="true">⌨</span> Keyboard Shortcuts
+        </button>
+        <div class="fmenu-sep" role="separator"></div>
+        <button
+          class="fmenu-item"
+          role="menuitem"
+          tabindex="-1"
+          data-action="switchSidebarTab"
+          data-args="about"
+        >
+          <span class="fmenu-icon" aria-hidden="true">ℹ</span> About Sliders GL
+        </button>
+      </div>
+    </div>
+
+    <div class="sp"></div>
+
+    <!-- 3.1: Boutons avec icônes SVG inline — quick access (right) -->
+    <button
+      class="hb"
+      data-action="openSTModal"
+      title="Import from ShaderToy"
+      aria-label="Import shader from ShaderToy"
+    >
+      <svg><use href="#icon-st" /></svg> ShaderToy
     </button>
-    <div class="file-menu-popup" id="fileMenuPopup" role="menu" aria-label="File operations" hidden>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="newProject">
-        <span class="fmenu-icon" aria-hidden="true">◻</span> New Project
-        <span class="fmenu-shortcut">Ctrl+N</span>
+
+    <button class="hb" data-action="openExportModal" id="exportBtn" aria-label="Open export dialog">
+      <svg><use href="#icon-export" /></svg> export
+    </button>
+
+    <button class="hb" data-action="togglePause" id="pbtn" aria-label="Toggle pause rendering">
+      <svg id="pauseIcon"><use href="#icon-pause" /></svg> pause
+    </button>
+
+    <button
+      class="hb"
+      data-action="toggleFullscreenVP"
+      id="vpfbtn"
+      title="F11"
+      aria-label="Toggle fullscreen viewport"
+    >
+      <svg><use href="#icon-fullscreen" /></svg><span class="hb-label">fullscreen</span>
+    </button>
+
+    <button class="hb help-btn" id="helpBtn" title="Help (F1)" aria-label="Open help center">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+        <circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.3" />
+        <path
+          d="M4.7 4.8c0-1 0.8-1.7 1.8-1.7s1.8 0.6 1.8 1.6c0 1.4-1.8 1.3-1.8 2.8"
+          stroke="currentColor"
+          stroke-width="1.2"
+          stroke-linecap="round"
+        />
+        <circle cx="6.5" cy="9.6" r="0.7" fill="currentColor" />
+      </svg>
+    </button>
+  </header>
+
+  <div class="layout" id="layout">
+    <!-- Tool shelf (Blender's "T"-panel equivalent) -->
+    <div class="tool-shelf" id="toolShelf" role="toolbar" aria-label="Tool shelf">
+      <button
+        class="ts-tool"
+        data-action="resetSliders"
+        title="Reset View / Sliders"
+        aria-label="Reset sliders"
+      >
+        ↺
       </button>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="openProject">
-        <span class="fmenu-icon" aria-hidden="true">↑</span> Open Project…
-        <span class="fmenu-shortcut">Ctrl+O</span>
+      <button
+        class="ts-tool"
+        data-action="randomizeUnpinnedSliders"
+        title="Randomize unpinned sliders"
+        aria-label="Randomize unpinned sliders"
+      >
+        🎲
       </button>
-      <div class="fmenu-sep" role="separator"></div>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="saveProject">
-        <span class="fmenu-icon" aria-hidden="true">💾</span> Save Project
-        <span class="fmenu-shortcut">Ctrl+S</span>
+      <div class="ts-sep"></div>
+      <button
+        class="ts-tool"
+        data-action="togglePause"
+        title="Play / Pause"
+        aria-label="Toggle pause"
+      >
+        ⏯
       </button>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="saveProjectAs">
-        <span class="fmenu-icon" aria-hidden="true">💾</span> Save Project As…
-        <span class="fmenu-shortcut">Ctrl+Shift+S</span>
+      <button
+        class="ts-tool"
+        data-action="toggleFullscreenVP"
+        title="Fullscreen Viewport (F11)"
+        aria-label="Toggle fullscreen viewport"
+      >
+        ⛶
       </button>
-      <div class="fmenu-sep" role="separator"></div>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="openExportModal">
-        <span class="fmenu-icon" aria-hidden="true">⇩</span> Export…
+      <div class="ts-sep"></div>
+      <button
+        class="ts-tool"
+        data-action="openExportModal"
+        title="Export / Snapshot"
+        aria-label="Open export dialog"
+      >
+        ⇩
       </button>
-      <div class="fmenu-sep" role="separator"></div>
-      <button class="fmenu-item" role="menuitemcheckbox" tabindex="-1" data-action="toggleWatchFile" id="watchFileItem" aria-checked="false">
-        <span class="fmenu-icon" aria-hidden="true">👁</span> Watch File
+      <button
+        class="ts-tool"
+        data-action="openSTModal"
+        title="Import from ShaderToy"
+        aria-label="Import from ShaderToy"
+      >
+        ◈
       </button>
-      <div class="fmenu-sep" role="separator"></div>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-menu-action="exit">
-        <span class="fmenu-icon" aria-hidden="true">⏻</span> Exit
+      <div class="ts-sep"></div>
+      <button
+        class="ts-tool"
+        data-action="switchSidebarTab"
+        data-args="settings"
+        title="Settings"
+        aria-label="Open settings"
+      >
+        ⚙
       </button>
-      <div class="fmenu-sep" role="separator"></div>
-      <!-- MRU list rendered here by JS -->
-      <div id="fmenuMruSection" style="display:none">
-        <div class="fmenu-section-title">Recent Projects</div>
-        <div id="fmenuMruList"></div>
+    </div>
+    <div class="panel" id="sidebar">
+      <div class="sidebar-tabs" role="tablist" aria-label="Sidebar sections">
+        <button
+          class="sidebar-tab"
+          type="button"
+          role="tab"
+          id="sbtab-render"
+          data-tab="render"
+          aria-selected="false"
+          aria-controls="sidebar-pane-render"
+          title="Render Settings (Alt+1)"
+        >
+          ▤
+        </button>
+        <button
+          class="sidebar-tab"
+          type="button"
+          role="tab"
+          id="sbtab-uniforms"
+          data-tab="uniforms"
+          aria-selected="true"
+          aria-controls="sidebar-pane-uniforms"
+          title="Uniforms (Alt+2)"
+        >
+          ⊞
+        </button>
+        <button
+          class="sidebar-tab"
+          type="button"
+          role="tab"
+          id="sbtab-export"
+          data-tab="export"
+          aria-selected="false"
+          aria-controls="sidebar-pane-export"
+          title="Export (Alt+3)"
+        >
+          ⇩
+        </button>
+        <button
+          class="sidebar-tab"
+          type="button"
+          role="tab"
+          id="sbtab-settings"
+          data-tab="settings"
+          aria-selected="false"
+          aria-controls="sidebar-pane-settings"
+          title="Settings (Alt+4)"
+        >
+          ⚙
+        </button>
+        <button
+          class="sidebar-tab"
+          type="button"
+          role="tab"
+          id="sbtab-about"
+          data-tab="about"
+          aria-selected="false"
+          aria-controls="sidebar-pane-about"
+          title="About (Alt+5)"
+        >
+          ℹ
+        </button>
       </div>
-    </div>
-  </div>
-
-  <!-- Edit menu -->
-  <div class="tb-menu-wrap" id="editMenuWrap">
-    <button class="hb tb-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Edit menu">Edit</button>
-    <div class="tb-menu-popup" role="menu" aria-label="Edit operations" hidden>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="slUndo">
-        <span class="fmenu-icon" aria-hidden="true">↶</span> Undo <span class="fmenu-shortcut">Ctrl+Z</span>
-      </button>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="slRedo">
-        <span class="fmenu-icon" aria-hidden="true">↷</span> Redo <span class="fmenu-shortcut">Ctrl+Y</span>
-      </button>
-      <div class="fmenu-sep" role="separator"></div>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="resetSliders">
-        <span class="fmenu-icon" aria-hidden="true">↺</span> Reset Sliders
-      </button>
-      <div class="fmenu-sep" role="separator"></div>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="switchSidebarTab" data-args="settings">
-        <span class="fmenu-icon" aria-hidden="true">⚙</span> Preferences…
-      </button>
-    </div>
-  </div>
-
-  <!-- Render menu -->
-  <div class="tb-menu-wrap" id="renderMenuWrap">
-    <button class="hb tb-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Render menu">Render</button>
-    <div class="tb-menu-popup" role="menu" aria-label="Render operations" hidden>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="applyAndParse">
-        <span class="fmenu-icon" aria-hidden="true">⟳</span> Run <span class="fmenu-shortcut">Ctrl+Enter</span>
-      </button>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="togglePause">
-        <span class="fmenu-icon" aria-hidden="true">⏸</span> Pause / Resume
-      </button>
-      <div class="fmenu-sep" role="separator"></div>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-menu-action="res720p">
-        <span class="fmenu-icon" aria-hidden="true">▤</span> Resolution 720p
-      </button>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-menu-action="res1080p">
-        <span class="fmenu-icon" aria-hidden="true">▤</span> Resolution 1080p
-      </button>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-menu-action="res4k">
-        <span class="fmenu-icon" aria-hidden="true">▤</span> Resolution 4K
-      </button>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-menu-action="resCustom">
-        <span class="fmenu-icon" aria-hidden="true">▤</span> Custom Resolution…
-      </button>
-      <div class="fmenu-sep" role="separator"></div>
-      <button class="fmenu-item" role="menuitemcheckbox" tabindex="-1" data-menu-action="togglePrevFrame" aria-checked="false">
-        <span class="fmenu-icon" aria-hidden="true">⟲</span> Feedback (Previous Frame)
-      </button>
-    </div>
-  </div>
-
-  <!-- Window menu -->
-  <div class="tb-menu-wrap" id="windowMenuWrap">
-    <button class="hb tb-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Window menu">Window</button>
-    <div class="tb-menu-popup" role="menu" aria-label="Window operations" hidden>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="toggleInspectorPanel">
-        <span class="fmenu-icon" aria-hidden="true">▥</span> Toggle Inspector Panel
-      </button>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="toggleFullscreenVP">
-        <span class="fmenu-icon" aria-hidden="true">⛶</span> Toggle Fullscreen Viewport <span class="fmenu-shortcut">F11</span>
-      </button>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="toggleCodeFocus">
-        <span class="fmenu-icon" aria-hidden="true">⛶</span> Code Focus Mode <span class="fmenu-shortcut">Ctrl+Shift+F</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Help menu -->
-  <div class="tb-menu-wrap" id="helpMenuWrap">
-    <button class="hb tb-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Help menu">Help</button>
-    <div class="tb-menu-popup" role="menu" aria-label="Help operations" hidden>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="openHelpCenter">
-        <span class="fmenu-icon" aria-hidden="true">?</span> Help Center <span class="fmenu-shortcut">F1</span>
-      </button>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="showShortcutsPanel">
-        <span class="fmenu-icon" aria-hidden="true">⌨</span> Keyboard Shortcuts
-      </button>
-      <div class="fmenu-sep" role="separator"></div>
-      <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="switchSidebarTab" data-args="about">
-        <span class="fmenu-icon" aria-hidden="true">ℹ</span> About Sliders GL
-      </button>
-    </div>
-  </div>
-
-  <div class="sp"></div>
-
-  <!-- 3.1: Boutons avec icônes SVG inline — quick access (right) -->
-  <button class="hb" data-action="openSTModal"
-          title="Import from ShaderToy" aria-label="Import shader from ShaderToy">
-    <svg><use href="#icon-st"/></svg> ShaderToy
-  </button>
-
-  <button class="hb" data-action="openExportModal" id="exportBtn" aria-label="Open export dialog">
-    <svg><use href="#icon-export"/></svg> export
-  </button>
-
-  <button class="hb" data-action="togglePause" id="pbtn" aria-label="Toggle pause rendering">
-    <svg id="pauseIcon"><use href="#icon-pause"/></svg> pause
-  </button>
-
-  <button class="hb" data-action="toggleFullscreenVP" id="vpfbtn"
-          title="F11" aria-label="Toggle fullscreen viewport">
-    <svg><use href="#icon-fullscreen"/></svg><span class="hb-label">fullscreen</span>
-  </button>
-
-  <button class="hb help-btn" id="helpBtn"
-          title="Help (F1)" aria-label="Open help center">
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-      <circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.3"/>
-      <path d="M4.7 4.8c0-1 0.8-1.7 1.8-1.7s1.8 0.6 1.8 1.6c0 1.4-1.8 1.3-1.8 2.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-      <circle cx="6.5" cy="9.6" r="0.7" fill="currentColor"/>
-    </svg>
-  </button>
-</header>
-
-<div class="layout" id="layout">
-  <!-- Tool shelf (Blender's "T"-panel equivalent) -->
-  <div class="tool-shelf" id="toolShelf" role="toolbar" aria-label="Tool shelf">
-    <button class="ts-tool" data-action="resetSliders" title="Reset View / Sliders" aria-label="Reset sliders">↺</button>
-    <button class="ts-tool" data-action="randomizeUnpinnedSliders" title="Randomize unpinned sliders" aria-label="Randomize unpinned sliders">🎲</button>
-    <div class="ts-sep"></div>
-    <button class="ts-tool" data-action="togglePause" title="Play / Pause" aria-label="Toggle pause">⏯</button>
-    <button class="ts-tool" data-action="toggleFullscreenVP" title="Fullscreen Viewport (F11)" aria-label="Toggle fullscreen viewport">⛶</button>
-    <div class="ts-sep"></div>
-    <button class="ts-tool" data-action="openExportModal" title="Export / Snapshot" aria-label="Open export dialog">⇩</button>
-    <button class="ts-tool" data-action="openSTModal" title="Import from ShaderToy" aria-label="Import from ShaderToy">◈</button>
-    <div class="ts-sep"></div>
-    <button class="ts-tool" data-action="switchSidebarTab" data-args="settings" title="Settings" aria-label="Open settings">⚙</button>
-  </div>
-  <div class="panel" id="sidebar">
-    <div class="sidebar-tabs" role="tablist" aria-label="Sidebar sections">
-      <button class="sidebar-tab" type="button" role="tab" id="sbtab-render" data-tab="render"
-              aria-selected="false" aria-controls="sidebar-pane-render" title="Render Settings (Alt+1)">▤</button>
-      <button class="sidebar-tab" type="button" role="tab" id="sbtab-uniforms" data-tab="uniforms"
-              aria-selected="true" aria-controls="sidebar-pane-uniforms" title="Uniforms (Alt+2)">⊞</button>
-      <button class="sidebar-tab" type="button" role="tab" id="sbtab-export" data-tab="export"
-              aria-selected="false" aria-controls="sidebar-pane-export" title="Export (Alt+3)">⇩</button>
-      <button class="sidebar-tab" type="button" role="tab" id="sbtab-settings" data-tab="settings"
-              aria-selected="false" aria-controls="sidebar-pane-settings" title="Settings (Alt+4)">⚙</button>
-      <button class="sidebar-tab" type="button" role="tab" id="sbtab-about" data-tab="about"
-              aria-selected="false" aria-controls="sidebar-pane-about" title="About (Alt+5)">ℹ</button>
-    </div>
-    <div class="sidebar-pane" id="sidebar-pane-render" hidden>
-      <div class="ph">
-        <div class="ph-title">Render Settings</div>
-      </div>
-      <div class="prop-section">
-        <div class="prop-section-title">Resolution</div>
-        <div class="prop-row prop-row-buttons">
-          <button class="pb" data-menu-action="res720p">720p</button>
-          <button class="pb" data-menu-action="res1080p">1080p</button>
-          <button class="pb" data-menu-action="res4k">4K</button>
-          <button class="pb" data-menu-action="resCustom">Custom…</button>
+      <div class="sidebar-pane" id="sidebar-pane-render" hidden>
+        <div class="ph">
+          <div class="ph-title">Render Settings</div>
         </div>
-        <div class="prop-hint">Internal canvas render resolution used for export. The live viewport preview always stays fixed at 800×450.</div>
-      </div>
-      <div class="prop-section">
-        <div class="prop-section-title">Playback</div>
-        <div class="prop-row prop-row-buttons">
-          <button class="pb" data-action="applyAndParse">⟳ Run</button>
-          <button class="pb" data-action="togglePause">⏸ Pause / Resume</button>
+        <div class="prop-section">
+          <div class="prop-section-title">Resolution</div>
+          <div class="prop-row prop-row-buttons">
+            <button class="pb" data-menu-action="res720p">720p</button>
+            <button class="pb" data-menu-action="res1080p">1080p</button>
+            <button class="pb" data-menu-action="res4k">4K</button>
+            <button class="pb" data-menu-action="resCustom">Custom…</button>
+          </div>
+          <div class="prop-hint">
+            Internal canvas render resolution used for export. The live viewport preview always
+            stays fixed at 800×450.
+          </div>
+        </div>
+        <div class="prop-section">
+          <div class="prop-section-title">Playback</div>
+          <div class="prop-row prop-row-buttons">
+            <button class="pb" data-action="applyAndParse">⟳ Run</button>
+            <button class="pb" data-action="togglePause">⏸ Pause / Resume</button>
+          </div>
+        </div>
+        <div class="prop-section">
+          <div class="prop-section-title">Feedback</div>
+          <div class="prop-row">
+            <label class="prop-checkbox">
+              <input type="checkbox" data-menu-action="togglePrevFrame" id="prevFrameCheckbox" />
+              Previous Frame Feedback
+            </label>
+          </div>
+          <div class="prop-hint">
+            Feeds last frame's output back in as an input texture — required for reaction-diffusion,
+            trails, and accumulation effects.
+          </div>
         </div>
       </div>
-      <div class="prop-section">
-        <div class="prop-section-title">Feedback</div>
-        <div class="prop-row">
-          <label class="prop-checkbox">
-            <input type="checkbox" data-menu-action="togglePrevFrame" id="prevFrameCheckbox"> Previous Frame Feedback
-          </label>
-        </div>
-        <div class="prop-hint">Feeds last frame's output back in as an input texture — required for reaction-diffusion, trails, and accumulation effects.</div>
-      </div>
-    </div>
-    <div class="sidebar-pane" id="sidebar-pane-uniforms">
-    <div class="ph">
-      <div class="ph-title">Constants &amp; Uniforms</div>
-      <button class="pb" id="slFilterToggleBtn" title="Toggle filter bar" aria-label="Toggle filter bar">⌕</button>
-      <div class="pb-panels-wrap">
-        <button class="pb pb-panels-toggle" id="pbPanelsToggle" title="Secondary panels" aria-label="Toggle secondary panels menu" aria-haspopup="true" aria-expanded="false">⊕ panels ▾</button>
-        <div class="pb-panels-menu" id="pbPanelsMenu" role="menu">
-          <button class="pb warn" data-action="resetSliders" title="Reset all unpinned sliders" aria-label="Reset all unpinned sliders" role="menuitem">↺ reset</button>
-          <button class="pb" data-action="randomizeUnpinnedSliders" title="Randomize every unpinned slider within its range" aria-label="Randomize unpinned sliders" role="menuitem">🎲 random</button>
-          <button class="pb" data-action="resetSliderCustomizations" title="Reset slider customizations (renamed labels, custom groups, order, manual ranges) back to auto-detected" aria-label="Reset slider customizations to auto-detected defaults" role="menuitem">⎌ custom</button>
-        </div>
-      </div>
-      <button class="pb" data-action="applyAndParse" title="Ctrl+Enter / Ctrl+S" aria-label="Apply and parse shader (Ctrl+Enter)">⟳ parse</button>
-    </div>
-    <div class="sl-filter" id="slFilter" style="display:none">
-      <input type="search" id="slFilterInput" class="sl-filter-input" placeholder="Filter sliders…" aria-label="Filter sliders by name or category" spellcheck="false" autocomplete="off">
-      <button id="slFilterModified" class="sl-filter-mod" type="button" title="Show only modified sliders" aria-pressed="false">modified</button>
-    </div>
-    <div class="sw" id="sw">
-      <div class="es" id="es">
-        <div class="es-icon">◈</div>
-        <div class="es-title">Paste a ShaderToy shader</div>
-        <div class="es-sub">
-          Paste any ShaderToy code in the editor below.<br>
-          Press <span class="es-key">Ctrl+S</span> or click<br>
-          <span style="color:var(--ac3)">⟳ parse</span> to extract all constants.
-        </div>
-      </div>
-    </div>
-    </div>
-
-    <div class="sidebar-pane" id="sidebar-pane-export" hidden>
-      <div class="ph">
-        <div class="ph-title">Export</div>
-      </div>
-      <div class="prop-section">
-        <div class="prop-section-title">Quick Export</div>
-        <div class="prop-row prop-row-buttons">
-          <button class="pb" data-action="openExportModal">⇩ Open Export Dialog…</button>
-        </div>
-        <div class="prop-hint">
-          Export as a PNG screenshot, current-frame capture, standalone HTML,
-          pure/minified GLSL, a Three.js snippet, p5.js sketch, GLSL Sandbox
-          format, ShaderToy format, or a recorded video — plus a full project
-          .zip archive.
-        </div>
-      </div>
-    </div>
-
-    <div class="sidebar-pane" id="sidebar-pane-settings" hidden>
-      <div class="ph">
-        <div class="ph-title">Settings</div>
-      </div>
-      <div class="prop-section">
-        <div class="prop-section-title">Editor Preferences</div>
-        <div class="prop-row prop-row-buttons">
-          <button class="pb" id="settingsToggleBtn" data-action="toggleSettingsPanel">⚙ Open Editor Settings…</button>
-        </div>
-        <div class="prop-hint">Font size, tab width, minimap, word wrap, and other Monaco editor preferences.</div>
-      </div>
-    </div>
-
-    <div class="sidebar-pane" id="sidebar-pane-about" hidden>
-      <div class="ph">
-        <div class="ph-title">About</div>
-      </div>
-      <div class="prop-section about-panel">
-        <div class="about-app-name">Sliders GL</div>
-        <div class="about-app-version">Version <span id="aboutVersion"></span></div>
-        <div class="prop-hint">Real-time GLSL shader editor, 100% Shadertoy-compatible.</div>
-        <div class="about-copyright">
-          Copyright © 2026 Patrick JAILLET — All rights reserved<br>
-          Email: <a href="mailto:contact.shaderstudio@gmail.com">contact.shaderstudio@gmail.com</a><br>
-          Website: <a href="https://patrickjaillet.github.io/sandefjord-software" target="_blank" rel="noopener noreferrer">patrickjaillet.github.io/sandefjord-software</a>
-        </div>
-        <div class="about-license">Licensed under the MIT License.</div>
-        <div class="about-credits">
-          <div class="about-credits-title">Third-Party Software</div>
-          <ul class="about-credits-list">
-            <li><span class="about-credits-name">Three.js</span> — MIT License</li>
-            <li><span class="about-credits-name">Monaco Editor</span> — MIT License</li>
-            <li><span class="about-credits-name">@shaderfrog/glsl-parser</span> — ISC License</li>
-            <li><span class="about-credits-name">JSZip</span> — MIT License</li>
-            <li><span class="about-credits-name">Fontsource</span> (IBM Plex Mono, Sora, Space Grotesk, Space Mono, Syne) — SIL Open Font License 1.1</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="right" id="viewport-zone">
-   <div class="zone-row" id="zoneRow">
-    <!-- Editor column (left): pass tabs + GLSL editor -->
-    <div class="editor-col" id="editorCol">
-      <!-- 2.4: Multi-pass tabs — P1.6: wrapped with scroll arrows -->
-      <div class="pass-tabs-wrap" id="passTabsWrap">
-        <button class="ptab-scroll-btn" id="passTabsLeft" aria-label="Scroll tabs left" hidden>‹</button>
-        <div class="pass-tabs" id="passTabs" role="tablist" aria-label="Shader passes">
-          <button class="pass-tab active enabled" id="ptab-image" role="tab" aria-selected="true" title="Image pass (final output)" aria-label="Image pass (final output)">◈ Image</button>
-        </div>
-        <button class="ptab-scroll-btn" id="passTabsRight" aria-label="Scroll tabs right" hidden>›</button>
-      </div>
-      <div class="ez" id="editorZone">
-        <div class="eb" style="position:relative">
-          <div class="area-type-wrap" id="edAreaTypeWrap">
-            <button class="el area-type-btn" id="edAreaTypeBtn" type="button"
-                    aria-haspopup="true" aria-expanded="false" title="Area type">
-              ▤ Shader Editor <span class="area-type-caret" aria-hidden="true">▾</span>
+      <div class="sidebar-pane" id="sidebar-pane-uniforms">
+        <div class="ph">
+          <div class="ph-title">Constants &amp; Uniforms</div>
+          <button
+            class="pb"
+            id="slFilterToggleBtn"
+            title="Toggle filter bar"
+            aria-label="Toggle filter bar"
+          >
+            ⌕
+          </button>
+          <div class="pb-panels-wrap">
+            <button
+              class="pb pb-panels-toggle"
+              id="pbPanelsToggle"
+              title="Secondary panels"
+              aria-label="Toggle secondary panels menu"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              ⊕ panels ▾
             </button>
-            <div class="area-type-menu" id="edAreaTypeMenu" role="menu" aria-label="Area type">
-              <button class="ebn area-type-item" role="menuitem" data-area-choice="viewport">◇ Viewport</button>
-              <button class="ebn area-type-item active" role="menuitem" data-area-choice="editor">▤ Shader Editor</button>
-              <div class="area-type-sep"></div>
-              <button class="ebn area-type-item" role="menuitem" data-area-choice="split">⬍ Split view</button>
+            <div class="pb-panels-menu" id="pbPanelsMenu" role="menu">
+              <button
+                class="pb warn"
+                data-action="resetSliders"
+                title="Reset all unpinned sliders"
+                aria-label="Reset all unpinned sliders"
+                role="menuitem"
+              >
+                ↺ reset
+              </button>
+              <button
+                class="pb"
+                data-action="randomizeUnpinnedSliders"
+                title="Randomize every unpinned slider within its range"
+                aria-label="Randomize unpinned sliders"
+                role="menuitem"
+              >
+                🎲 random
+              </button>
+              <button
+                class="pb"
+                data-action="resetSliderCustomizations"
+                title="Reset slider customizations (renamed labels, custom groups, order, manual ranges) back to auto-detected"
+                aria-label="Reset slider customizations to auto-detected defaults"
+                role="menuitem"
+              >
+                ⎌ custom
+              </button>
             </div>
           </div>
-          <div class="el ed-filename" id="edFilename">fragment.glsl</div>
-          <div class="esp"></div>
-          <button class="hb eb-apply" data-action="applyAndParseActive" aria-label="Apply and parse active pass" title="Apply and parse active pass (Ctrl+Enter)">↻ apply</button>
-          <button class="ebn" data-action="loadExample" aria-label="Load example shader">load example</button>
-          <button class="ebn" data-action="copyCode" aria-label="Copy shader code to clipboard">copy</button>
-          <!-- 2.1: Command palette -->
-          <button class="ebn" id="paletteBtn" data-action="openCommandPalette"
-                  title="Command Palette (Ctrl+Shift+P)" aria-label="Open command palette">⌨ palette</button>
-          <!-- §7.3: shader complexity score badge -->
-          <span class="ebn cx-badge" id="complexityBadge" hidden role="status" aria-label="Shader complexity score">⚙ 0</span>
-          <!-- P1.2: "…" dropdown for less-used options -->
-          <div class="eb-more-wrap">
-            <button class="ebn" id="ebMoreBtn" title="More editor options" aria-label="More editor options" aria-haspopup="true" aria-expanded="false">⋯</button>
-            <div class="eb-more-menu" id="ebMoreMenu" role="menu">
-              <!-- minimap toggle -->
-              <button class="ebn" id="minimapBtn" data-action="toggleMinimap"
-                      title="Toggle minimap" aria-label="Toggle minimap" aria-pressed="true" role="menuitem">map</button>
-              <!-- §2.3: Code focus mode toggle -->
-              <button class="ebn" id="codeFocusBtn"
-                      title="Code focus — maximize editor, shrink canvas (Ctrl+Shift+F)" aria-label="Toggle code focus mode" aria-pressed="false" role="menuitem">⛶ focus</button>
-            </div>
-          </div>
-          <!-- snippets ▾ button removed (10.1) — use snippets ✦ library instead -->
-          <!-- apply + parse moved to first position (P1.2) -->
-          <!-- #snippetsMenu removed (10.1) -->
+          <button
+            class="pb"
+            data-action="applyAndParse"
+            title="Ctrl+Enter / Ctrl+S"
+            aria-label="Apply and parse shader (Ctrl+Enter)"
+          >
+            ⟳ parse
+          </button>
         </div>
-        <!-- GLSL editor pane -->
-        <div class="ez-split" id="ezSplit">
-          <div id="mc"></div>
+        <div class="sl-filter" id="slFilter" style="display: none">
+          <input
+            type="search"
+            id="slFilterInput"
+            class="sl-filter-input"
+            placeholder="Filter sliders…"
+            aria-label="Filter sliders by name or category"
+            spellcheck="false"
+            autocomplete="off"
+          />
+          <button
+            id="slFilterModified"
+            class="sl-filter-mod"
+            type="button"
+            title="Show only modified sliders"
+            aria-pressed="false"
+          >
+            modified
+          </button>
+        </div>
+        <div class="sw" id="sw">
+          <div class="es" id="es">
+            <div class="es-icon">◈</div>
+            <div class="es-title">Paste a ShaderToy shader</div>
+            <div class="es-sub">
+              Paste any ShaderToy code in the editor below.<br />
+              Press <span class="es-key">Ctrl+S</span> or click<br />
+              <span style="color: var(--ac3)">⟳ parse</span> to extract all constants.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-pane" id="sidebar-pane-export" hidden>
+        <div class="ph">
+          <div class="ph-title">Export</div>
+        </div>
+        <div class="prop-section">
+          <div class="prop-section-title">Quick Export</div>
+          <div class="prop-row prop-row-buttons">
+            <button class="pb" data-action="openExportModal">⇩ Open Export Dialog…</button>
+          </div>
+          <div class="prop-hint">
+            Export as a PNG screenshot, current-frame capture, standalone HTML, pure/minified GLSL,
+            a Three.js snippet, p5.js sketch, GLSL Sandbox format, ShaderToy format, or a recorded
+            video — plus a full project .zip archive.
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-pane" id="sidebar-pane-settings" hidden>
+        <div class="ph">
+          <div class="ph-title">Settings</div>
+        </div>
+        <div class="prop-section">
+          <div class="prop-section-title">Editor Preferences</div>
+          <div class="prop-row prop-row-buttons">
+            <button class="pb" id="settingsToggleBtn" data-action="toggleSettingsPanel">
+              ⚙ Open Editor Settings…
+            </button>
+          </div>
+          <div class="prop-hint">
+            Font size, tab width, minimap, word wrap, and other Monaco editor preferences.
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-pane" id="sidebar-pane-about" hidden>
+        <div class="ph">
+          <div class="ph-title">About</div>
+        </div>
+        <div class="prop-section about-panel">
+          <div class="about-app-name">Sliders GL</div>
+          <div class="about-app-version">Version <span id="aboutVersion"></span></div>
+          <div class="prop-hint">Real-time GLSL shader editor, 100% Shadertoy-compatible.</div>
+          <div class="about-copyright">
+            Copyright © 2026 Patrick JAILLET — All rights reserved<br />
+            Email: <a href="mailto:contact.shaderstudio@gmail.com">contact.shaderstudio@gmail.com</a
+            ><br />
+            Website:
+            <a
+              href="https://patrickjaillet.github.io/sandefjord-software"
+              target="_blank"
+              rel="noopener noreferrer"
+              >patrickjaillet.github.io/sandefjord-software</a
+            >
+          </div>
+          <div class="about-license">Licensed under the MIT License.</div>
+          <div class="about-credits">
+            <div class="about-credits-title">Third-Party Software</div>
+            <ul class="about-credits-list">
+              <li><span class="about-credits-name">Three.js</span> — MIT License</li>
+              <li><span class="about-credits-name">Monaco Editor</span> — MIT License</li>
+              <li><span class="about-credits-name">@shaderfrog/glsl-parser</span> — ISC License</li>
+              <li><span class="about-credits-name">JSZip</span> — MIT License</li>
+              <li>
+                <span class="about-credits-name">Fontsource</span> (IBM Plex Mono, Sora, Space
+                Grotesk, Space Mono, Syne) — SIL Open Font License 1.1
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Viewport column (right): area-type header + fixed 800×450 canvas + timeline -->
-    <div class="viewport-col" id="viewportCol">
-      <!-- §1 Main editor area — per-area header: area-type dropdown (Blender's
+    <div class="right" id="viewport-zone">
+      <div class="zone-row" id="zoneRow">
+        <!-- Editor column (left): pass tabs + GLSL editor -->
+        <div class="editor-col" id="editorCol">
+          <!-- 2.4: Multi-pass tabs — P1.6: wrapped with scroll arrows -->
+          <div class="pass-tabs-wrap" id="passTabsWrap">
+            <button class="ptab-scroll-btn" id="passTabsLeft" aria-label="Scroll tabs left" hidden>
+              ‹
+            </button>
+            <div class="pass-tabs" id="passTabs" role="tablist" aria-label="Shader passes">
+              <button
+                class="pass-tab active enabled"
+                id="ptab-image"
+                role="tab"
+                aria-selected="true"
+                title="Image pass (final output)"
+                aria-label="Image pass (final output)"
+              >
+                ◈ Image
+              </button>
+            </div>
+            <button
+              class="ptab-scroll-btn"
+              id="passTabsRight"
+              aria-label="Scroll tabs right"
+              hidden
+            >
+              ›
+            </button>
+          </div>
+          <div class="ez" id="editorZone">
+            <div class="eb" style="position: relative">
+              <div class="area-type-wrap" id="edAreaTypeWrap">
+                <button
+                  class="el area-type-btn"
+                  id="edAreaTypeBtn"
+                  type="button"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  title="Area type"
+                >
+                  ▤ Shader Editor <span class="area-type-caret" aria-hidden="true">▾</span>
+                </button>
+                <div class="area-type-menu" id="edAreaTypeMenu" role="menu" aria-label="Area type">
+                  <button class="ebn area-type-item" role="menuitem" data-area-choice="viewport">
+                    ◇ Viewport
+                  </button>
+                  <button
+                    class="ebn area-type-item active"
+                    role="menuitem"
+                    data-area-choice="editor"
+                  >
+                    ▤ Shader Editor
+                  </button>
+                  <div class="area-type-sep"></div>
+                  <button class="ebn area-type-item" role="menuitem" data-area-choice="split">
+                    ⬍ Split view
+                  </button>
+                </div>
+              </div>
+              <div class="el ed-filename" id="edFilename">fragment.glsl</div>
+              <div class="esp"></div>
+              <button
+                class="hb eb-apply"
+                data-action="applyAndParseActive"
+                aria-label="Apply and parse active pass"
+                title="Apply and parse active pass (Ctrl+Enter)"
+              >
+                ↻ apply
+              </button>
+              <button class="ebn" data-action="loadExample" aria-label="Load example shader">
+                load example
+              </button>
+              <button class="ebn" data-action="copyCode" aria-label="Copy shader code to clipboard">
+                copy
+              </button>
+              <!-- 2.1: Command palette -->
+              <button
+                class="ebn"
+                id="paletteBtn"
+                data-action="openCommandPalette"
+                title="Command Palette (Ctrl+Shift+P)"
+                aria-label="Open command palette"
+              >
+                ⌨ palette
+              </button>
+              <!-- §7.3: shader complexity score badge -->
+              <span
+                class="ebn cx-badge"
+                id="complexityBadge"
+                hidden
+                role="status"
+                aria-label="Shader complexity score"
+                >⚙ 0</span
+              >
+              <!-- P1.2: "…" dropdown for less-used options -->
+              <div class="eb-more-wrap">
+                <button
+                  class="ebn"
+                  id="ebMoreBtn"
+                  title="More editor options"
+                  aria-label="More editor options"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  ⋯
+                </button>
+                <div class="eb-more-menu" id="ebMoreMenu" role="menu">
+                  <!-- minimap toggle -->
+                  <button
+                    class="ebn"
+                    id="minimapBtn"
+                    data-action="toggleMinimap"
+                    title="Toggle minimap"
+                    aria-label="Toggle minimap"
+                    aria-pressed="true"
+                    role="menuitem"
+                  >
+                    map
+                  </button>
+                  <!-- §2.3: Code focus mode toggle -->
+                  <button
+                    class="ebn"
+                    id="codeFocusBtn"
+                    title="Code focus — maximize editor, shrink canvas (Ctrl+Shift+F)"
+                    aria-label="Toggle code focus mode"
+                    aria-pressed="false"
+                    role="menuitem"
+                  >
+                    ⛶ focus
+                  </button>
+                </div>
+              </div>
+              <!-- snippets ▾ button removed (10.1) — use snippets ✦ library instead -->
+              <!-- apply + parse moved to first position (P1.2) -->
+              <!-- #snippetsMenu removed (10.1) -->
+            </div>
+            <!-- GLSL editor pane -->
+            <div class="ez-split" id="ezSplit">
+              <div id="mc"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Viewport column (right): area-type header + fixed 800×450 canvas + timeline -->
+        <div class="viewport-col" id="viewportCol">
+          <!-- §1 Main editor area — per-area header: area-type dropdown (Blender's
            editor-type selector, adapted) + contextual icon toolbar row, mirroring
            the shader-editor's existing .eb header. -->
-      <div class="eb vp-header" id="vpHeader">
-        <div class="area-type-wrap" id="vpAreaTypeWrap">
-          <button class="el area-type-btn" id="vpAreaTypeBtn" type="button"
-                  aria-haspopup="true" aria-expanded="false" title="Area type">
-            ◇ Viewport <span class="area-type-caret" aria-hidden="true">▾</span>
+          <div class="eb vp-header" id="vpHeader">
+            <div class="area-type-wrap" id="vpAreaTypeWrap">
+              <button
+                class="el area-type-btn"
+                id="vpAreaTypeBtn"
+                type="button"
+                aria-haspopup="true"
+                aria-expanded="false"
+                title="Area type"
+              >
+                ◇ Viewport <span class="area-type-caret" aria-hidden="true">▾</span>
+              </button>
+              <div class="area-type-menu" id="vpAreaTypeMenu" role="menu" aria-label="Area type">
+                <button
+                  class="ebn area-type-item active"
+                  role="menuitem"
+                  data-area-choice="viewport"
+                >
+                  ◇ Viewport
+                </button>
+                <button class="ebn area-type-item" role="menuitem" data-area-choice="editor">
+                  ▤ Shader Editor
+                </button>
+                <div class="area-type-sep"></div>
+                <button class="ebn area-type-item" role="menuitem" data-area-choice="split">
+                  ⬍ Split view
+                </button>
+              </div>
+            </div>
+            <div class="esp"></div>
+            <button
+              class="ebn"
+              data-action="toggleGuides"
+              id="vpGuidesBtn"
+              title="Toggle guides (G)"
+              aria-label="Toggle guides"
+            >
+              ⊹ guides
+            </button>
+            <button
+              class="ebn"
+              data-action="toggleHUD"
+              id="vpHudBtn"
+              title="Toggle HUD (H)"
+              aria-label="Toggle HUD"
+            >
+              ◱ hud
+            </button>
+            <button
+              class="ebn"
+              data-action="resetZoom"
+              title="Reset zoom (Ctrl+0)"
+              aria-label="Reset zoom"
+            >
+              ⤢ zoom
+            </button>
+            <button
+              class="ebn"
+              data-action="saveReference"
+              title="Save reference frame (hold B to compare)"
+              aria-label="Save reference frame"
+            >
+              ⧉ ref
+            </button>
+            <button
+              class="ebn"
+              data-action="copyFrameToClipboard"
+              title="Copy frame to clipboard (Ctrl+Shift+C)"
+              aria-label="Copy frame to clipboard"
+            >
+              ⧉ copy
+            </button>
+          </div>
+          <div class="cw" id="cwrap">
+            <canvas id="glc"></canvas>
+
+            <div class="hud-l">
+              <div class="pill" id="fpspill">-- FPS</div>
+            </div>
+            <div class="hud">
+              <div class="pill" id="respill">-- × --</div>
+              <div class="pill" id="tpill">t = 0.00</div>
+              <div class="pill" id="fpill">f 0</div>
+            </div>
+            <!-- 1.1: collapsible error panel -->
+            <div
+              class="cerr-wrap"
+              id="cerrWrap"
+              role="status"
+              aria-live="polite"
+              aria-atomic="false"
+            >
+              <div class="cerr-header" data-action="toggleErrPanel" id="cerrHeader">
+                <span>⚠</span>
+                <span>Compile Error</span>
+                <span class="cerr-count" id="cerrCount">0 error</span>
+                <span class="cerr-toggle" id="cerrToggle">▲</span>
+              </div>
+              <div class="cerr-body" id="cerrBody"></div>
+            </div>
+          </div>
+
+          <!-- Timeline area (Blender-style transport strip, bound to state.simTime) -->
+          <div class="timeline-strip" id="timelineStrip">
+            <span class="tl-icon" aria-hidden="true">⏱</span>
+            <span class="vp-scrub-t" id="vpScrubT">t = 0.00 s</span>
+            <input
+              type="range"
+              id="timeScrubber"
+              class="vp-scrub-range"
+              min="0"
+              max="60"
+              step="0.01"
+              value="0"
+              aria-label="Scrub simulation time"
+            />
+            <button
+              id="timeScrubberReset"
+              class="vp-scrub-reset"
+              type="button"
+              title="Reset time to 0"
+              aria-label="Reset time to 0"
+            >
+              ↺
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: Outliner (top) + contextual Inspector (below) — Blender-style stack -->
+    <div class="inspector-col" id="inspectorCol">
+      <!-- Outliner: read-only structure tree — Blender-style, top of the right column -->
+      <div class="outliner" id="outliner" tabindex="0">
+        <div class="outliner-header">Outliner</div>
+        <div class="outliner-tree">
+          <div class="outliner-row" data-outliner-jump="render">
+            <span class="outliner-icon" aria-hidden="true">◈</span> Image
+            <span class="outliner-badge">pass</span>
+          </div>
+          <div class="outliner-row" data-outliner-jump="uniforms">
+            <span class="outliner-icon" aria-hidden="true">⊞</span> Uniforms
+            <span class="outliner-count" id="outlinerUniformCount">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inspector panel: contextual (Phase Q) — Pass / Slider / Uniform -->
+      <div class="inspector" id="inspector">
+        <div class="inspector-header">
+          <span class="inspector-title" id="inspectorTitle">Pass</span>
+          <button
+            class="inspector-close"
+            data-action="toggleInspectorPanel"
+            aria-label="Close inspector"
+          >
+            ✕
           </button>
-          <div class="area-type-menu" id="vpAreaTypeMenu" role="menu" aria-label="Area type">
-            <button class="ebn area-type-item active" role="menuitem" data-area-choice="viewport">◇ Viewport</button>
-            <button class="ebn area-type-item" role="menuitem" data-area-choice="editor">▤ Shader Editor</button>
-            <div class="area-type-sep"></div>
-            <button class="ebn area-type-item" role="menuitem" data-area-choice="split">⬍ Split view</button>
+        </div>
+        <div class="inspector-body" id="inspectorBody" tabindex="0">
+          <div class="insp-pane" id="insp-pass"><div class="insp-empty">No active pass.</div></div>
+          <div class="insp-pane hidden" id="insp-slider">
+            <div class="insp-empty">Hover a slider…</div>
+          </div>
+          <div class="insp-pane hidden" id="insp-uniform">
+            <div class="insp-empty">Hover a runtime uniform in the editor…</div>
           </div>
         </div>
-        <div class="esp"></div>
-        <button class="ebn" data-action="toggleGuides" id="vpGuidesBtn" title="Toggle guides (G)" aria-label="Toggle guides">⊹ guides</button>
-        <button class="ebn" data-action="toggleHUD" id="vpHudBtn" title="Toggle HUD (H)" aria-label="Toggle HUD">◱ hud</button>
-        <button class="ebn" data-action="resetZoom" title="Reset zoom (Ctrl+0)" aria-label="Reset zoom">⤢ zoom</button>
-        <button class="ebn" data-action="saveReference" title="Save reference frame (hold B to compare)" aria-label="Save reference frame">⧉ ref</button>
-        <button class="ebn" data-action="copyFrameToClipboard" title="Copy frame to clipboard (Ctrl+Shift+C)" aria-label="Copy frame to clipboard">⧉ copy</button>
       </div>
-      <div class="cw" id="cwrap">
-        <canvas id="glc"></canvas>
+    </div>
+  </div>
+  <footer class="app-footer app-statusbar" id="appStatusBar">
+    <!-- §1.3 — Zone gauche : état de compilation + compteur d'erreurs -->
+    <div class="sb-zone sb-left">
+      <div class="status-badge ready" id="statusBadge" role="status" aria-live="polite">
+        <div class="status-dot"></div>
+        <span id="stxt">READY</span>
+      </div>
+      <button
+        class="sb-errcount"
+        id="sbErrCount"
+        data-action="toggleErrPanel"
+        hidden
+        title="Show compile errors"
+        aria-label="Compile errors — click to show panel"
+      >
+        0 errors
+      </button>
+    </div>
 
-        <div class="hud-l">
-          <div class="pill" id="fpspill">-- FPS</div>
+    <!-- §1.3 — Zone centre : position du curseur -->
+    <div class="sb-zone sb-center">
+      <span class="curpos" id="curpos">Ln 1, Col 1</span>
+    </div>
+
+    <!-- F-10.4 — Zone info : uniforms, compile time, GPU mem, lignes -->
+    <div class="sb-zone sb-info" id="sbInfo" aria-label="Shader statistics">
+      <span class="sb-stat" id="sbUniforms" title="Uniform count">-- ⊞</span>
+      <span class="sb-sep" aria-hidden="true">·</span>
+      <span class="sb-stat" id="sbCompile" title="Last compile time">-- ms</span>
+      <span class="sb-sep" aria-hidden="true">·</span>
+      <span class="sb-stat" id="sbLines" title="Shader lines">-- L</span>
+      <span class="sb-sep" aria-hidden="true">·</span>
+      <span
+        class="sb-stat"
+        id="sbPassBadge"
+        title="Active pass — click to scroll to tab"
+        role="button"
+        tabindex="0"
+        >◈ Image</span
+      >
+    </div>
+
+    <!-- §1.3 — Zone droite : FPS, résolution, copyright -->
+    <div class="sb-zone sb-right">
+      <svg
+        class="fps-spark-svg"
+        id="fpsSpark"
+        viewBox="0 0 90 18"
+        preserveAspectRatio="none"
+        title="FPS history (last 90 frames)"
+        aria-hidden="true"
+      >
+        <polyline id="fpsPolyline" points="" stroke="var(--spark-go)" opacity="0.7" />
+      </svg>
+      <span role="status" aria-live="off" aria-atomic="true" id="fpsLive"
+        ><span class="fps" id="fps">-- fps</span></span
+      >
+      <span class="sb-sep" aria-hidden="true">·</span>
+      <span class="sb-res" id="statusRes" title="Render resolution">-- × --</span>
+      <span class="sb-sep" aria-hidden="true">·</span>
+      <span class="sb-stat sb-mem" id="sbMemGpu" title="GPU renderer">-- MB</span>
+      <span class="sb-sep" aria-hidden="true">·</span>
+      <span class="sb-version" id="sbVersion" title="Sliders GL version">v--</span>
+      <span class="sb-sep" aria-hidden="true">·</span>
+      <span class="app-footer-copy">©2026 Patrick JAILLET</span>
+    </div>
+  </footer>
+  <!-- §6.2 — Région d'annonce assertive pour les lecteurs d'écran (erreurs) -->
+  <div id="a11y-alert" class="sr-only" role="alert" aria-live="assertive" aria-atomic="true"></div>
+  <!-- Fix 1.12 — Résumé shader pour lecteurs d'écran (créé dynamiquement par shader-summary.js mais déclaré ici comme ancre) -->
+  <div id="shader-summary" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  <!-- ═══════════════════════════════ TOAST STACK (Phase 5.3) ══ -->
+  <!-- Stack de toasts Phase 5 — bas-centre, pile avec stagger -->
+  <div id="toast-stack" aria-live="polite" aria-atomic="false"></div>
+
+  <!-- ═══════════════════════════════ CONTEXT MENU (Phase 5.2) ══ -->
+  <div class="ctx-menu" id="ctxMenu" role="menu">
+    <div class="ctx-item" role="menuitem" tabindex="-1" data-action="ctxCmd" data-args="reset">
+      <svg viewBox="0 0 16 16">
+        <path d="M3 8a5 5 0 1 0 1.5-3.5" />
+        <polyline points="1,5 3,8 6,6" />
+      </svg>
+      Reset to default
+    </div>
+    <div class="ctx-item" role="menuitem" tabindex="-1" data-action="ctxCmd" data-args="copy">
+      <svg viewBox="0 0 16 16">
+        <rect x="5" y="5" width="8" height="9" rx="1.5" />
+        <path d="M3 11V3a1 1 0 0 1 1-1h8" />
+      </svg>
+      Copy value
+    </div>
+    <div class="ctx-item" role="menuitem" tabindex="-1" data-action="ctxCmd" data-args="setrange">
+      <svg viewBox="0 0 16 16">
+        <line x1="2" y1="8" x2="14" y2="8" />
+        <line x1="2" y1="5" x2="2" y2="11" />
+        <line x1="14" y1="5" x2="14" y2="11" />
+      </svg>
+      Set range / precision…
+    </div>
+    <div class="ctx-sep" role="separator"></div>
+    <div class="ctx-item" role="menuitem" tabindex="-1" data-action="ctxCmd" data-args="rename">
+      <svg viewBox="0 0 16 16">
+        <path d="M11 2l3 3-8 8H3v-3z" />
+        <line x1="9" y1="4" x2="12" y2="7" />
+      </svg>
+      Rename
+    </div>
+    <div class="ctx-item" role="menuitem" tabindex="-1" data-action="ctxCmd" data-args="pin">
+      <svg viewBox="0 0 16 16">
+        <path d="M9 2l5 5-3 1-4 4-1 3-2-2 4-4L7 6z" />
+        <line x1="2" y1="14" x2="6" y2="10" />
+      </svg>
+      Pin / Unpin
+    </div>
+  </div>
+
+  <!-- Phase Y — right-click context menu on a .sh group header -->
+  <div class="ctx-menu" id="groupCtxMenu" role="menu">
+    <div class="ctx-item" role="menuitem" tabindex="-1" data-action="groupCtxCmd" data-args="reset">
+      <svg viewBox="0 0 16 16">
+        <path d="M3 8a5 5 0 1 0 1.5-3.5" />
+        <polyline points="1,5 3,8 6,6" />
+      </svg>
+      Reset group
+    </div>
+    <div
+      class="ctx-item"
+      role="menuitem"
+      tabindex="-1"
+      data-action="groupCtxCmd"
+      data-args="copyjson"
+    >
+      <svg viewBox="0 0 16 16">
+        <rect x="5" y="5" width="8" height="9" rx="1.5" />
+        <path d="M3 11V3a1 1 0 0 1 1-1h8" />
+      </svg>
+      Copy group as JSON
+    </div>
+    <div
+      class="ctx-item"
+      role="menuitem"
+      tabindex="-1"
+      data-action="groupCtxCmd"
+      data-args="pinall"
+    >
+      <svg viewBox="0 0 16 16">
+        <path d="M9 2l5 5-3 1-4 4-1 3-2-2 4-4L7 6z" />
+        <line x1="2" y1="14" x2="6" y2="10" />
+      </svg>
+      Pin all in group
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ SHADERTOY IMPORT (Phase 7.1) ══ -->
+  <div class="modal-overlay" id="stModal" data-action="closeSTModal" aria-hidden="true">
+    <div
+      class="modal"
+      style="width: 380px"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="stModalTitle"
+      tabindex="-1"
+    >
+      <div class="modal-header">
+        <h3 id="stModalTitle">Import from ShaderToy</h3>
+        <button class="modal-close" data-action="closeSTModal" aria-label="Close">
+          <svg viewBox="0 0 14 14">
+            <line x1="2" y1="2" x2="12" y2="12" />
+            <line x1="12" y1="2" x2="2" y2="12" />
+          </svg>
+        </button>
+      </div>
+      <div class="st-field">
+        <div class="modal-label">ShaderToy API Key</div>
+        <input
+          class="modal-input"
+          id="stApiKey"
+          placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+          data-input="stStoreApiKey"
+          aria-label="ShaderToy API key"
+        />
+        <div class="st-note">
+          Get your key at
+          <a href="https://www.shadertoy.com/myapps" target="_blank" rel="noopener"
+            >shadertoy.com/myapps</a
+          >
         </div>
-        <div class="hud">
-          <div class="pill" id="respill">-- × --</div>
-          <div class="pill" id="tpill">t = 0.00</div>
-          <div class="pill" id="fpill">f 0</div>
-        </div>
-        <!-- 1.1: collapsible error panel -->
-        <div class="cerr-wrap" id="cerrWrap" role="status" aria-live="polite" aria-atomic="false">
-          <div class="cerr-header" data-action="toggleErrPanel" id="cerrHeader">
-            <span>⚠</span>
-            <span>Compile Error</span>
-            <span class="cerr-count" id="cerrCount">0 error</span>
-            <span class="cerr-toggle" id="cerrToggle">▲</span>
-          </div>
-          <div class="cerr-body" id="cerrBody"></div>
+        <div class="st-note" id="stKeyNotice">
+          Security note: this key is stored unencrypted in your browser localStorage and sent to
+          ShaderToy via URL query string.
         </div>
       </div>
-
-      <!-- Timeline area (Blender-style transport strip, bound to state.simTime) -->
-      <div class="timeline-strip" id="timelineStrip">
-        <span class="tl-icon" aria-hidden="true">⏱</span>
-        <span class="vp-scrub-t" id="vpScrubT">t = 0.00 s</span>
-        <input type="range" id="timeScrubber" class="vp-scrub-range" min="0" max="60" step="0.01" value="0"
-               aria-label="Scrub simulation time">
-        <button id="timeScrubberReset" class="vp-scrub-reset" type="button" title="Reset time to 0" aria-label="Reset time to 0">↺</button>
-      </div>
-    </div>
-   </div>
-  </div>
-
-  <!-- Right column: Outliner (top) + contextual Inspector (below) — Blender-style stack -->
-  <div class="inspector-col" id="inspectorCol">
-    <!-- Outliner: read-only structure tree — Blender-style, top of the right column -->
-    <div class="outliner" id="outliner">
-      <div class="outliner-header">Outliner</div>
-      <div class="outliner-tree">
-        <div class="outliner-row" data-outliner-jump="render">
-          <span class="outliner-icon" aria-hidden="true">◈</span> Image <span class="outliner-badge">pass</span>
+      <div class="st-field">
+        <div class="modal-label" style="margin-bottom: 4px">Optional proxy mode (recommended)</div>
+        <label
+          class="st-note"
+          style="display: flex; align-items: center; gap: 6px; cursor: pointer"
+        >
+          <input
+            type="checkbox"
+            id="stUseProxy"
+            data-change="stSetUseProxyInput"
+            aria-label="Use backend proxy to hide API key"
+          />
+          Use backend proxy to hide key from direct ShaderToy URL requests
+        </label>
+        <input
+          class="modal-input"
+          id="stProxyUrl"
+          placeholder="/api/shadertoy or https://your-proxy.example.com/shadertoy"
+          data-input="stStoreProxyUrlInput"
+          style="margin-top: 6px"
+          aria-label="Proxy URL"
+        />
+        <div class="st-note">
+          Proxy contract: POST JSON { shaderId, apiKey } and return ShaderToy API JSON.
         </div>
-        <div class="outliner-row" data-outliner-jump="uniforms">
-          <span class="outliner-icon" aria-hidden="true">⊞</span> Uniforms <span class="outliner-count" id="outlinerUniformCount">0</span>
+      </div>
+      <div class="st-field">
+        <div class="modal-label">Shader ID or URL</div>
+        <input
+          class="modal-input"
+          id="stShaderId"
+          placeholder="XsXXXX or https://www.shadertoy.com/view/XsXXXX"
+          data-keydown="Enter:doSTImport"
+          aria-label="ShaderToy shader ID or URL"
+        />
+      </div>
+      <div class="st-field">
+        <div class="modal-label" style="margin-bottom: 2px">Built-in texture mapping</div>
+        <div class="st-note">
+          Abstract, noise, and common ShaderToy textures are mapped automatically to solid-colour
+          placeholders. Buffer, cubemap, sound, video, and keyboard channels are not supported and
+          fall back to a solid placeholder.
         </div>
       </div>
-    </div>
-
-    <!-- Inspector panel: contextual (Phase Q) — Pass / Slider / Uniform -->
-    <div class="inspector" id="inspector">
-      <div class="inspector-header">
-        <span class="inspector-title" id="inspectorTitle">Pass</span>
-        <button class="inspector-close" data-action="toggleInspectorPanel" aria-label="Close inspector">✕</button>
-      </div>
-      <div class="inspector-body" id="inspectorBody">
-        <div class="insp-pane" id="insp-pass"><div class="insp-empty">No active pass.</div></div>
-        <div class="insp-pane hidden" id="insp-slider"><div class="insp-empty">Hover a slider…</div></div>
-        <div class="insp-pane hidden" id="insp-uniform"><div class="insp-empty">Hover a runtime uniform in the editor…</div></div>
-      </div>
-    </div>
-  </div>
-</div>
-<footer class="app-footer app-statusbar" id="appStatusBar">
-  <!-- §1.3 — Zone gauche : état de compilation + compteur d'erreurs -->
-  <div class="sb-zone sb-left">
-    <div class="status-badge ready" id="statusBadge" role="status" aria-live="polite">
-      <div class="status-dot"></div><span id="stxt">READY</span>
-    </div>
-    <button class="sb-errcount" id="sbErrCount" data-action="toggleErrPanel" hidden
-            title="Show compile errors" aria-label="Compile errors — click to show panel">0 errors</button>
-  </div>
-
-  <!-- §1.3 — Zone centre : position du curseur -->
-  <div class="sb-zone sb-center">
-    <span class="curpos" id="curpos">Ln 1, Col 1</span>
-  </div>
-
-  <!-- F-10.4 — Zone info : uniforms, compile time, GPU mem, lignes -->
-  <div class="sb-zone sb-info" id="sbInfo" aria-label="Shader statistics">
-    <span class="sb-stat" id="sbUniforms" title="Uniform count">-- ⊞</span>
-    <span class="sb-sep" aria-hidden="true">·</span>
-    <span class="sb-stat" id="sbCompile" title="Last compile time">-- ms</span>
-    <span class="sb-sep" aria-hidden="true">·</span>
-    <span class="sb-stat" id="sbLines" title="Shader lines">-- L</span>
-    <span class="sb-sep" aria-hidden="true">·</span>
-    <span class="sb-stat" id="sbPassBadge" title="Active pass — click to scroll to tab" role="button" tabindex="0">◈ Image</span>
-  </div>
-
-  <!-- §1.3 — Zone droite : FPS, résolution, copyright -->
-  <div class="sb-zone sb-right">
-    <svg class="fps-spark-svg" id="fpsSpark" viewBox="0 0 90 18"
-         preserveAspectRatio="none" title="FPS history (last 90 frames)" aria-hidden="true">
-      <polyline id="fpsPolyline" points="" stroke="var(--spark-go)" opacity="0.7"/>
-    </svg>
-    <span role="status" aria-live="off" aria-atomic="true" id="fpsLive"><span class="fps" id="fps">-- fps</span></span>
-    <span class="sb-sep" aria-hidden="true">·</span>
-    <span class="sb-res" id="statusRes" title="Render resolution">-- × --</span>
-    <span class="sb-sep" aria-hidden="true">·</span>
-    <span class="sb-stat sb-mem" id="sbMemGpu" title="GPU renderer">-- MB</span>
-    <span class="sb-sep" aria-hidden="true">·</span>
-    <span class="sb-version" id="sbVersion" title="Sliders GL version">v--</span>
-    <span class="sb-sep" aria-hidden="true">·</span>
-    <span class="app-footer-copy">©2026 Patrick JAILLET</span>
-  </div>
-</footer>
-<!-- §6.2 — Région d'annonce assertive pour les lecteurs d'écran (erreurs) -->
-<div id="a11y-alert" class="sr-only" role="alert" aria-live="assertive" aria-atomic="true"></div>
-<!-- Fix 1.12 — Résumé shader pour lecteurs d'écran (créé dynamiquement par shader-summary.js mais déclaré ici comme ancre) -->
-<div id="shader-summary" class="sr-only" aria-live="polite" aria-atomic="true"></div>
-<!-- ═══════════════════════════════ TOAST STACK (Phase 5.3) ══ -->
-<!-- Stack de toasts Phase 5 — bas-centre, pile avec stagger -->
-<div id="toast-stack" aria-live="polite" aria-atomic="false"></div>
-
-<!-- ═══════════════════════════════ CONTEXT MENU (Phase 5.2) ══ -->
-<div class="ctx-menu" id="ctxMenu" role="menu">
-  <div class="ctx-item" role="menuitem" tabindex="-1" data-action="ctxCmd" data-args="reset">
-    <svg viewBox="0 0 16 16"><path d="M3 8a5 5 0 1 0 1.5-3.5"/><polyline points="1,5 3,8 6,6"/></svg>
-    Reset to default
-  </div>
-  <div class="ctx-item" role="menuitem" tabindex="-1" data-action="ctxCmd" data-args="copy">
-    <svg viewBox="0 0 16 16"><rect x="5" y="5" width="8" height="9" rx="1.5"/><path d="M3 11V3a1 1 0 0 1 1-1h8"/></svg>
-    Copy value
-  </div>
-  <div class="ctx-item" role="menuitem" tabindex="-1" data-action="ctxCmd" data-args="setrange">
-    <svg viewBox="0 0 16 16"><line x1="2" y1="8" x2="14" y2="8"/><line x1="2" y1="5" x2="2" y2="11"/><line x1="14" y1="5" x2="14" y2="11"/></svg>
-    Set range / precision…
-  </div>
-  <div class="ctx-sep" role="separator"></div>
-  <div class="ctx-item" role="menuitem" tabindex="-1" data-action="ctxCmd" data-args="rename">
-    <svg viewBox="0 0 16 16"><path d="M11 2l3 3-8 8H3v-3z"/><line x1="9" y1="4" x2="12" y2="7"/></svg>
-    Rename
-  </div>
-  <div class="ctx-item" role="menuitem" tabindex="-1" data-action="ctxCmd" data-args="pin">
-    <svg viewBox="0 0 16 16"><path d="M9 2l5 5-3 1-4 4-1 3-2-2 4-4L7 6z"/><line x1="2" y1="14" x2="6" y2="10"/></svg>
-    Pin / Unpin
-  </div>
-</div>
-
-<!-- Phase Y — right-click context menu on a .sh group header -->
-<div class="ctx-menu" id="groupCtxMenu" role="menu">
-  <div class="ctx-item" role="menuitem" tabindex="-1" data-action="groupCtxCmd" data-args="reset">
-    <svg viewBox="0 0 16 16"><path d="M3 8a5 5 0 1 0 1.5-3.5"/><polyline points="1,5 3,8 6,6"/></svg>
-    Reset group
-  </div>
-  <div class="ctx-item" role="menuitem" tabindex="-1" data-action="groupCtxCmd" data-args="copyjson">
-    <svg viewBox="0 0 16 16"><rect x="5" y="5" width="8" height="9" rx="1.5"/><path d="M3 11V3a1 1 0 0 1 1-1h8"/></svg>
-    Copy group as JSON
-  </div>
-  <div class="ctx-item" role="menuitem" tabindex="-1" data-action="groupCtxCmd" data-args="pinall">
-    <svg viewBox="0 0 16 16"><path d="M9 2l5 5-3 1-4 4-1 3-2-2 4-4L7 6z"/><line x1="2" y1="14" x2="6" y2="10"/></svg>
-    Pin all in group
-  </div>
-</div>
-
-<!-- ═══════════════════════════════ SHADERTOY IMPORT (Phase 7.1) ══ -->
-<div class="modal-overlay" id="stModal" data-action="closeSTModal" aria-hidden="true">
-  <div class="modal"  style="width:380px" role="dialog" aria-modal="true" aria-labelledby="stModalTitle" tabindex="-1">
-    <div class="modal-header">
-      <h3 id="stModalTitle">Import from ShaderToy</h3>
-      <button class="modal-close" data-action="closeSTModal" aria-label="Close">
-        <svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg>
-      </button>
-    </div>
-    <div class="st-field">
-      <div class="modal-label">ShaderToy API Key</div>
-      <input class="modal-input" id="stApiKey" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-        data-input="stStoreApiKey" aria-label="ShaderToy API key">
-      <div class="st-note">Get your key at <a href="https://www.shadertoy.com/myapps" target="_blank" rel="noopener">shadertoy.com/myapps</a></div>
-      <div class="st-note" id="stKeyNotice">Security note: this key is stored unencrypted in your browser localStorage and sent to ShaderToy via URL query string.</div>
-    </div>
-    <div class="st-field">
-      <div class="modal-label" style="margin-bottom:4px">Optional proxy mode (recommended)</div>
-      <label class="st-note" style="display:flex;align-items:center;gap:6px;cursor:pointer">
-        <input type="checkbox" id="stUseProxy" data-change="stSetUseProxyInput" aria-label="Use backend proxy to hide API key">
-        Use backend proxy to hide key from direct ShaderToy URL requests
-      </label>
-      <input class="modal-input" id="stProxyUrl" placeholder="/api/shadertoy or https://your-proxy.example.com/shadertoy"
-        data-input="stStoreProxyUrlInput" style="margin-top:6px" aria-label="Proxy URL">
-      <div class="st-note">Proxy contract: POST JSON { shaderId, apiKey } and return ShaderToy API JSON.</div>
-    </div>
-    <div class="st-field">
-      <div class="modal-label">Shader ID or URL</div>
-      <input class="modal-input" id="stShaderId" placeholder="XsXXXX or https://www.shadertoy.com/view/XsXXXX"
-        data-keydown="Enter:doSTImport" aria-label="ShaderToy shader ID or URL">
-    </div>
-    <div class="st-field">
-      <div class="modal-label" style="margin-bottom:2px">Built-in texture mapping</div>
-      <div class="st-note">
-        Abstract, noise, and common ShaderToy textures are mapped automatically to solid-colour placeholders.
-        Buffer, cubemap, sound, video, and keyboard channels are not supported and fall back to a solid placeholder.
+      <div
+        id="stStatus"
+        class="text-10"
+        style="font-family: 'JetBrains Mono', monospace; color: var(--t3); min-height: 16px"
+      ></div>
+      <div class="modal-actions">
+        <button class="modal-btn" data-action="closeSTModal" aria-label="Cancel import">
+          Cancel
+        </button>
+        <button
+          class="modal-btn"
+          data-action="stOpenInST"
+          id="stOpenBtn"
+          style="display: none"
+          aria-label="Open shader on ShaderToy website"
+        >
+          Open in ST ↗
+        </button>
+        <button
+          class="modal-btn confirm"
+          data-action="doSTImport"
+          id="stImportBtn"
+          aria-label="Import shader from ShaderToy"
+        >
+          Import
+        </button>
       </div>
     </div>
-    <div id="stStatus" class="text-10" style="font-family:'JetBrains Mono',monospace;color:var(--t3);min-height:16px"></div>
-    <div class="modal-actions">
-      <button class="modal-btn" data-action="closeSTModal" aria-label="Cancel import">Cancel</button>
-      <button class="modal-btn" data-action="stOpenInST" id="stOpenBtn" style="display:none" aria-label="Open shader on ShaderToy website">Open in ST ↗</button>
-      <button class="modal-btn confirm" data-action="doSTImport" id="stImportBtn" aria-label="Import shader from ShaderToy">Import</button>
+  </div>
+
+  <!-- Confirm overwrite/load dialog -->
+  <div class="modal-overlay" id="confirmModal" aria-hidden="true">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirmTitle"
+      aria-describedby="confirmMsg"
+      tabindex="-1"
+    >
+      <div class="modal-header">
+        <h3 id="confirmTitle">Load this shader?</h3>
+        <button class="modal-close" data-action="closeConfirmModal" aria-label="Close">
+          <svg viewBox="0 0 14 14">
+            <line x1="2" y1="2" x2="12" y2="12" />
+            <line x1="12" y1="2" x2="2" y2="12" />
+          </svg>
+        </button>
+      </div>
+      <p
+        class="text-11"
+        style="color: var(--t2); font-family: 'JetBrains Mono', monospace; line-height: 1.6"
+        id="confirmMsg"
+      ></p>
+      <div class="modal-actions">
+        <button class="modal-btn" data-action="closeConfirmModal" aria-label="Cancel">
+          Cancel
+        </button>
+        <button class="modal-btn confirm" data-action="executeConfirm" aria-label="Confirm action">
+          Confirm
+        </button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Confirm overwrite/load dialog -->
-<div class="modal-overlay" id="confirmModal" aria-hidden="true">
-  <div class="modal"  role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMsg" tabindex="-1">
-    <div class="modal-header">
-      <h3 id="confirmTitle">Load this shader?</h3>
-      <button class="modal-close" data-action="closeConfirmModal" aria-label="Close">
-        <svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg>
-      </button>
-    </div>
-    <p class="text-11" style="color:var(--t2);font-family:'JetBrains Mono',monospace;line-height:1.6" id="confirmMsg"></p>
-    <div class="modal-actions">
-      <button class="modal-btn" data-action="closeConfirmModal" aria-label="Cancel">Cancel</button>
-      <button class="modal-btn confirm" data-action="executeConfirm" aria-label="Confirm action">Confirm</button>
+  <!-- Export Modal (Phase 4) -->
+  <div class="modal-overlay" id="exportModal" data-action="closeExportModal" aria-hidden="true">
+    <div
+      class="modal export-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="exportModalTitle"
+      tabindex="-1"
+    >
+      <div class="modal-header">
+        <h3 id="exportModalTitle">Export</h3>
+        <button class="modal-close" data-action="closeExportModal" aria-label="Close">
+          <svg viewBox="0 0 14 14">
+            <line x1="2" y1="2" x2="12" y2="12" />
+            <line x1="12" y1="2" x2="2" y2="12" />
+          </svg>
+        </button>
+      </div>
+      <!-- tabs -->
+      <div class="export-tabs" role="tablist" aria-label="Export format">
+        <button
+          class="export-tab active"
+          role="tab"
+          data-action="switchExportTab"
+          data-args="image"
+          aria-label="Image export"
+          aria-selected="true"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 14 14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+          >
+            <rect x="1" y="2" width="12" height="10" rx="1" />
+            <path d="M1 9l3-3 3 3 2-2 4 4" />
+            <circle cx="10" cy="5" r="1.2" fill="currentColor" stroke="none" />
+          </svg>
+          Image
+        </button>
+        <button
+          class="export-tab"
+          role="tab"
+          data-action="switchExportTab"
+          data-args="video"
+          aria-label="Video export"
+          aria-selected="false"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 14 14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+          >
+            <rect x="1" y="2" width="9" height="10" rx="1" />
+            <path d="M10 5l3-2v8l-3-2" fill="currentColor" stroke="none" />
+            <path d="M10 5l3-2v8l-3-2z" />
+          </svg>
+          Video
+        </button>
+        <button
+          class="export-tab"
+          role="tab"
+          data-action="switchExportTab"
+          data-args="code"
+          aria-label="Code export"
+          aria-selected="false"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 14 14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+          >
+            <polyline points="4,3 1,7 4,11" />
+            <polyline points="10,3 13,7 10,11" />
+          </svg>
+          Code
+        </button>
+      </div>
+
+      <!-- Image pane -->
+      <div class="export-pane active" id="exp-image">
+        <div class="exp-row">
+          <div class="exp-label">Resolution</div>
+          <select class="exp-select" id="exp-res" aria-label="Image export resolution">
+            <option value="viewport">Viewport (current)</option>
+            <option value="1280x720">1280 × 720 (HD)</option>
+            <option value="1920x1080" selected>1920 × 1080 (Full HD)</option>
+            <option value="2560x1440">2560 × 1440 (QHD)</option>
+            <option value="3840x2160">3840 × 2160 (4K)</option>
+          </select>
+        </div>
+        <label class="exp-check-row">
+          <input type="checkbox" id="exp-alpha" aria-label="Export with transparent background" />
+          <span class="exp-check-label">Transparent background (alpha)</span>
+        </label>
+        <button
+          class="exp-action-btn"
+          data-action="exportScreenshot"
+          id="exp-ss-btn"
+          aria-label="Download screenshot as PNG"
+        >
+          ↓ Download PNG
+        </button>
+        <button
+          class="exp-action-btn"
+          style="background: var(--bg3); margin-top: 0"
+          data-action="renderExportPreview"
+          data-args="exp-img-preview,1920x1080"
+          aria-label="Preview first frame before exporting"
+        >
+          <span aria-hidden="true">👁</span> Preview Frame
+        </button>
+        <div id="exp-img-preview" style="margin-top: 6px; min-height: 0"></div>
+        <div class="exp-note">
+          Renders an offscreen frame at the chosen resolution.<br />The live viewport is not
+          affected.
+        </div>
+      </div>
+
+      <!-- Video pane -->
+      <div class="export-pane" id="exp-video">
+        <div class="exp-row">
+          <div class="exp-label">Duration</div>
+          <select class="exp-select" id="exp-dur" aria-label="Video export duration">
+            <option value="5">5 seconds</option>
+            <option value="10" selected>10 seconds</option>
+            <option value="15">15 seconds</option>
+            <option value="30">30 seconds</option>
+            <option value="60">60 seconds</option>
+          </select>
+        </div>
+        <div class="exp-row">
+          <div class="exp-label">Frame rate</div>
+          <select class="exp-select" id="exp-fps" aria-label="Video export frame rate">
+            <option value="24">24 fps</option>
+            <option value="30" selected>30 fps</option>
+            <option value="60">60 fps</option>
+          </select>
+        </div>
+        <div class="exp-row">
+          <div class="exp-label">Start time</div>
+          <select class="exp-select" id="exp-tstart" aria-label="Video export start time">
+            <option value="current" selected>Current (iTime)</option>
+            <option value="0">0.0 (from start)</option>
+          </select>
+        </div>
+        <div class="exp-progress" id="exp-vprog-wrap" style="display: none">
+          <div class="exp-progress-bar" id="exp-vprog"></div>
+        </div>
+        <button
+          class="exp-action-btn rec"
+          data-action="toggleVideoRecord"
+          id="exp-rec-btn"
+          aria-label="Toggle video recording"
+        >
+          ⏺ Start Recording
+        </button>
+        <div class="exp-note">
+          Records the live viewport via MediaRecorder.<br />Output: WebM (VP9). Audio channels are
+          not captured.
+        </div>
+      </div>
+
+      <!-- Code pane -->
+      <div class="export-pane" id="exp-code">
+        <div class="exp-code-row">
+          <button
+            class="exp-code-btn"
+            data-action="exportStandaloneHTML"
+            aria-label="Export as standalone HTML file"
+          >
+            ⟨/⟩<br />Standalone HTML
+          </button>
+          <button
+            class="exp-code-btn"
+            data-action="exportPureGLSL"
+            aria-label="Export as pure GLSL code"
+          >
+            ◈<br />Pure GLSL
+          </button>
+          <button
+            class="exp-code-btn"
+            data-action="exportMinifiedGLSL"
+            aria-label="Export as minified GLSL code"
+          >
+            ⊡<br />Minified GLSL
+          </button>
+          <button
+            class="exp-code-btn"
+            data-action="exportThreeSnippet"
+            aria-label="Export as Three.js ShaderMaterial snippet"
+          >
+            △<br />Three.js snippet
+          </button>
+          <button
+            class="exp-code-btn"
+            data-action="exportProjectZip"
+            id="expZipBtn"
+            aria-label="Export full project as ZIP archive"
+          >
+            📦<br />Project ZIP
+          </button>
+          <button
+            class="exp-code-btn"
+            data-action="exportP5Sketch"
+            aria-label="Export as p5.js sketch"
+          >
+            🎨<br />p5.js sketch
+          </button>
+          <button
+            class="exp-code-btn"
+            data-action="exportGLSLSandbox"
+            aria-label="Export GLSL Sandbox compatible shader"
+          >
+            🟩<br />GLSL Sandbox
+          </button>
+          <button
+            class="exp-code-btn"
+            data-action="exportShaderToyFormat"
+            aria-label="Export ShaderToy paste format"
+          >
+            🌐<br />ShaderToy
+          </button>
+        </div>
+        <div class="exp-note">
+          Standalone HTML: self-contained file, no Monaco, no dependencies.<br />Minified GLSL:
+          strips comments and whitespace for sharing.<br />Three.js: paste-ready ShaderMaterial ·
+          p5.js: runs in the p5 editor · GLSL Sandbox / ShaderToy: platform-compatible paste format.
+        </div>
+      </div>
+
+      <div style="margin-top: 8px; text-align: right">
+        <button class="modal-btn" data-action="closeExportModal" aria-label="Close export dialog">
+          Close
+        </button>
+      </div>
     </div>
   </div>
-</div>
-
-<!-- Export Modal (Phase 4) -->
-<div class="modal-overlay" id="exportModal" data-action="closeExportModal" aria-hidden="true">
-  <div class="modal export-modal"  role="dialog" aria-modal="true" aria-labelledby="exportModalTitle" tabindex="-1">
-    <div class="modal-header">
-      <h3 id="exportModalTitle">Export</h3>
-      <button class="modal-close" data-action="closeExportModal" aria-label="Close">
-        <svg viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg>
-      </button>
-    </div>
-    <!-- tabs -->
-    <div class="export-tabs" role="tablist" aria-label="Export format">
-      <button class="export-tab active" role="tab" data-action="switchExportTab" data-args="image" aria-label="Image export" aria-selected="true">
-        <svg aria-hidden="true" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="2" width="12" height="10" rx="1"/><path d="M1 9l3-3 3 3 2-2 4 4"/><circle cx="10" cy="5" r="1.2" fill="currentColor" stroke="none"/></svg>
-        Image</button>
-      <button class="export-tab" role="tab" data-action="switchExportTab" data-args="video" aria-label="Video export" aria-selected="false">
-        <svg aria-hidden="true" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="2" width="9" height="10" rx="1"/><path d="M10 5l3-2v8l-3-2" fill="currentColor" stroke="none"/><path d="M10 5l3-2v8l-3-2z"/></svg>
-        Video</button>
-      <button class="export-tab" role="tab" data-action="switchExportTab" data-args="code" aria-label="Code export" aria-selected="false">
-        <svg aria-hidden="true" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><polyline points="4,3 1,7 4,11"/><polyline points="10,3 13,7 10,11"/></svg>
-        Code</button>
-    </div>
-
-    <!-- Image pane -->
-    <div class="export-pane active" id="exp-image">
-      <div class="exp-row">
-        <div class="exp-label">Resolution</div>
-        <select class="exp-select" id="exp-res" aria-label="Image export resolution">
-          <option value="viewport">Viewport (current)</option>
-          <option value="1280x720">1280 × 720 (HD)</option>
-          <option value="1920x1080" selected>1920 × 1080 (Full HD)</option>
-          <option value="2560x1440">2560 × 1440 (QHD)</option>
-          <option value="3840x2160">3840 × 2160 (4K)</option>
-        </select>
-      </div>
-      <label class="exp-check-row">
-        <input type="checkbox" id="exp-alpha" aria-label="Export with transparent background">
-        <span class="exp-check-label">Transparent background (alpha)</span>
-      </label>
-      <button class="exp-action-btn" data-action="exportScreenshot" id="exp-ss-btn" aria-label="Download screenshot as PNG">
-        ↓ Download PNG
-      </button>
-      <button class="exp-action-btn" style="background:var(--bg3);margin-top:0" data-action="renderExportPreview" data-args="exp-img-preview,1920x1080" aria-label="Preview first frame before exporting">
-        <span aria-hidden="true">👁</span> Preview Frame
-      </button>
-      <div id="exp-img-preview" style="margin-top:6px;min-height:0"></div>
-      <div class="exp-note">Renders an offscreen frame at the chosen resolution.<br>The live viewport is not affected.</div>
-    </div>
-
-    <!-- Video pane -->
-    <div class="export-pane" id="exp-video">
-      <div class="exp-row">
-        <div class="exp-label">Duration</div>
-        <select class="exp-select" id="exp-dur" aria-label="Video export duration">
-          <option value="5">5 seconds</option>
-          <option value="10" selected>10 seconds</option>
-          <option value="15">15 seconds</option>
-          <option value="30">30 seconds</option>
-          <option value="60">60 seconds</option>
-        </select>
-      </div>
-      <div class="exp-row">
-        <div class="exp-label">Frame rate</div>
-        <select class="exp-select" id="exp-fps" aria-label="Video export frame rate">
-          <option value="24">24 fps</option>
-          <option value="30" selected>30 fps</option>
-          <option value="60">60 fps</option>
-        </select>
-      </div>
-      <div class="exp-row">
-        <div class="exp-label">Start time</div>
-        <select class="exp-select" id="exp-tstart" aria-label="Video export start time">
-          <option value="current" selected>Current (iTime)</option>
-          <option value="0">0.0 (from start)</option>
-        </select>
-      </div>
-      <div class="exp-progress" id="exp-vprog-wrap" style="display:none">
-        <div class="exp-progress-bar" id="exp-vprog"></div>
-      </div>
-      <button class="exp-action-btn rec" data-action="toggleVideoRecord" id="exp-rec-btn" aria-label="Toggle video recording">
-        ⏺ Start Recording
-      </button>
-      <div class="exp-note">Records the live viewport via MediaRecorder.<br>Output: WebM (VP9). Audio channels are not captured.</div>
-    </div>
-
-    <!-- Code pane -->
-    <div class="export-pane" id="exp-code">
-      <div class="exp-code-row">
-        <button class="exp-code-btn" data-action="exportStandaloneHTML" aria-label="Export as standalone HTML file">⟨/⟩<br>Standalone HTML</button>
-        <button class="exp-code-btn" data-action="exportPureGLSL" aria-label="Export as pure GLSL code">◈<br>Pure GLSL</button>
-        <button class="exp-code-btn" data-action="exportMinifiedGLSL" aria-label="Export as minified GLSL code">⊡<br>Minified GLSL</button>
-        <button class="exp-code-btn" data-action="exportThreeSnippet" aria-label="Export as Three.js ShaderMaterial snippet">△<br>Three.js snippet</button>
-        <button class="exp-code-btn" data-action="exportProjectZip" id="expZipBtn" aria-label="Export full project as ZIP archive">📦<br>Project ZIP</button>
-        <button class="exp-code-btn" data-action="exportP5Sketch" aria-label="Export as p5.js sketch">🎨<br>p5.js sketch</button>
-        <button class="exp-code-btn" data-action="exportGLSLSandbox" aria-label="Export GLSL Sandbox compatible shader">🟩<br>GLSL Sandbox</button>
-        <button class="exp-code-btn" data-action="exportShaderToyFormat" aria-label="Export ShaderToy paste format">🌐<br>ShaderToy</button>
-      </div>
-      <div class="exp-note">Standalone HTML: self-contained file, no Monaco, no dependencies.<br>Minified GLSL: strips comments and whitespace for sharing.<br>Three.js: paste-ready ShaderMaterial · p5.js: runs in the p5 editor · GLSL Sandbox / ShaderToy: platform-compatible paste format.</div>
-    </div>
-
-    <div style="margin-top:8px;text-align:right">
-      <button class="modal-btn" data-action="closeExportModal" aria-label="Close export dialog">Close</button>
-    </div>
-  </div>
-</div>
+</body>

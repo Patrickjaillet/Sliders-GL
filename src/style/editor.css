@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   min-height: 96px;
-  flex: 1 1 auto;   /* fills the rest of .editor-col's height below the pass tabs */
+  flex: 1 1 auto; /* fills the rest of .editor-col's height below the pass tabs */
   overflow: visible;
   background: var(--bg-surface);
   width: 100%;
@@ -101,7 +101,10 @@
   font-family: var(--font-mono);
   font-size: 10px;
   cursor: pointer;
-  transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast),
+    color var(--t-fast);
 }
 
 .ebn:hover {
@@ -150,7 +153,9 @@
   border: 1px solid var(--status-err);
   background: var(--status-err-bg);
   box-shadow: var(--shadow-md);
-  transition: max-height 200ms ease, border-color 200ms ease;
+  transition:
+    max-height 200ms ease,
+    border-color 200ms ease;
 }
 
 .cerr-wrap.visible {
@@ -294,7 +299,10 @@
   align-items: center;
   padding: 0 10px;
   border-radius: var(--radius);
-  transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast);
+  transition:
+    color var(--t-fast),
+    border-color var(--t-fast),
+    background var(--t-fast);
 }
 
 .pass-tab:hover {
@@ -304,7 +312,10 @@
 }
 
 .pass-tab.active {
-  color: var(--accent-hover);
+  /* --accent-hover is reserved for transient hover feedback, not static text
+     (see tokens.css) — using it here for a permanently-active tab left it
+     under the WCAG AA contrast minimum against the tinted background. */
+  color: var(--accent);
   border-color: var(--accent);
   background: var(--accent-light);
   font-weight: 500;
@@ -347,27 +358,64 @@
 }
 
 @keyframes compilePulseTab {
-  0%   { transform: scale(0.8); opacity: 0.5; }
-  50%  { transform: scale(1.2); opacity: 1;   }
-  100% { transform: scale(1);   opacity: 0.7; }
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
 }
 
 /* ── Monaco theme overrides ─────────────────────────────────────────────── */
 
-.monaco-editor .margin { background: var(--bg-editor) !important; }
-.monaco-editor, .monaco-editor-background { background: var(--bg-editor) !important; }
+.monaco-editor .margin {
+  background: var(--bg-editor) !important;
+}
+.monaco-editor,
+.monaco-editor-background {
+  background: var(--bg-editor) !important;
+}
 
 /* Error line decoration */
-.errorLineHighlight { background: rgba(239,68,68,0.08) !important; border-left: 2px solid #EF4444 !important; }
-.errorGlyph::before { content: '\26D4'; color: #EF4444; font-size: 11px; font-style: normal; }
-.errorInlineMsg { color: #F87171 !important; font-style: italic; opacity: 0.78; font-size: 0.88em; pointer-events: none; }
+.errorLineHighlight {
+  background: rgba(239, 68, 68, 0.08) !important;
+  border-left: 2px solid #ef4444 !important;
+}
+.errorGlyph::before {
+  content: '\26D4';
+  color: #ef4444;
+  font-size: 11px;
+  font-style: normal;
+}
+.errorInlineMsg {
+  color: #f87171 !important;
+  font-style: italic;
+  opacity: 0.78;
+  font-size: 0.88em;
+  pointer-events: none;
+}
 
 /* Inlay hints */
-.monaco-editor .inlay-hint { color: #4D5566 !important; font-size: 10px !important; font-family: 'JetBrains Mono', monospace !important; }
+.monaco-editor .inlay-hint {
+  color: #4d5566 !important;
+  font-size: 10px !important;
+  font-family: 'JetBrains Mono', monospace !important;
+}
 
 /* Scrollbar */
-.monaco-scrollable-element > .scrollbar > .slider { background: rgba(255,255,255,0.12) !important; border-radius: 3px !important; }
-.monaco-scrollable-element > .scrollbar > .slider:hover { background: rgba(255,255,255,0.22) !important; }
+.monaco-scrollable-element > .scrollbar > .slider {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-radius: 3px !important;
+}
+.monaco-scrollable-element > .scrollbar > .slider:hover {
+  background: rgba(255, 255, 255, 0.22) !important;
+}
 
 /* ── Command Palette ─────────────────────────────────────────────────────── */
 
@@ -379,7 +427,7 @@
   align-items: flex-start;
   justify-content: center;
   padding-top: 14vh;
-  background: rgba(0, 0, 0, 0.60);
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(2px);
   animation: toast-in 120ms ease;
 }
@@ -392,7 +440,7 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--border-mid);
   background: var(--bg-overlay);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
   overflow: hidden;
 }
 
@@ -423,7 +471,9 @@
   scrollbar-color: var(--border-strong) transparent;
 }
 
-.zcp-list::-webkit-scrollbar { width: 4px; }
+.zcp-list::-webkit-scrollbar {
+  width: 4px;
+}
 .zcp-list::-webkit-scrollbar-thumb {
   border-radius: 2px;
   background: var(--border-strong);
@@ -509,8 +559,12 @@
   color: var(--text-secondary);
   cursor: pointer;
 }
-.settings-check input { accent-color: var(--accent); }
-.settings-check:hover { color: var(--text-primary); }
+.settings-check input {
+  accent-color: var(--accent);
+}
+.settings-check:hover {
+  color: var(--text-primary);
+}
 
 /* ── WGSL Preview split layout ──────────────────────────────────────────── */
 
@@ -543,7 +597,9 @@
   color: var(--text-inverse, #fff);
   cursor: pointer;
   font-weight: 600;
-  transition: background var(--t-fast), border-color var(--t-fast);
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast);
   flex-shrink: 0;
 }
 
@@ -567,7 +623,7 @@
   border: 1px solid var(--border, #2a2d40);
   border-radius: var(--radius, 6px);
   padding: 4px;
-  box-shadow: 0 4px 16px rgba(0,0,0,.5);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
   flex-direction: column;
   gap: 2px;
   min-width: 100px;
@@ -621,7 +677,7 @@
   border: 1px solid var(--border, #2a2d40);
   border-radius: var(--radius, 6px);
   padding: 4px;
-  box-shadow: 0 4px 16px rgba(0,0,0,.5);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
   flex-direction: column;
   gap: 2px;
   min-width: 160px;
@@ -691,7 +747,7 @@
   cursor: pointer;
   font-size: 14px;
   border-right: 1px solid var(--border);
-  opacity: .7;
+  opacity: 0.7;
   transition: opacity var(--t-fast);
 }
 

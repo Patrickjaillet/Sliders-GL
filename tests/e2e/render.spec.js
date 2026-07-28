@@ -5,8 +5,8 @@
  */
 
 // @ts-check
-const { test, expect } = require('@playwright/test');
-const crypto = require('crypto');
+import { test, expect } from '@playwright/test';
+import crypto from 'crypto';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -34,12 +34,15 @@ async function waitForRender(page, timeout = 10_000) {
 
 /** Apply a shader via the Apply button or Ctrl+Enter */
 async function applyShader(page, code) {
-  // Focus the Monaco editor textarea
-  const editorArea = page.locator('.monaco-editor textarea').first();
-  await editorArea.waitFor({ timeout: 8_000 });
+  // Focus the Monaco editor. Calling .focus() directly on the hidden input
+  // textarea sets DOM focus but doesn't establish Monaco's own internal
+  // editor-focus state, so keystrokes are silently dropped — a real click on
+  // the rendered view-lines is what Monaco actually listens for.
+  const viewLines = page.locator('.monaco-editor .view-lines');
+  await viewLines.waitFor({ timeout: 8_000 });
+  await viewLines.click();
 
   // Select all and replace
-  await editorArea.focus();
   await page.keyboard.press('Control+a');
   await page.keyboard.type(code, { delay: 0 });
 
@@ -56,6 +59,11 @@ async function applyShader(page, code) {
 
 test.describe('Sliders GL render pipeline E2E', () => {
   test.beforeEach(async ({ page }) => {
+    // A fresh browser context has no localStorage, so the first-launch welcome
+    // modal would open and intercept every subsequent click in this suite —
+    // these tests target the render/export pipeline, not onboarding, so mark
+    // it as already dismissed before any app script runs.
+    await page.addInitScript(() => localStorage.setItem('sl_first_launch_done', '1'));
     await page.goto('/');
     // Wait for the app to boot — Monaco editor should be present
     await page.waitForSelector('.monaco-editor', { timeout: 20_000 });
@@ -73,7 +81,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     await applyShader(page, shader);
     await waitForRender(page);
 
-    const canvas = page.locator('canvas').first();
+    // #glc is the WebGL viewport canvas — Monaco's minimap also renders via an
+    // internal <canvas> that precedes it in DOM order, so a bare `canvas`
+    // locator would grab that instead.
+    const canvas = page.locator('#glc');
     await expect(canvas).toBeVisible();
 
     // Canvas should have non-zero dimensions
@@ -100,13 +111,29 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // Wait a beat to ensure the frame is fully painted
     await page.waitForTimeout(500);
 
-    const screenshot1 = await page.locator('canvas').first().screenshot();
-    const hash1 = pixelHash(screenshot1);
+    // Read the actual WebGL framebuffer rather than an element .screenshot():
+    // #glc is displayed through a CSS transform: scale(var(--cw-scale)) wrapper
+    // (see .cw.scale-fit in layout.css), and rasterizing a fractionally-scaled
+    // element into a PNG twice in a row is not guaranteed pixel-stable (browser
+    // compositing/anti-aliasing jitter) even though the GL content underneath
+    // is byte-identical — confirmed by comparing raw readPixels() output above.
+    const readGlPixels = () =>
+      page.evaluate(() => {
+        const canvas = document.getElementById('glc');
+        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+        const { width, height } = canvas;
+        const pixels = new Uint8Array(width * height * 4);
+        gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+        return Array.from(pixels);
+      });
 
-    // Take a second screenshot shortly after — should be identical (no animation)
+    const pixels1 = await readGlPixels();
+    const hash1 = pixelHash(Buffer.from(pixels1));
+
+    // Read again shortly after — should be identical (no animation)
     await page.waitForTimeout(200);
-    const screenshot2 = await page.locator('canvas').first().screenshot();
-    const hash2 = pixelHash(screenshot2);
+    const pixels2 = await readGlPixels();
+    const hash2 = pixelHash(Buffer.from(pixels2));
 
     expect(hash1).toBe(hash2);
     expect(hash1).toHaveLength(16);
@@ -140,7 +167,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   // ── Test 4: Export modal opens ─────────────────────────────────────────────
 
   test('export button opens export modal', async ({ page }) => {
-    const exportBtn = page.locator('#exportBtn, [data-action="openExportModal"]').first();
+    // #exportBtn is the always-visible topbar quick-access icon; several other
+    // elements (File-menu item, tool-shelf icon, panel button) share the same
+    // data-action but sit inside collapsed/hidden containers by default.
+    const exportBtn = page.locator('#exportBtn');
     await exportBtn.click();
 
     // Export modal should become visible

@@ -10,12 +10,14 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(0,0,0,0.70);
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(2px);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity var(--dur) var(--ease), visibility var(--dur) var(--ease);
+  transition:
+    opacity var(--dur) var(--ease),
+    visibility var(--dur) var(--ease);
 }
 
 .modal-overlay.open {
@@ -36,10 +38,12 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--border-mid);
   background: var(--bg-overlay);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
   opacity: 0;
   transform: translateY(8px) scale(0.99);
-  transition: transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
+  transition:
+    transform var(--dur) var(--ease),
+    opacity var(--dur) var(--ease);
 }
 
 .modal-overlay.open .modal {
@@ -51,7 +55,6 @@
   transform: translateY(-4px);
   opacity: 0;
 }
-
 
 .modal-header,
 .modal-body,
@@ -92,7 +95,10 @@
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast);
+  transition:
+    color var(--t-fast),
+    border-color var(--t-fast),
+    background var(--t-fast);
 }
 
 .modal-close:hover {
@@ -230,13 +236,16 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--border-mid);
   background: var(--bg-overlay);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
   pointer-events: none;
   visibility: hidden;
   opacity: 0;
   transform: translateY(-4px);
   transform-origin: top left;
-  transition: opacity 80ms ease, transform 80ms ease, visibility 0s linear 80ms;
+  transition:
+    opacity 80ms ease,
+    transform 80ms ease,
+    visibility 0s linear 80ms;
 }
 
 .ctx-menu.open {
@@ -244,7 +253,10 @@
   visibility: visible;
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 80ms ease, transform 80ms ease, visibility 0s linear 0s;
+  transition:
+    opacity 80ms ease,
+    transform 80ms ease,
+    visibility 0s linear 0s;
 }
 
 .ctx-item {
@@ -322,7 +334,9 @@
 /* §3 audit — seul système actif. Le singleton legacy #toast a été
    supprimé de ui.html. Cette règle le cache par sécurité si du code
    externe venait à le réinjecter. */
-#toast { display: none !important; }
+#toast {
+  display: none !important;
+}
 
 #toast-stack {
   position: fixed;
@@ -357,7 +371,9 @@
   opacity: 0;
   transform: translateY(10px) scale(0.98);
   /* §B.1 — entrée expressive (spring) unifiée */
-  transition: opacity var(--motion-quick), transform var(--motion-spring);
+  transition:
+    opacity var(--motion-quick),
+    transform var(--motion-spring);
 }
 
 .toast.show {
@@ -414,7 +430,10 @@
   font: 12px var(--font-ui);
   cursor: pointer;
 }
-.exp-preset-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.exp-preset-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
 
 /* §9.4 — compteur de toasts identiques regroupés */
 .toast-count {
@@ -440,27 +459,36 @@
 }
 
 @keyframes toastProgress {
-  from { transform: scaleX(1); }
-  to   { transform: scaleX(0); }
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
 }
 
+/* Toasts float freely over the whole viewport, including the code editor pane
+   (kept intentionally dark — see --bg-editor in tokens.css) — layering the
+   status tint over an opaque --bg-panel backing (rather than the bare
+   translucent token, which is fine for hovers painted over a known-light
+   panel) keeps toast text legible no matter what's positioned underneath. */
 .toast.ok {
   color: var(--status-ok);
   border-color: var(--status-ok);
-  background: var(--status-ok-bg);
+  background: linear-gradient(var(--status-ok-bg), var(--status-ok-bg)), var(--bg-panel);
 }
 
 .toast.warn {
   color: var(--status-warn);
   border-color: var(--status-warn);
-  background: var(--status-warn-bg);
+  background: linear-gradient(var(--status-warn-bg), var(--status-warn-bg)), var(--bg-panel);
 }
 
 .toast.err,
 .toast.error {
   color: var(--status-err);
   border-color: var(--status-err);
-  background: var(--status-err-bg);
+  background: linear-gradient(var(--status-err-bg), var(--status-err-bg)), var(--bg-panel);
 }
 
 /* ── Notes et liens ──────────────────────────────────────────── */
@@ -493,7 +521,9 @@
   border-radius: var(--radius);
   cursor: pointer;
   text-align: left;
-  transition: border-color var(--t-fast), background var(--t-fast);
+  transition:
+    border-color var(--t-fast),
+    background var(--t-fast);
 }
 
 .welcome-card:hover {

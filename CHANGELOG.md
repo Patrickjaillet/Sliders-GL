@@ -5,6 +5,17 @@ All notable changes to Sliders GL are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] — 2026-07-28
+
+### Fixed
+
+- Accessibility: fixed several WCAG 2.1 AA color-contrast issues across the
+  gray theme — control borders, status toasts, the active pass/workspace
+  tabs, viewport HUD readouts, and status-bar text now all meet or exceed
+  the required contrast ratios.
+- Accessibility: the Outliner and Inspector panels are now reachable and
+  scrollable by keyboard.
+
 ## [1.0.0] — 2026-07-26
 
 ### Added
@@ -29,4 +40,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   locally — zero network dependency for core functionality.
 - MIT license.
 
+[1.0.1]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.0.1
 [1.0.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.0.0

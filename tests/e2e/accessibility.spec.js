@@ -6,13 +6,19 @@
  */
 
 // @ts-check
-const { test, expect } = require('@playwright/test');
-const AxeBuilder = require('@axe-core/playwright').default;
+import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 test.describe('Sliders GL accessibility (axe-core)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('.monaco-editor', { timeout: 20_000 });
+    // The first-launch welcome modal fades/scales in over --dur (120ms); give it
+    // time to settle so axe doesn't sample a still-transitioning, translucent state.
+    const welcome = page.locator('#welcome-overlay.open .modal');
+    if ((await welcome.count()) > 0) {
+      await expect(welcome).toHaveCSS('opacity', '1');
+    }
   });
 
   test('main workspace has no WCAG 2.1 AA violations', async ({ page }) => {
@@ -22,7 +28,7 @@ test.describe('Sliders GL accessibility (axe-core)', () => {
 
     if (results.violations.length > 0) {
       const summary = results.violations
-        .map(v => `${v.id} (${v.impact}): ${v.nodes.length} node(s) — ${v.help}`)
+        .map((v) => `${v.id} (${v.impact}): ${v.nodes.length} node(s) — ${v.help}`)
         .join('\n');
       console.log('Accessibility violations:\n' + summary);
     }

@@ -27,11 +27,11 @@ const COMP_W = 800;
 const COMP_H = 450;
 
 export const RESOLUTION_PRESETS = {
-  viewport: null,          // fixed composition canvas (800x450)
-  '720p':   [1280,  720],
-  '1080p':  [1920, 1080],
-  '1440p':  [2560, 1440],
-  '2160p':  [3840, 2160],
+  viewport: null, // fixed composition canvas (800x450)
+  '720p': [1280, 720],
+  '1080p': [1920, 1080],
+  '1440p': [2560, 1440],
+  '2160p': [3840, 2160],
 };
 
 const PRESET_KEY = 'zgl_render_res_v1';
@@ -41,7 +41,11 @@ let _activePreset = safeLocalGet(PRESET_KEY, 'viewport');
 
 /** Custom resolution [w, h] when preset === 'custom'. */
 let _customRes = (() => {
-  try { return JSON.parse(safeLocalGet('zgl_render_res_custom', '[1920,1080]')); } catch { return [1920, 1080]; }
+  try {
+    return JSON.parse(safeLocalGet('sl_render_res_custom', '[1920,1080]'));
+  } catch {
+    return [1920, 1080];
+  }
 })();
 
 /**
@@ -55,7 +59,7 @@ export function setRenderResolution(preset, customWH) {
 
   if (preset === 'custom' && customWH) {
     _customRes = customWH;
-    safeLocalSet('zgl_render_res_custom', JSON.stringify(customWH));
+    safeLocalSet('sl_render_res_custom', JSON.stringify(customWH));
   }
 
   _applyResolution();
@@ -63,12 +67,14 @@ export function setRenderResolution(preset, customWH) {
 }
 
 /** Return the active preset key. */
-export function getActiveResolutionPreset() { return _activePreset; }
+export function getActiveResolutionPreset() {
+  return _activePreset;
+}
 
 /** Return the effective [width, height] for the current preset. */
 export function getEffectiveResolution() {
   if (_activePreset === 'viewport') return _getViewportSize();
-  if (_activePreset === 'custom')   return _customRes;
+  if (_activePreset === 'custom') return _customRes;
   return RESOLUTION_PRESETS[_activePreset] ?? _getViewportSize();
 }
 
@@ -85,7 +91,7 @@ export function _applyResolution() {
 
   if (_activePreset === 'viewport') {
     const canvas = state.renderer3.domElement;
-    canvas.style.width  = '';
+    canvas.style.width = '';
     canvas.style.height = '';
     doResize();
     return;
@@ -99,7 +105,7 @@ export function _applyResolution() {
   state.renderer3.setSize(w, h, false);
 
   // CSS-scale the canvas to fill its container without affecting GL viewport
-  canvas.style.width  = '100%';
+  canvas.style.width = '100%';
   canvas.style.height = '100%';
   canvas.style.imageRendering = 'auto';
 
@@ -116,7 +122,7 @@ export function _applyResolution() {
 }
 
 function _syncUI() {
-  document.querySelectorAll('[data-res-preset]').forEach(btn => {
+  document.querySelectorAll('[data-res-preset]').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.resPreset === _activePreset);
   });
   const customInput = document.getElementById('resCustomWH');
@@ -142,12 +148,15 @@ function _syncUI() {
  * @param {number}   [opts.quality=0.95]  - for jpeg/webp
  * @returns {Promise<Blob>}
  */
-export async function renderHeadless({ width = 1920, height = 1080, alpha = false,
-  format = 'png', quality = 0.95 } = {}) {
-
-  const mimeType = format === 'jpeg' ? 'image/jpeg'
-    : format === 'webp' ? 'image/webp'
-    : 'image/png';
+export async function renderHeadless({
+  width = 1920,
+  height = 1080,
+  alpha = false,
+  format = 'png',
+  quality = 0.95,
+} = {}) {
+  const mimeType =
+    format === 'jpeg' ? 'image/jpeg' : format === 'webp' ? 'image/webp' : 'image/png';
 
   // ── Create off-screen canvas ──────────────────────────────────────────────
   let offCanvas;
@@ -157,7 +166,7 @@ export async function renderHeadless({ width = 1920, height = 1080, alpha = fals
     offCanvas = new OffscreenCanvas(width, height);
   } else {
     offCanvas = document.createElement('canvas');
-    offCanvas.width  = width;
+    offCanvas.width = width;
     offCanvas.height = height;
     offCanvas.style.display = 'none';
     document.body.appendChild(offCanvas);
@@ -165,11 +174,11 @@ export async function renderHeadless({ width = 1920, height = 1080, alpha = fals
 
   // ── Create isolated Three.js renderer ────────────────────────────────────
   const offRenderer = new THREE.WebGLRenderer({
-    canvas:                offCanvas,
-    antialias:             false,
+    canvas: offCanvas,
+    antialias: false,
     alpha,
     preserveDrawingBuffer: true,
-    powerPreference:       'high-performance',
+    powerPreference: 'high-performance',
   });
   offRenderer.setPixelRatio(1);
   offRenderer.setSize(width, height, false);
@@ -183,26 +192,26 @@ export async function renderHeadless({ width = 1920, height = 1080, alpha = fals
     // Copy current uniform values
     const live = state.mat3?.uniforms;
     if (live) {
-      uniforms.iTime.value      = live.iTime.value;
+      uniforms.iTime.value = live.iTime.value;
       uniforms.iTimeDelta.value = live.iTimeDelta.value;
-      uniforms.iFrame.value     = live.iFrame.value;
+      uniforms.iFrame.value = live.iFrame.value;
       uniforms.iMouse.value.copy(live.iMouse.value);
       uniforms.iResolution.value.set(width, height, 1);
       // Copy channel textures (shared references - same GPU textures)
       for (let i = 0; i < 4; i++) {
-        const ch = live['iChannel' + i];
-        if (ch?.value) uniforms['iChannel' + i] = { value: ch.value };
+        const ch = live[`iChannel${  i}`];
+        if (ch?.value) uniforms[`iChannel${  i}`] = { value: ch.value };
       }
     }
 
-    const offScene  = new THREE.Scene();
-    const offCam    = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const offScene = new THREE.Scene();
+    const offCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
     offCam.position.z = 1;
 
     // Use a full-screen triangle (Phase 1.3 geometry optimization)
     const tri = _makeFullScreenTriangle();
     const mat = new THREE.ShaderMaterial({
-      vertexShader:   _VERT_TRIANGLE,
+      vertexShader: _VERT_TRIANGLE,
       fragmentShader: code,
       uniforms,
     });
@@ -213,9 +222,9 @@ export async function renderHeadless({ width = 1920, height = 1080, alpha = fals
     // ── Extract pixels ────────────────────────────────────────────────────
     let blob;
     if (supportsOffscreen) {
-      blob = await (/** @type {any} */ (offCanvas)).convertToBlob({ type: mimeType, quality });
+      blob = await /** @type {any} */ (offCanvas).convertToBlob({ type: mimeType, quality });
     } else {
-      blob = await new Promise(res => offCanvas.toBlob(res, mimeType, quality));
+      blob = await new Promise((res) => offCanvas.toBlob(res, mimeType, quality));
     }
 
     // Cleanup
@@ -225,7 +234,7 @@ export async function renderHeadless({ width = 1920, height = 1080, alpha = fals
     return blob;
   } finally {
     offRenderer.dispose();
-    if (!supportsOffscreen && offCanvas.parentNode) (/** @type {any} */ (offCanvas)).remove();
+    if (!supportsOffscreen && offCanvas.parentNode) /** @type {any} */ (offCanvas).remove();
   }
 }
 
@@ -256,7 +265,7 @@ void main() {
 export function _makeFullScreenTriangle() {
   const geo = new THREE.BufferGeometry();
   // 3 vertices with position = [0,0,0] - actual positions computed in the VS from gl_VertexID
-  const verts = new Float32Array(9);  // 3 × vec3
+  const verts = new Float32Array(9); // 3 × vec3
   geo.setAttribute('position', new THREE.BufferAttribute(verts, 3));
   geo.setDrawRange(0, 3);
   return geo;

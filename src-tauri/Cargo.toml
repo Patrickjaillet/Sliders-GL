@@ -1,6 +1,6 @@
 [package]
 name = "sliders-gl"
-version = "1.0.0"
+version = "1.0.1"
 description = "Real-time GLSL shader editor, 100% Shadertoy-compatible"
 authors = ["Patrick JAILLET"]
 edition = "2021"
