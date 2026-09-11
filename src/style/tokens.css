@@ -39,7 +39,9 @@
   --bg-input: var(--bg-overlay);
   --bg-tooltip: var(--bg-overlay);
 
-  /* short aliases */
+  /* short aliases — legacy, still read from JS (inline styles / generated
+     swatches); migrate call sites to the full names above rather than
+     adding new references here. */
   --bg2: var(--bg-surface);
   --bg3: var(--bg-void);
   --bg4: var(--bg-raised);
@@ -60,7 +62,7 @@
   --border-input: var(--border-mid);
   --border-faint: var(--border-sub);
 
-  /* short aliases */
+  /* short aliases — legacy, still read from JS; see note on --bg2/3/4 above */
   --b1: var(--border-mid);
   --b2: var(--border-strong);
   --b3: var(--border-hot);
@@ -83,7 +85,7 @@
   --text-tooltip: var(--text-primary);
   --text-placeholder: var(--text-ghost);
 
-  /* short aliases */
+  /* short aliases — legacy, still read from JS; see note on --bg2/3/4 above */
   --t1: var(--text-primary);
   --t2: var(--text-dim);
   --t3: var(--text-ghost);
@@ -145,7 +147,7 @@
   --status-ok-hover-bg: #c8efc8;
   --status-warn-hover-bg: #ffe99a;
 
-  /* short aliases */
+  /* short aliases — legacy, still read from JS; see note on --bg2/3/4 above */
   --ac: var(--accent);
   --ac3: var(--accent);
   --ac4: var(--warn);
@@ -173,7 +175,61 @@
   --shadow-panel: var(--shadow-md);
 
   /* ============================================================
-     GEOMETRY
+     ELEVATION — continuous shadow scale for floating surfaces.
+     0 = flush with the surface (no shadow). 1-2 = panels/dropdowns/
+     tooltips (existing --shadow-sm/md). 3 = popups/context menus
+     (existing --shadow-popup). 4-5 = modals and the highest-priority
+     overlays (which-key, command palette) — deliberately heavier so
+     stacked overlays still read as "above" popups.
+     ============================================================ */
+
+  --elevation-0: none;
+  --elevation-1: var(--shadow-sm);
+  --elevation-2: var(--shadow-md);
+  --elevation-3: var(--shadow-popup);
+  --elevation-4: 0 12px 32px rgba(0, 0, 0, 0.32), 0 2px 6px rgba(0, 0, 0, 0.2);
+  --elevation-5: 0 20px 48px rgba(0, 0, 0, 0.36), 0 4px 10px rgba(0, 0, 0, 0.22);
+
+  /* ============================================================
+     SPACING — 4px base scale. Use for padding/margin/gap; NOT for
+     border widths, font sizes, or fixed component dimensions
+     (icon/control sizes), which stay literal.
+     ============================================================ */
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+
+  /* ============================================================
+     TYPOGRAPHY SCALE — sizes/weights/line-heights for panel titles,
+     labels, numeric values, and code, harmonized with the base rules
+     already in typography.css.
+     ============================================================ */
+
+  --fs-label: 10px; /* uppercase section/panel-header labels */
+  --fs-body: 11px; /* default UI text (sliders, rows, menus) */
+  --fs-value: 12px; /* numeric readouts, inputs */
+  --fs-title: 13px; /* panel/section titles */
+  --fs-heading: 15px; /* modal/onboarding headings */
+
+  --lh-tight: 1.2; /* labels, single-line rows */
+  --lh-normal: 1.4; /* body text */
+  --lh-loose: 1.6; /* prose, multi-line help text */
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* ============================================================
+     GEOMETRY — border radius, locked to the existing "workbench"
+     esthetic (3-6px). Do not introduce new radius values without
+     updating this list.
      ============================================================ */
 
   --radius-sm: 3px;
@@ -211,7 +267,11 @@
   --topbar-h: 40px; /* Blender-style topbar: workspace tabs + menus + quick icons */
   --tsw: 40px; /* tool shelf width (left icon strip) */
   --sw: 280px; /* left sidebar */
-  --iw: 200px; /* right inspector */
+  --iw: 200px; /* right inspector — default width when open; see layout.css for the
+                  ≥1280px breakpoint that opens it by default */
+  /* Reserved for a future permanent pasteboard occupant (shader-library gallery
+     and/or panel-dock, roadmap §2/§10) — not yet consumed by layout.css. */
+  --gallery-w: 320px;
 
   /* aliases */
   --pw: var(--sw);
@@ -244,7 +304,14 @@
   --spark-warm-rgb: 110, 66, 0;
 
   /* ============================================================
-     LEGACY ALIASES — kept because they are consumed in the code
+     LEGACY ALIASES — migration in progress, NOT dead code.
+     Grepped exhaustively (2026 audit, roadmap §1): every alias below
+     is still read from JS (inline styles, generated color swatches,
+     export code-template strings) as well as CSS, so none can be
+     removed without tracing and updating each call site individually.
+     Do not add new references to these names — use the canonical
+     token instead — and prefer migrating a call site off an alias
+     over adding a new one here.
      ============================================================ */
 
   --inp: var(--bg-overlay);

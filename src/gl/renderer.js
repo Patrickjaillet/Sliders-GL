@@ -1,12 +1,21 @@
-
 import * as THREE from 'three';
 import { state } from '../core/state.js';
 import { EXAMPLE } from '../core/constants.js';
 import { explainGLSLError } from '../shader/glsl-error-explain.js';
 import { toast } from '../io/actions.js';
 import { shaderNeedsRecompile, markCompiled } from '../render/shader-cache.js';
-import { initGpuCache, isCached, recordSuccess, shaderCacheKey } from '../render/gpu-program-cache.js';
-import { _makeFullScreenTriangle, _VERT_TRIANGLE, _applyResolution, getActiveResolutionPreset } from '../render/resolution.js';
+import {
+  initGpuCache,
+  isCached,
+  recordSuccess,
+  shaderCacheKey,
+} from '../render/gpu-program-cache.js';
+import {
+  _makeFullScreenTriangle,
+  _VERT_TRIANGLE,
+  _applyResolution,
+  getActiveResolutionPreset,
+} from '../render/resolution.js';
 import { startLoop } from '../render/raf-loop.js';
 import { fpsColorClass } from '../core/utils.js';
 
@@ -30,17 +39,17 @@ function _cacheDomRefs() {
 }
 
 // F-7.4 — blend mode GLSL constants (index order must match BLEND_DESCS below)
-const _BLEND_MODES = ['normal','add','multiply','screen','overlay','mask_alpha','difference'];
+const _BLEND_MODES = ['normal', 'add', 'multiply', 'screen', 'overlay', 'mask_alpha', 'difference'];
 
 // F-7.4 — blend mode descriptions shown in the context menu.
 // Note: kept for the channel-wiring/blend-mode feature (unrelated to multipass
 // buffers) — see the wiring-system cleanup section, not this one.
 export const BLEND_DESCS = {
-  normal:     'Pass-through — raw texture value',
-  add:        '+ Exposure ×2 — additive brightness boost (src + src)',
-  multiply:   '× Darken — gamma-style tone curve (src²)',
-  screen:     '◌ Lighten — inverse gamma lift (1−(1−src)²)',
-  overlay:    '◑ Contrast — S-curve (hard mix at 0.5)',
+  normal: 'Pass-through — raw texture value',
+  add: '+ Exposure ×2 — additive brightness boost (src + src)',
+  multiply: '× Darken — gamma-style tone curve (src²)',
+  screen: '◌ Lighten — inverse gamma lift (1−(1−src)²)',
+  overlay: '◑ Contrast — S-curve (hard mix at 0.5)',
   mask_alpha: 'α Premult — RGB × alpha (straight→premultiplied)',
   difference: '∆ Invert — 1 − src (negative/complement)',
 };
@@ -84,8 +93,8 @@ export function wrapFrag(userCode) {
   const hasMain = /void\s+mainImage\s*\(/.test(userCode);
   const channelDecls = [];
   for (let i = 0; i < 4; i++) {
-    if (new RegExp('iChannel' + i).test(userCode)) {
-      channelDecls.push('uniform sampler2D iChannel' + i + ';');
+    if (new RegExp(`iChannel${  i}`).test(userCode)) {
+      channelDecls.push(`uniform sampler2D iChannel${  i  };`);
     }
   }
   // F-7.4 — always inject sampleChannel() so shaders can opt-in to blend modes
@@ -107,7 +116,9 @@ uniform vec2 iTilt;
 ${channelDecls.join('\n')}${blendHelper}
 #line 1
 ${userCode}`;
-  if (hasMain) frag += '\nvoid main(){vec4 o=vec4(0);mainImage(o,gl_FragCoord.xy);gl_FragColor=clamp(o,0.0,1.0);}';
+  if (hasMain)
+    frag +=
+      '\nvoid main(){vec4 o=vec4(0);mainImage(o,gl_FragCoord.xy);gl_FragColor=clamp(o,0.0,1.0);}';
   else if (!/void\s+main\s*\(/.test(userCode)) {
     frag += '\nvoid main(){gl_FragColor=vec4(0.5,0.2,0.8,1.0);}';
   }
@@ -118,44 +129,47 @@ export { _BLEND_MODES };
 
 function makeDummyTexture() {
   const data = new Uint8Array([0, 0, 0, 255]);
-  const tex  = new THREE.DataTexture(data, 1, 1, THREE.RGBAFormat);
+  const tex = new THREE.DataTexture(data, 1, 1, THREE.RGBAFormat);
   tex.needsUpdate = true;
   return tex;
 }
 
 export function buildUniforms(extra) {
   const base = {
-    iResolution:        { value: new THREE.Vector3(800, 600, 1) },
-    iTime:              { value: 0 },
-    iTimeDelta:         { value: 0.016 },
-    iFrame:             { value: 0 },
-    iMouse:             { value: new THREE.Vector4(0, 0, 0, 0) },
-    iJitter:            { value: new THREE.Vector2(0, 0) },
-    iChannel0:          { value: makeDummyTexture() },
-    iChannel1:          { value: makeDummyTexture() },
-    iChannel2:          { value: makeDummyTexture() },
-    iChannel3:          { value: makeDummyTexture() },
-    iChannelResolution: { value: [
-      new THREE.Vector3(1, 1, 1),
-      new THREE.Vector3(1, 1, 1),
-      new THREE.Vector3(1, 1, 1),
-      new THREE.Vector3(1, 1, 1),
-    ]},
-    iChannelMode:       { value: [0, 0, 0, 0] },  // F-7.4: blend modes per channel
-    iAccel:    { value: new THREE.Vector3(0, 0, 0) },
-    iGyro:     { value: new THREE.Vector3(0, 0, 0) },
-    iDepth:    { value: makeDummyTexture() },
-    iGaze:     { value: new THREE.Vector2(0.5, 0.5) },
-    iHeart:    { value: 0 },
-    iGSR:      { value: 0 },
+    iResolution: { value: new THREE.Vector3(800, 600, 1) },
+    iTime: { value: 0 },
+    iTimeDelta: { value: 0.016 },
+    iFrame: { value: 0 },
+    iMouse: { value: new THREE.Vector4(0, 0, 0, 0) },
+    iJitter: { value: new THREE.Vector2(0, 0) },
+    iChannel0: { value: makeDummyTexture() },
+    iChannel1: { value: makeDummyTexture() },
+    iChannel2: { value: makeDummyTexture() },
+    iChannel3: { value: makeDummyTexture() },
+    iChannelResolution: {
+      value: [
+        new THREE.Vector3(1, 1, 1),
+        new THREE.Vector3(1, 1, 1),
+        new THREE.Vector3(1, 1, 1),
+        new THREE.Vector3(1, 1, 1),
+      ],
+    },
+    iChannelMode: { value: [0, 0, 0, 0] }, // F-7.4: blend modes per channel
+    iAccel: { value: new THREE.Vector3(0, 0, 0) },
+    iGyro: { value: new THREE.Vector3(0, 0, 0) },
+    iDepth: { value: makeDummyTexture() },
+    iGaze: { value: new THREE.Vector2(0.5, 0.5) },
+    iHeart: { value: 0 },
+    iGSR: { value: 0 },
     iPressure: { value: 0 },
-    iTilt:     { value: new THREE.Vector2(0, 0) },
+    iTilt: { value: new THREE.Vector2(0, 0) },
   };
   return Object.assign(base, extra || {});
 }
 
 function _buildFragPrecheckSource(gl, fragSrc) {
-  const isWebGL2 = typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext;
+  const isWebGL2 =
+    typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext;
   if (!isWebGL2) return fragSrc;
   return `#version 300 es
 #define varying in
@@ -173,12 +187,12 @@ ${fragSrc}`;
 
 export function checkFragCompile(fragSrc) {
   if (!state.renderer3) return null;
-  const gl  = state.renderer3.getContext();
+  const gl = state.renderer3.getContext();
   const src = _buildFragPrecheckSource(gl, fragSrc);
-  const sh  = gl.createShader(gl.FRAGMENT_SHADER);
+  const sh = gl.createShader(gl.FRAGMENT_SHADER);
   gl.shaderSource(sh, src);
   gl.compileShader(sh);
-  const ok  = gl.getShaderParameter(sh, gl.COMPILE_STATUS);
+  const ok = gl.getShaderParameter(sh, gl.COMPILE_STATUS);
   const log = gl.getShaderInfoLog(sh) || '';
   gl.deleteShader(sh);
   if (!ok) return log || 'Shader compilation failed';
@@ -186,51 +200,68 @@ export function checkFragCompile(fragSrc) {
   return null;
 }
 
-const COMP_W = 800;
-const COMP_H = 450;
+// §2 roadmap rework — 800×450 is now only the FALLBACK size used before the
+// viewport column has ever been laid out/measured (e.g. this first call).
+// The live "viewport" resolution comes from measuring #viewportCol's actual
+// box in doResize() below, so the display surface fills the real available
+// space instead of a permanently fixed composition size. Non-"viewport"
+// presets (720p/1080p/4K/custom) are unaffected — render/resolution.js
+// already renders those at a fixed target size independent of container size.
+const FALLBACK_W = 800;
+const FALLBACK_H = 450;
 
 export function initGL(canvas, width, height) {
   if (!canvas) {
     canvas = document.getElementById('glc');
-    width  = COMP_W;
-    height = COMP_H;
+    width = FALLBACK_W;
+    height = FALLBACK_H;
   }
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, preserveDrawingBuffer: true });
-  renderer.setSize(width, height);
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: false,
+    preserveDrawingBuffer: true,
+  });
+  // updateStyle=false — this initial FALLBACK_W/H size must not set an inline
+  // canvas.style.width/height (Three.js's default when the 3rd arg is
+  // omitted), which would permanently pin the canvas at 800×450px via an
+  // inline style that the layout.css `canvas#glc { width:auto; ... }` rule
+  // (lower specificity) could never override. doResize() below measures the
+  // real container immediately after and resizes for real.
+  renderer.setSize(width, height, false);
   renderer.setPixelRatio(1);
   renderer.setClearColor(0x000000, 1);
 
-  const scene    = new THREE.Scene();
-  const camera   = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  const scene = new THREE.Scene();
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   camera.position.z = 1;
 
   const geometry = _makeFullScreenTriangle();
   const material = new THREE.ShaderMaterial({
-    vertexShader:   _VERT_TRIANGLE,
+    vertexShader: _VERT_TRIANGLE,
     fragmentShader: wrapFrag(EXAMPLE),
-    uniforms:       buildUniforms(),
-    depthTest:      false,
-    depthWrite:     false,
+    uniforms: buildUniforms(),
+    depthTest: false,
+    depthWrite: false,
   });
 
   const mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
 
   state.renderer3 = renderer;
-  state.scene3    = scene;
-  state.cam3      = camera;
-  state.mat3      = material;
-  state.mesh3     = mesh;
+  state.scene3 = scene;
+  state.cam3 = camera;
+  state.mat3 = material;
+  state.mesh3 = mesh;
   _cacheDomRefs();
 
   // Phase 22.2 — Initialiser le cache GPU persistant (IndexedDB) après avoir
   // le contexte WebGL disponible. On récupère les strings GPU via gl-caps.
   (async () => {
     try {
-      const gl  = renderer.getContext();
+      const gl = renderer.getContext();
       const dbg = gl.getExtension('WEBGL_debug_renderer_info');
-      const gpuVendor   = dbg ? gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL)   : 'unknown';
+      const gpuVendor = dbg ? gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) : 'unknown';
       const gpuRenderer = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : 'unknown';
       await initGpuCache(gpuRenderer, gpuVendor);
     } catch (err) {
@@ -238,14 +269,14 @@ export function initGL(canvas, width, height) {
     }
   })();
 
-  state.mat3._ownedDummies = [0,1,2,3]
-    .map(i => material.uniforms['iChannel' + i]?.value)
+  state.mat3._ownedDummies = [0, 1, 2, 3]
+    .map((i) => material.uniforms[`iChannel${  i}`]?.value)
     .filter(Boolean);
 
   doResize();
   window.addEventListener('resize', doResize);
 
-  canvas.addEventListener('mousemove', e => {
+  canvas.addEventListener('mousemove', (e) => {
     const r = canvas.getBoundingClientRect();
     if (state.mat3) {
       state.mat3.uniforms.iMouse.value.set(
@@ -261,6 +292,36 @@ export function initGL(canvas, width, height) {
   return { renderer, scene, camera, material };
 }
 
+// Hard ceiling on the "viewport" preset's live GL resolution \u2014 the display
+// surface can grow arbitrarily large (ultra-wide monitors, 4K+ windows),
+// but rendering the shader at literally every physical pixel of a huge
+// window buys no visible quality (canvas is still CSS-letterboxed to fit)
+// while materially increasing per-frame GPU cost. Comfortably above 1080p
+// so typical desktop/laptop screens still render at their native size.
+const VIEWPORT_MAX_W = 2560;
+const VIEWPORT_MAX_H = 1440;
+
+/**
+ * Measure #viewportCol's actual content box and clamp it to
+ * VIEWPORT_MAX_W/H, preserving aspect ratio. Falls back to the pre-layout
+ * FALLBACK_W/H size when the column hasn't been measured yet (0\u00d70).
+ */
+export function _measureViewportSize() {
+  const col = document.getElementById('viewportCol');
+  const rect = col?.getBoundingClientRect();
+  let w = rect?.width ? Math.round(rect.width) : FALLBACK_W;
+  let h = rect?.height ? Math.round(rect.height) : FALLBACK_H;
+  // Leave room for the 20px side margins .cw keeps around the monitor.
+  w = Math.max(1, w - 40);
+  h = Math.max(1, h);
+  if (w > VIEWPORT_MAX_W || h > VIEWPORT_MAX_H) {
+    const scale = Math.min(VIEWPORT_MAX_W / w, VIEWPORT_MAX_H / h);
+    w = Math.round(w * scale);
+    h = Math.round(h * scale);
+  }
+  return [w, h];
+}
+
 export function doResize() {
   const { respill } = _cacheDomRefs();
   if (!state.renderer3) return;
@@ -270,8 +331,16 @@ export function doResize() {
     return;
   }
 
-  const w = COMP_W;
-  const h = COMP_H;
+  const [w, h] = _measureViewportSize();
+  const canvas = state.renderer3.domElement;
+  // Skip the resize entirely when the target size hasn't actually changed.
+  // initPasteboardObserver() (ui/viewport.js) calls doResize() on every
+  // #viewportCol ResizeObserver firing, including spurious ones (layout
+  // settling, font-load reflow) that don't change the measured size \u2014 a
+  // no-op setSize() still reallocates the GL backbuffer and clears it,
+  // which is wasted work and, worse, a visible flash/redraw race for
+  // anything reading the framebuffer right after a resize.
+  if (canvas.width === w && canvas.height === h) return;
   state.renderer3.setPixelRatio(1);
   state.renderer3.setSize(w, h, false);
   if (state.mat3) state.mat3.uniforms.iResolution.value.set(w, h, 1);
@@ -316,9 +385,9 @@ function _tick() {
   state.lastTs = now;
   if (!state.paused) state.simTime += dt;
   if (state.mat3) {
-    state.mat3.uniforms.iTime.value      = state.simTime;
+    state.mat3.uniforms.iTime.value = state.simTime;
     state.mat3.uniforms.iTimeDelta.value = dt;
-    state.mat3.uniforms.iFrame.value     = state.fidx++;
+    state.mat3.uniforms.iFrame.value = state.fidx++;
     // per-frame sub-pixel jitter (Halton sequence)
     if (state.mat3.uniforms.iJitter) {
       const frameIndex = state.mat3.uniforms.iFrame.value || 0;
@@ -334,19 +403,21 @@ function _tick() {
 
   const frameMs = performance.now() - t0;
 
-  state.fcount++; state.ftimer += dt;
+  state.fcount++;
+  state.ftimer += dt;
   if (state.ftimer >= 0.5) {
     const fps = Math.round(state.fcount / state.ftimer);
     if (dom.fpspill) {
-      dom.fpspill.textContent = fps + ' FPS';
+      dom.fpspill.textContent = `${fps  } FPS`;
       dom.fpspill.classList.remove('fps-good', 'fps-warn', 'fps-bad');
       dom.fpspill.classList.add(fpsColorClass(fps));
     }
-    if (dom.fps)     dom.fps.textContent     = fps + ' fps';
-    state.fcount = 0; state.ftimer = 0;
+    if (dom.fps) dom.fps.textContent = `${fps  } fps`;
+    state.fcount = 0;
+    state.ftimer = 0;
   }
 
-  if (dom.tpill) dom.tpill.textContent = 't = ' + state.simTime.toFixed(2);
+  if (dom.tpill) dom.tpill.textContent = `t = ${  state.simTime.toFixed(2)}`;
 }
 
 export async function applyGLShader(code) {
@@ -365,11 +436,18 @@ export async function applyGLShader(code) {
 
   if (!gpuCached) {
     const errLog = checkFragCompile(fragSrc);
-    if (errLog) { showErr(errLog); return false; }
+    if (errLog) {
+      showErr(errLog);
+      return false;
+    }
   }
 
   if (Array.isArray(state.mat3._ownedDummies)) {
-    state.mat3._ownedDummies.forEach(t => { try { t.dispose(); } catch(e){} });
+    state.mat3._ownedDummies.forEach((t) => {
+      try {
+        t.dispose();
+      } catch (e) {}
+    });
   }
 
   const prev = state.mat3.uniforms;
@@ -380,20 +458,20 @@ export async function applyGLShader(code) {
   for (let i = 0; i < 4; i++) {
     const d = makeDummyTexture();
     newDummies.push(d);
-    chanUniforms['iChannel' + i] = { value: d };
+    chanUniforms[`iChannel${  i}`] = { value: d };
   }
 
   state.mat3.uniforms = {
     iResolution: prev.iResolution,
-    iTime:       prev.iTime,
-    iTimeDelta:  prev.iTimeDelta,
-    iFrame:      prev.iFrame,
-    iMouse:      prev.iMouse,
+    iTime: prev.iTime,
+    iTimeDelta: prev.iTimeDelta,
+    iFrame: prev.iFrame,
+    iMouse: prev.iMouse,
     ...chanUniforms,
   };
   state.mat3._ownedDummies = newDummies;
   state.mat3.fragmentShader = fragSrc;
-  state.mat3.needsUpdate    = true;
+  state.mat3.needsUpdate = true;
   try {
     state.renderer3.render(state.scene3, state.cam3);
     hideErr();
@@ -410,13 +488,13 @@ export async function applyGLShader(code) {
 export function updateUniforms(time, frame, mouse) {
   const uniforms = state.mat3?.uniforms;
   if (!uniforms) return;
-  uniforms.iTime.value  = time;
+  uniforms.iTime.value = time;
   uniforms.iFrame.value = frame;
   if (mouse) uniforms.iMouse.value.copy(mouse);
   const renderer = state.renderer3;
   if (renderer) {
-    const w   = renderer.domElement.width;
-    const h   = renderer.domElement.height;
+    const w = renderer.domElement.width;
+    const h = renderer.domElement.height;
     const dpr = window.devicePixelRatio || 1;
     uniforms.iResolution.value.set(w, h, dpr);
   }
@@ -432,29 +510,29 @@ let errorDecorationIds = [];
 
 function parseGLSLErrors(log) {
   const errors = [];
-  const seen   = new Set();
+  const seen = new Set();
 
   for (const raw of log.split('\n')) {
     const line = raw.trim();
     if (!line) continue;
 
     let lineNo = null;
-    let colNo  = null;
-    let msg    = null;
+    let colNo = null;
+    let msg = null;
 
     let m = line.match(/^ERROR:\s*\d+:(\d+)(?::(\d+))?:\s*(.*)/i);
     if (m) {
       lineNo = parseInt(m[1], 10);
-      colNo  = m[2] ? parseInt(m[2], 10) : null;
-      msg    = m[3].trim();
+      colNo = m[2] ? parseInt(m[2], 10) : null;
+      msg = m[3].trim();
     }
 
     if (!msg) {
       m = line.match(/^(\d+)(?::(\d+))?:\s*(?:error|warning):\s*(.*)/i);
       if (m) {
         lineNo = parseInt(m[1], 10);
-        colNo  = m[2] ? parseInt(m[2], 10) : null;
-        msg    = m[3].trim();
+        colNo = m[2] ? parseInt(m[2], 10) : null;
+        msg = m[3].trim();
       }
     }
 
@@ -462,8 +540,8 @@ function parseGLSLErrors(log) {
       m = line.match(/^ERROR:\s*(\d+)(?::(\d+))?:\s*(.*)/i);
       if (m) {
         lineNo = parseInt(m[1], 10);
-        colNo  = m[2] ? parseInt(m[2], 10) : null;
-        msg    = m[3].trim();
+        colNo = m[2] ? parseInt(m[2], 10) : null;
+        msg = m[3].trim();
       }
     }
 
@@ -471,7 +549,7 @@ function parseGLSLErrors(log) {
       m = line.match(/^(\d+):\s+(.*)/);
       if (m) {
         lineNo = parseInt(m[1], 10);
-        msg    = m[2].trim();
+        msg = m[2].trim();
       }
     }
 
@@ -493,8 +571,10 @@ function parseGLSLErrors(log) {
 
 function _esc(str) {
   return String(str)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function _wrapOffset() {
@@ -513,26 +593,33 @@ function _pulseEditor(kind) {
   // Phase W — flash FPS pill on successful compile
   if (kind !== 'err') {
     const pill = document.getElementById('fpspill');
-    if (pill) { pill.classList.remove('compile-ok'); void pill.offsetWidth; pill.classList.add('compile-ok'); setTimeout(() => pill.classList.remove('compile-ok'), 400); }
+    if (pill) {
+      pill.classList.remove('compile-ok');
+      void pill.offsetWidth;
+      pill.classList.add('compile-ok');
+      setTimeout(() => pill.classList.remove('compile-ok'), 400);
+    }
   }
   // §I.4 — repère sonore subtil (opt-in via le toggle son ; no-op si coupé)
-  import('../ui/sound.js').then(m => m.playSound(kind === 'err' ? 'error' : 'confirm')).catch(() => {});
+  import('../ui/sound.js')
+    .then((m) => m.playSound(kind === 'err' ? 'error' : 'confirm'))
+    .catch(() => {});
 }
 
 export function showErr(log) {
   setStatus('err');
   _hadCompileError = true;
   _pulseEditor('err');
-  const errors     = parseGLSLErrors(log);
-  const userCode   = state.editor ? state.editor.getValue() : '';
+  const errors = parseGLSLErrors(log);
+  const userCode = state.editor ? state.editor.getValue() : '';
   const wrapOffset = _wrapOffset();
 
-  const body    = document.getElementById('cerrBody');
-  const wrap    = document.getElementById('cerrWrap');
+  const body = document.getElementById('cerrBody');
+  const wrap = document.getElementById('cerrWrap');
   const countEl = document.getElementById('cerrCount');
   if (!body || !wrap || !countEl) return;
 
-  const realErrors = errors.filter(e => e.lineNo !== null);
+  const realErrors = errors.filter((e) => e.lineNo !== null);
   const errCount = realErrors.length || errors.length;
   countEl.textContent = `${errCount} error${errors.length !== 1 ? 's' : ''}`;
 
@@ -548,15 +635,17 @@ export function showErr(log) {
   }
   // §6.2 — annonce assertive pour les lecteurs d'écran
   const a11y = document.getElementById('a11y-alert');
-  if (a11y) a11y.textContent = `Shader compile failed — ${errCount} error${errCount !== 1 ? 's' : ''}`;
+  if (a11y)
+    a11y.textContent = `Shader compile failed — ${errCount} error${errCount !== 1 ? 's' : ''}`;
 
   let html = '';
-  errors.forEach(err => {
+  errors.forEach((err) => {
     const userLine = err.lineNo ? err.lineNo - wrapOffset : null;
-    const lineStr  = userLine && userLine > 0 ? `L${userLine}` : '?';
-    const jumpAttr = userLine > 0
-      ? `data-action="jumpTo" data-args="${userLine - 1}" title="Jump to line ${userLine}"`
-      : '';
+    const lineStr = userLine && userLine > 0 ? `L${userLine}` : '?';
+    const jumpAttr =
+      userLine > 0
+        ? `data-action="jumpTo" data-args="${userLine - 1}" title="Jump to line ${userLine}"`
+        : '';
     html += `<div class="cerr-line" ${jumpAttr}>
       <span class="cerr-lineno">${lineStr}</span>
       <span class="cerr-msg">${_esc(err.msg)}</span>
@@ -583,21 +672,17 @@ export function showErr(log) {
         return { startCol: 1, endCol: 1, wholeLine: true };
       }
       const lineText = model.getLineContent(editorLine);
-      const maxCol   = model.getLineMaxColumn(editorLine);
+      const maxCol = model.getLineMaxColumn(editorLine);
 
       if (colNo !== null && colNo >= 1 && colNo < maxCol) {
-
         let end = colNo;
-        const isIdent = ch => /[A-Za-z0-9_]/.test(ch);
+        const isIdent = (ch) => /[A-Za-z0-9_]/.test(ch);
         const ch0 = lineText[colNo - 1] ?? '';
         if (isIdent(ch0)) {
-
           while (end < maxCol - 1 && isIdent(lineText[end])) end++;
         } else if (ch0 !== ' ' && ch0 !== '	') {
-
           end = colNo + 1;
         } else {
-
           return { startCol: 1, endCol: maxCol, wholeLine: true };
         }
         return { startCol: colNo, endCol: end, wholeLine: false };
@@ -607,9 +692,9 @@ export function showErr(log) {
     }
 
     const decors = realErrors
-      .filter(err => (err.lineNo - wrapOffset) > 0)
-      .map(err => {
-        const l   = err.lineNo - wrapOffset;
+      .filter((err) => err.lineNo - wrapOffset > 0)
+      .map((err) => {
+        const l = err.lineNo - wrapOffset;
         const loc = _resolveColumns(l, err.colNo);
         const colHint = err.colNo ? ` (col ${err.colNo})` : '';
         return {
@@ -619,13 +704,13 @@ export function showErr(log) {
             className: 'errorLineHighlight',
             glyphMarginClassName: 'errorGlyph',
             glyphMarginHoverMessage: { value: `**GLSL Error**${colHint} — ${err.msg}` },
-            hoverMessage:           { value: `⛔ **${err.msg}**${colHint}` },
+            hoverMessage: { value: `⛔ **${err.msg}**${colHint}` },
             after: {
-              content: '  ⛔ ' + err.msg,
+              content: `  ⛔ ${  err.msg}`,
               inlineClassName: 'errorInlineMsg',
             },
             overviewRuler: { color: '#ff5050', position: monaco.editor.OverviewRulerLane.Full },
-            minimap:       { color: '#ff5050', position: monaco.editor.MinimapPosition.Inline },
+            minimap: { color: '#ff5050', position: monaco.editor.MinimapPosition.Inline },
           },
         };
       });
@@ -633,22 +718,20 @@ export function showErr(log) {
 
     if (model) {
       const markers = realErrors
-        .filter(err => (err.lineNo - wrapOffset) > 0)
-        .map(err => {
+        .filter((err) => err.lineNo - wrapOffset > 0)
+        .map((err) => {
           const editorLine = err.lineNo - wrapOffset;
           const loc = _resolveColumns(editorLine, err.colNo);
           return {
             startLineNumber: editorLine,
-            startColumn:     loc.startCol,
-            endLineNumber:   editorLine,
-            endColumn:       loc.endCol,
-            message:         err.msg,
-            severity:        monaco.MarkerSeverity.Error,
-            source:          'GLSL',
+            startColumn: loc.startCol,
+            endLineNumber: editorLine,
+            endColumn: loc.endCol,
+            message: err.msg,
+            severity: monaco.MarkerSeverity.Error,
+            source: 'GLSL',
 
-            code: err.colNo
-              ? `L${editorLine}:${err.colNo}`
-              : `L${editorLine}`,
+            code: err.colNo ? `L${editorLine}:${err.colNo}` : `L${editorLine}`,
           };
         });
       monaco.editor.setModelMarkers(model, 'glsl-renderer', markers);
@@ -661,11 +744,17 @@ export function showErr(log) {
 export function hideErr() {
   setStatus('live');
   // §B.2 — ne pulse en vert que si on sort effectivement d'une erreur
-  if (_hadCompileError) { _pulseEditor('ok'); _hadCompileError = false; }
+  if (_hadCompileError) {
+    _pulseEditor('ok');
+    _hadCompileError = false;
+  }
   document.getElementById('cerrWrap')?.classList.remove('visible');
   // §1.4 — masque le compteur d'erreurs de la barre de statut
   const sbErr = document.getElementById('sbErrCount');
-  if (sbErr) { sbErr.hidden = true; sbErr.classList.remove('has-errors'); }
+  if (sbErr) {
+    sbErr.hidden = true;
+    sbErr.classList.remove('has-errors');
+  }
   // §6.2 — efface l'annonce d'erreur (succès de compilation)
   const a11y = document.getElementById('a11y-alert');
   if (a11y) a11y.textContent = '';
@@ -681,7 +770,7 @@ export function hideErr() {
 let errPanelCollapsed = false;
 export function toggleErrPanel() {
   errPanelCollapsed = !errPanelCollapsed;
-  const wrap   = document.getElementById('cerrWrap');
+  const wrap = document.getElementById('cerrWrap');
   const toggle = document.getElementById('cerrToggle');
   wrap?.classList.toggle('collapsed', errPanelCollapsed);
   if (toggle) toggle.textContent = errPanelCollapsed ? '▼' : '▲';
@@ -689,22 +778,28 @@ export function toggleErrPanel() {
 
 function setStatus(s) {
   const badge = document.getElementById('statusBadge');
-  const txt   = document.getElementById('stxt');
-  if (badge) badge.className = 'status-badge ' + s;
-  if (txt)   txt.textContent  = s.toUpperCase();
+  const txt = document.getElementById('stxt');
+  if (badge) badge.className = `status-badge ${  s}`;
+  if (txt) txt.textContent = s.toUpperCase();
   // §1.3 — teinte la barre de statut en cas d'erreur de compilation
   const bar = document.getElementById('appStatusBar');
   if (bar) bar.classList.toggle('err', s === 'err');
 }
 
 export function disposeGL() {
-  if (state.mat3)   { state.mat3.dispose();   state.mat3   = null; }
+  if (state.mat3) {
+    state.mat3.dispose();
+    state.mat3 = null;
+  }
   if (state.scene3) {
-    state.scene3.traverse(obj => {
+    state.scene3.traverse((obj) => {
       if (obj.geometry) obj.geometry.dispose();
       if (obj.material) obj.material.dispose();
     });
     state.scene3 = null;
   }
-  if (state.renderer3) { state.renderer3.dispose(); state.renderer3 = null; }
+  if (state.renderer3) {
+    state.renderer3.dispose();
+    state.renderer3 = null;
+  }
 }

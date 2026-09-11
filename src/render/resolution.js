@@ -18,16 +18,20 @@
 
 import * as THREE from 'three';
 import { state } from '../core/state.js';
-import { VERT, wrapFrag, buildUniforms, checkFragCompile, doResize } from '../gl/renderer.js';
+import {
+  VERT,
+  wrapFrag,
+  buildUniforms,
+  checkFragCompile,
+  doResize,
+  _measureViewportSize,
+} from '../gl/renderer.js';
 import { safeLocalGet, safeLocalSet } from '../core/utils.js';
 
 // ─── Resolution presets ───────────────────────────────────────────────────────
 
-const COMP_W = 800;
-const COMP_H = 450;
-
 export const RESOLUTION_PRESETS = {
-  viewport: null, // fixed composition canvas (800x450)
+  viewport: null, // adaptive — fills #viewportCol, see gl/renderer.js _measureViewportSize()
   '720p': [1280, 720],
   '1080p': [1920, 1080],
   '1440p': [2560, 1440],
@@ -79,7 +83,7 @@ export function getEffectiveResolution() {
 }
 
 function _getViewportSize() {
-  return [COMP_W, COMP_H];
+  return _measureViewportSize();
 }
 
 /**
@@ -199,8 +203,8 @@ export async function renderHeadless({
       uniforms.iResolution.value.set(width, height, 1);
       // Copy channel textures (shared references - same GPU textures)
       for (let i = 0; i < 4; i++) {
-        const ch = live[`iChannel${  i}`];
-        if (ch?.value) uniforms[`iChannel${  i}`] = { value: ch.value };
+        const ch = live[`iChannel${i}`];
+        if (ch?.value) uniforms[`iChannel${i}`] = { value: ch.value };
       }
     }
 

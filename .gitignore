@@ -1,7 +1,8 @@
-# Internal roadmap files — never pushed to GitHub (see ROADMAP.md §5/§9)
+# Internal roadmap / AI-assistant files — never pushed to GitHub (see ROADMAP.md §5/§9)
 /ROADMAP.md
 /src/ROADMAP.md
 /roadmap-cleanup.md
+/CLAUDE.md
 
 # Dependencies
 node_modules/
@@ -27,6 +28,9 @@ coverage/
 *.swp
 .DS_Store
 Thumbs.db
+
+# zip
+*.zip
 
 # Logs
 *.log

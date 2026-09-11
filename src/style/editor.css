@@ -23,7 +23,6 @@
   height: 26px;
   padding: 0 10px;
   width: 100%;
-  max-width: 800px;
   background: var(--bg-surface);
   border-top: 1px solid var(--border-sub);
 }

@@ -20,7 +20,10 @@ function toggleFullscreenVP() {
     btn.classList.toggle('active', vpFullscreen);
     const label = btn.querySelector('.hb-label');
     if (label) label.textContent = vpFullscreen ? 'exit full' : 'fullscreen';
-    btn.setAttribute('aria-label', vpFullscreen ? 'Exit fullscreen viewport' : 'Toggle fullscreen viewport');
+    btn.setAttribute(
+      'aria-label',
+      vpFullscreen ? 'Exit fullscreen viewport' : 'Toggle fullscreen viewport'
+    );
   }
   setTimeout(doResize, 50);
   safeLocalSet('sl_vpFull', vpFullscreen ? '1' : '0');
@@ -43,28 +46,76 @@ export function toggleCodeFocus(force) {
   setTimeout(doResize, 60);
 }
 
-document.addEventListener('keydown', e => {
+document.addEventListener('keydown', (e) => {
   if (trapModalFocus(e)) return;
-  if (e.key === 'F11') { e.preventDefault(); toggleFullscreenVP(); }
-  if ((e.ctrlKey||e.metaKey) && e.shiftKey && (e.key === 'F' || e.key === 'f')) { e.preventDefault(); toggleCodeFocus(); return; }
+  if (e.key === 'F11') {
+    e.preventDefault();
+    toggleFullscreenVP();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'F' || e.key === 'f')) {
+    e.preventDefault();
+    toggleCodeFocus();
+    return;
+  }
   // Fix 3.4 — Ctrl+Shift+S dupliqué entre viewport.js et io/project-ui.js.
   // En mode navigateur (!isTauri()) les deux handlers se déclenchaient en cascade.
   // Utiliser stopImmediatePropagation() pour qu'un seul handler s'exécute.
-  if ((e.ctrlKey||e.metaKey) && !e.shiftKey && e.key === 'z' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-    e.preventDefault(); slUndo(); return;
+  if (
+    (e.ctrlKey || e.metaKey) &&
+    !e.shiftKey &&
+    e.key === 'z' &&
+    e.target.tagName !== 'INPUT' &&
+    e.target.tagName !== 'TEXTAREA'
+  ) {
+    e.preventDefault();
+    slUndo();
+    return;
   }
-  if ((e.ctrlKey||e.metaKey) && (e.shiftKey && e.key === 'z' || e.key === 'y') && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-    e.preventDefault(); slRedo(); return;
+  if (
+    (e.ctrlKey || e.metaKey) &&
+    ((e.shiftKey && e.key === 'z') || e.key === 'y') &&
+    e.target.tagName !== 'INPUT' &&
+    e.target.tagName !== 'TEXTAREA'
+  ) {
+    e.preventDefault();
+    slRedo();
+    return;
   }
   if (e.key === 'Escape') {
-    if (document.getElementById('ctxMenu')?.classList.contains('open')) { document.getElementById('ctxMenu').classList.remove('open'); return; }
-    if (document.getElementById('stModal')?.classList.contains('open')) { closeSTModal(); return; }
-    if (document.getElementById('confirmModal')?.classList.contains('open')) { closeConfirmModal(); return; }
-    if (document.getElementById('exportModal')?.classList.contains('open')) { closeExportModal(); return; }
-    if (_codeFocus) { toggleCodeFocus(false); return; }
-    if (vpFullscreen) { toggleFullscreenVP(); return; }
+    if (document.getElementById('ctxMenu')?.classList.contains('open')) {
+      document.getElementById('ctxMenu').classList.remove('open');
+      return;
+    }
+    if (document.getElementById('stModal')?.classList.contains('open')) {
+      closeSTModal();
+      return;
+    }
+    if (document.getElementById('confirmModal')?.classList.contains('open')) {
+      closeConfirmModal();
+      return;
+    }
+    if (document.getElementById('exportModal')?.classList.contains('open')) {
+      closeExportModal();
+      return;
+    }
+    if (_codeFocus) {
+      toggleCodeFocus(false);
+      return;
+    }
+    if (vpFullscreen) {
+      toggleFullscreenVP();
+      return;
+    }
   }
-  if (e.key === ' ' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' && !e.target.closest('.monaco-editor')) { e.preventDefault(); togglePause(); }
+  if (
+    e.key === ' ' &&
+    e.target.tagName !== 'INPUT' &&
+    e.target.tagName !== 'TEXTAREA' &&
+    !e.target.closest('.monaco-editor')
+  ) {
+    e.preventDefault();
+    togglePause();
+  }
 });
 
 // Editor/viewport are now a fixed-width two-column layout (editor left,
@@ -74,7 +125,8 @@ document.addEventListener('keydown', e => {
 
 let pausedB = false;
 function togglePause() {
-  pausedB = !pausedB; state.paused = pausedB;
+  pausedB = !pausedB;
+  state.paused = pausedB;
   const btn = document.getElementById('pbtn');
   if (btn) {
     // Phase 3: swap SVG icon pause <-> play
@@ -83,7 +135,7 @@ function togglePause() {
       iconUse.setAttribute('href', pausedB ? '#icon-play' : '#icon-pause');
     }
     // Update text node
-    const textNode = [...btn.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
+    const textNode = [...btn.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim());
     if (textNode) textNode.textContent = pausedB ? ' paused' : ' pause';
     // Phase Y — strong visual differentiation vs the play state (reuses the
     // existing .hb.active styling: accent-dim background, accent text/icon)
@@ -95,12 +147,12 @@ function togglePause() {
 // Revealed on hover near the bottom of the canvas (.cw:hover). Lets the user
 // seek/scrub state.simTime directly without opening a separate panel.
 function _initTimeScrubber() {
-  const bar      = document.getElementById('timelineStrip');
-  const range    = document.getElementById('timeScrubber');
+  const bar = document.getElementById('timelineStrip');
+  const range = document.getElementById('timeScrubber');
   const resetBtn = document.getElementById('timeScrubberReset');
-  const label    = document.getElementById('vpScrubT');
-  const tpill    = document.getElementById('tpill');
-  const fpspill  = document.getElementById('fpspill');
+  const label = document.getElementById('vpScrubT');
+  const tpill = document.getElementById('tpill');
+  const fpspill = document.getElementById('fpspill');
   if (!bar || !range) return;
 
   let dragging = false;
@@ -110,13 +162,18 @@ function _initTimeScrubber() {
     bar.classList.add('active');
     // Scrubbing only makes sense while paused — otherwise the RAF loop's
     // `state.simTime += dt` immediately overrides whatever the user dragged to.
-    if (!state.paused) { togglePause(); tpill?.classList.add('scrub-active'); }
+    if (!state.paused) {
+      togglePause();
+      tpill?.classList.add('scrub-active');
+    }
   });
-  range.addEventListener('pointerup',   () => { dragging = false; });
+  range.addEventListener('pointerup', () => {
+    dragging = false;
+  });
   range.addEventListener('input', () => {
     const v = parseFloat(range.value) || 0;
     state.simTime = v;
-    if (label) label.textContent = 't = ' + v.toFixed(2) + ' s';
+    if (label) label.textContent = `t = ${  v.toFixed(2)  } s`;
   });
 
   resetBtn?.addEventListener('click', () => {
@@ -143,43 +200,44 @@ function _initTimeScrubber() {
       const v = state.simTime || 0;
       if (v > parseFloat(range.max)) range.max = String(Math.ceil(v / 10) * 10 + 10);
       range.value = String(v);
-      if (label) label.textContent = 't = ' + v.toFixed(2) + ' s';
+      if (label) label.textContent = `t = ${  v.toFixed(2)  } s`;
     }
     requestAnimationFrame(_sync);
   }
   requestAnimationFrame(_sync);
 }
 
-const COMP_W = 800;
-const COMP_MARGIN = 40;
-
+// §2 roadmap rework — the monitor (.cw) now fills #viewportCol at its real
+// size instead of staying fixed at 800×450 with a CSS scale-fit shrink (see
+// layout.css .cw and gl/renderer.js doResize()/_measureViewportSize()).
+// This observer's job is now simply to trigger a real GL resize whenever
+// the column's box changes — splitter drags, sidebar/inspector open-close,
+// window resize, code-focus toggle — none of which fire a `window resize`
+// event on their own, so `doResize()`'s own `window.addEventListener`
+// (gl/renderer.js initGL()) isn't enough by itself.
 export function initPasteboardObserver() {
   const zone = document.getElementById('viewportCol');
-  const cw   = document.getElementById('cwrap');
-  if (!zone || !cw) {
+  if (!zone) {
     document.addEventListener('zgl:ui-ready', initPasteboardObserver, { once: true });
     return;
   }
 
-  const minColWidth = COMP_W + COMP_MARGIN;
-
-  function update(availableWidth) {
-    if (availableWidth < minColWidth) {
-      const scale = Math.max(0.25, (availableWidth - COMP_MARGIN) / COMP_W);
-      cw.style.setProperty('--cw-scale', scale.toFixed(4));
-      cw.classList.add('scale-fit');
-    } else {
-      cw.style.removeProperty('--cw-scale');
-      cw.classList.remove('scale-fit');
-    }
-  }
-
-  const ro = new ResizeObserver(entries => {
-    const entry = entries[0];
-    update(entry ? entry.contentRect.width : zone.clientWidth);
+  let queued = false;
+  const ro = new ResizeObserver(() => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      doResize();
+    });
   });
   ro.observe(zone);
-  update(zone.clientWidth);
 }
 
-export { vpFullscreen, toggleFullscreenVP, pausedB, togglePause, _initTimeScrubber as initTimeScrubber };
+export {
+  vpFullscreen,
+  toggleFullscreenVP,
+  pausedB,
+  togglePause,
+  _initTimeScrubber as initTimeScrubber,
+};

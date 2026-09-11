@@ -10,7 +10,13 @@ import { initEmbedMode, emitReady } from '../io/api.js';
 import { safeLocalGet, safeLocalRemove } from '../core/utils.js';
 import { initTitlebar } from '../native/titlebar.js';
 import { initFileDrop } from '../native/file-drop.js';
-import { onOpenFile, isTauri, setWindowTitle, listenGlobalKeys, getCliArgs } from '../native/tauri.js';
+import {
+  onOpenFile,
+  isTauri,
+  setWindowTitle,
+  listenGlobalKeys,
+  getCliArgs,
+} from '../native/tauri.js';
 import { initProject } from '../io/project.js';
 import { initProjectShortcuts, setProjectBreadcrumb } from '../io/project-ui.js';
 import { toast } from '../io/actions.js';
@@ -40,7 +46,13 @@ let _appInitialized = false;
 // the custom theme studio (Phase 1) were all removed; silently drop their
 // leftover localStorage keys from older sessions instead of leaving them
 // as permanent, unread clutter.
-const _OBSOLETE_STORAGE_KEYS = ['sl_theme', 'sl_theme_name', 'sl_themeOverrides', 'sl_uiPreset', 'sl_density'];
+const _OBSOLETE_STORAGE_KEYS = [
+  'sl_theme',
+  'sl_theme_name',
+  'sl_themeOverrides',
+  'sl_uiPreset',
+  'sl_density',
+];
 function _cleanupObsoleteStorageKeys() {
   _OBSOLETE_STORAGE_KEYS.forEach(safeLocalRemove);
 }
@@ -57,7 +69,7 @@ window.addEventListener('load', async () => {
   if (isTauri()) {
     const argv = await getCliArgs();
     if (argv.includes('--headless') || argv.includes('render')) {
-      const cliArgs = argv.filter(a => a !== '--headless');
+      const cliArgs = argv.filter((a) => a !== '--headless');
       await runHeadlessCLI(cliArgs);
       return;
     }
@@ -104,7 +116,7 @@ window.addEventListener('load', async () => {
     const syncVV = () => {
       const full = window.innerHeight;
       if (vv.height < full - 80) {
-        document.documentElement.style.height = vv.height + 'px';
+        document.documentElement.style.height = `${vv.height  }px`;
       } else {
         document.documentElement.style.height = '';
       }
@@ -114,27 +126,11 @@ window.addEventListener('load', async () => {
     vv.addEventListener('resize', syncVV);
   }
 
-  // §PB — Pasteboard scale-to-fit: when the viewport-zone column is narrower
-  // than 840px (800px canvas + 2×20px margin), scale the .cw down visually.
-  // The canvas attribute stays 800×450 — no GL resize event is fired.
-  const cwEl = document.querySelector('.cw');
-  const pasteboardEl = document.getElementById('viewportCol');
-  if (cwEl && pasteboardEl && typeof ResizeObserver !== 'undefined') {
-    const CANVAS_W = 800;
-    const CANVAS_MARGIN = 40; // 2 × 20px
-    const pbRO = new ResizeObserver(([entry]) => {
-      const available = entry.contentRect.width;
-      if (available < CANVAS_W + CANVAS_MARGIN) {
-        const scale = Math.max(0.25, (available - CANVAS_MARGIN) / CANVAS_W);
-        cwEl.style.setProperty('--cw-scale', scale.toFixed(4));
-        cwEl.classList.add('scale-fit');
-      } else {
-        cwEl.style.removeProperty('--cw-scale');
-        cwEl.classList.remove('scale-fit');
-      }
-    });
-    pbRO.observe(pasteboardEl);
-  }
+  // §2 roadmap rework — the pasteboard scale-to-fit hack (shrinking a fixed
+  // 800×450 .cw via CSS transform) was removed: .cw now fills #viewportCol
+  // for real, and initPasteboardObserver() (called above) drives an actual
+  // GL resize via doResize() on every column resize. See layout.css .cw and
+  // gl/renderer.js _measureViewportSize().
 
   // Sync sound toggle button to saved preference
   const soundBtn = document.getElementById('soundToggleBtn');
@@ -148,8 +144,8 @@ window.addEventListener('load', async () => {
   // Phase 1.2: Project model — wire callbacks once the editor is mounted
   // (editor is set on state.editor by ui/editor.js during initGL → Monaco init)
   initProject({
-    getCode:     () => state.editor ? state.editor.getValue() : '',
-    setCode:     (code) => {
+    getCode: () => (state.editor ? state.editor.getValue() : ''),
+    setCode: (code) => {
       if (!state.editor) return;
       state.editor.setValue(code);
     },
@@ -157,20 +153,27 @@ window.addEventListener('load', async () => {
     // payload (textures/video/webcam/audio/keyboard/procedural) was removed
     // together with the multi-pass/wiring system; project.js no longer reads
     // or writes a "channels" field anywhere (autosave or .zgl bundle).
-    getPresets:  async () => {
+    getPresets: async () => {
       try {
-            return loadUserPresets();
-      } catch { return []; }
+        return loadUserPresets();
+      } catch {
+        return [];
+      }
     },
     // Fix 2.3 — getTimeline / setTimeline non câblés → timeline absente des .zgl
     getTimeline: () => state.timeline || {},
-    setTimeline: (tl) => { state.timeline = tl; },
+    setTimeline: (tl) => {
+      state.timeline = tl;
+    },
     applyShader: (code) => applyGLShader(code),
-    toast:       (msg, type) => toast(msg, type),
-    confirm:     (title, msg, ok) => {
+    toast: (msg, type) => toast(msg, type),
+    confirm: (title, msg, ok) => {
       showConfirm(title, msg, ok);
     },
-    setTitle:    (name) => { setWindowTitle(name); setProjectBreadcrumb(name); },
+    setTitle: (name) => {
+      setWindowTitle(name);
+      setProjectBreadcrumb(name);
+    },
   });
 
   // Phase 1.2: Global Ctrl+N / Ctrl+O / Ctrl+S / Ctrl+Shift+S shortcuts
@@ -183,9 +186,7 @@ window.addEventListener('load', async () => {
       processImportedText(text, fileName);
     });
     // C6 — Écouter les raccourcis globaux via événement Tauri (plus via win.eval)
-    listenGlobalKeys().catch(err =>
-      console.warn('[init] listenGlobalKeys failed:', err)
-    );
+    listenGlobalKeys().catch((err) => console.warn('[init] listenGlobalKeys failed:', err));
   }
   initGL();
   // Fix 2.5 — initSettingsPanel() doit être appelé une fois au démarrage (après initGL)
@@ -210,9 +211,12 @@ window.addEventListener('load', async () => {
     try {
       // Code source : éditeur si dispo, sinon currentCode, sinon l'exemple intégré.
       const fromEditor = state.editor ? state.editor.getValue() : '';
-      const code = (fromEditor && fromEditor.trim())
-        ? fromEditor
-        : (state.currentCode && state.currentCode.trim() ? state.currentCode : EXAMPLE);
+      const code =
+        fromEditor && fromEditor.trim()
+          ? fromEditor
+          : state.currentCode && state.currentCode.trim()
+            ? state.currentCode
+            : EXAMPLE;
       if (!code || !code.trim()) return;
 
       const { buildUI } = await import('../ui/slider.js');
@@ -224,7 +228,9 @@ window.addEventListener('load', async () => {
       state.currentCode = code;
       state.vars = entries;
       state.varMap = {};
-      entries.forEach(e => { state.varMap[e.id] = e; });
+      entries.forEach((e) => {
+        state.varMap[e.id] = e;
+      });
 
       if (entries.length > 0) {
         _sliderBuilt = true;
@@ -239,14 +245,16 @@ window.addEventListener('load', async () => {
         const sw = document.getElementById('sw');
         if (sw) {
           // Forcer un reflow synchrone.
-          // eslint-disable-next-line no-unused-expressions
+           
           void sw.offsetHeight;
           // Double rAF : garantit un repaint sur le frame suivant même si le
           // premier reflow n'a pas suffi dans certaines versions de WebView2.
           requestAnimationFrame(() => {
             sw.style.contentVisibility = 'visible';
             void sw.offsetHeight;
-            requestAnimationFrame(() => { void sw.offsetHeight; });
+            requestAnimationFrame(() => {
+              void sw.offsetHeight;
+            });
           });
         }
       }
@@ -269,7 +277,7 @@ window.addEventListener('load', async () => {
   // 7.3: Emit ready event for parent frames
   emitReady();
   // F-8.2: Check for shared include in URL hash (#include=<base64>)
-  import('../ui/includes-panel.js').then(m => m.checkInitHashInclude());
+  import('../ui/includes-panel.js').then((m) => m.checkInitHashInclude());
   // 2.4: Store initial Image pass code
   // (state.mp.passes.image is the sole surviving pass of the legacy
   // multi-pass state, kept because shader-summary.js, editor.js,
@@ -286,7 +294,6 @@ export function parseAndRebuildUI() {
   const entries = parseShader(state.currentCode);
   state.vars = entries;
   state.varMap = {};
-  entries.forEach(e => state.varMap[e.id] = e);
+  entries.forEach((e) => (state.varMap[e.id] = e));
   document.dispatchEvent(new CustomEvent('variables-updated', { detail: entries }));
 }
-

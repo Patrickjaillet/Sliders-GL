@@ -10,7 +10,7 @@
 //   - 'uniform' ← Monaco editor.onMouseMove (réutilise hover-inspector.js)
 
 import { state } from '../core/state.js';
-import { esc, fmtN } from '../core/utils.js';
+import { esc, fmtN, safeLocalGet, safeLocalSet } from '../core/utils.js';
 import { startRangeEdit } from './context-menu.js';
 import { RUNTIME, findSliderEntry } from './hover-inspector.js';
 
@@ -18,7 +18,7 @@ const MODE_TITLES = { pass: 'Pass', slider: 'Slider', uniform: 'Uniform' };
 let _mode = 'pass';
 
 function _setActivePane(mode) {
-  document.querySelectorAll('.insp-pane').forEach(p => {
+  document.querySelectorAll('.insp-pane').forEach((p) => {
     p.classList.toggle('hidden', p.id !== `insp-${mode}`);
   });
   const title = document.getElementById('inspectorTitle');
@@ -48,7 +48,10 @@ function _emptyState(msg) {
 async function _renderPassInfo() {
   const id = state.mp?.active;
   const p = id && state.mp.passes[id];
-  if (!p) { setInspectorMode('pass', _emptyState('No active pass.')); return; }
+  if (!p) {
+    setInspectorMode('pass', _emptyState('No active pass.'));
+    return;
+  }
 
   const label = id === 'image' ? 'Image' : id;
 
@@ -56,39 +59,52 @@ async function _renderPassInfo() {
   for (let i = 0; i < 4; i++) {
     const srcId = p.ch[i];
     const chLabel = srcId ? (srcId === 'image' ? 'Image' : srcId) : '— empty —';
-    rows.push(`<div class="insp-row"><span class="insp-k">iChannel${i}</span><span class="insp-v">${esc(chLabel)}</span></div>`);
+    rows.push(
+      `<div class="insp-row"><span class="insp-k">iChannel${i}</span><span class="insp-v">${esc(chLabel)}</span></div>`
+    );
   }
 
-  setInspectorMode('pass', `
+  setInspectorMode(
+    'pass',
+    `
     <div class="insp-section-title">${esc(label)}</div>
     <div class="insp-row"><span class="insp-k">Resolution</span><span class="insp-v">${Math.round((p.resolutionScale ?? 1) * 100)}%</span></div>
     <div class="insp-row"><span class="insp-k">Feedback</span><span class="insp-v">${p.feedbackDelay ? 'on' : 'off'}</span></div>
     ${rows.join('')}
-  `);
+  `
+  );
 }
 
 // ── Mode "slider" ────────────────────────────────────────────────────────────
 
 function _renderSliderInfo(id) {
   const e = state.varMap?.[id];
-  if (!e) { setInspectorMode('slider', _emptyState('Hover a slider…')); return; }
+  if (!e) {
+    setInspectorMode('slider', _emptyState('Hover a slider…'));
+    return;
+  }
   const source = (e.stableKey || '').split(':')[0] || '—'; // def / const / lit
 
-  setInspectorMode('slider', `
+  setInspectorMode(
+    'slider',
+    `
     <div class="insp-section-title">${esc(e.label)}</div>
     <div class="insp-row"><span class="insp-k">Value</span><span class="insp-v">${fmtN(e.value, e.decimals ?? 3)}</span></div>
     <div class="insp-row"><span class="insp-k">Range</span><span class="insp-v">${fmtN(e.min, e.decimals ?? 3)} … ${fmtN(e.max, e.decimals ?? 3)}</span></div>
     <div class="insp-row"><span class="insp-k">Source</span><span class="insp-v">${esc(source)}</span></div>
     <button class="pb insp-edit-range-btn" type="button">Edit range</button>
-  `);
+  `
+  );
 
-  document.querySelector('#insp-slider .insp-edit-range-btn')?.addEventListener('click', () => startRangeEdit(id));
+  document
+    .querySelector('#insp-slider .insp-edit-range-btn')
+    ?.addEventListener('click', () => startRangeEdit(id));
 }
 
 function _initSliderHover() {
   const sw = document.getElementById('sw');
   if (!sw) return;
-  sw.addEventListener('mouseover', e => {
+  sw.addEventListener('mouseover', (e) => {
     const row = e.target.closest('.sr');
     if (!row) return;
     const id = row.id?.replace(/^sr-/, '');
@@ -111,7 +127,7 @@ function _mdLite(s) {
 
 function _initUniformHover() {
   if (!state.editor) return;
-  state.editor.onMouseMove(e => {
+  state.editor.onMouseMove((e) => {
     const pos = e.target?.position;
     const model = pos && state.editor.getModel();
     const word = model?.getWordAtPosition(pos);
@@ -129,12 +145,32 @@ function _initUniformHover() {
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 
+const INSPECTOR_OPEN_KEY = 'sl_inspectorOpen';
+const INSPECTOR_DEFAULT_OPEN_MIN_WIDTH = 1280;
+
 /** Toggle the visibility of the whole right-hand inspector column. */
 export function toggleInspectorPanel(e) {
   if (e) e.stopPropagation();
   const layout = document.getElementById('layout');
   if (!layout) return;
-  layout.classList.toggle('inspector-open');
+  const open = layout.classList.toggle('inspector-open');
+  // Remember the user's explicit choice so it survives reload — otherwise
+  // the ≥1280px default-open below would silently re-open it every time.
+  safeLocalSet(INSPECTOR_OPEN_KEY, open ? '1' : '0');
+}
+
+// §2 roadmap — the Outliner + contextual Inspector column used to start
+// closed (--iw: 0px) on every screen size, hiding functional content (the
+// Outliner tree and Pass/Slider/Uniform inspector) by default. On desktop
+// screens wide enough to afford it (≥1280px) it now opens by default,
+// unless the user has explicitly toggled it in a previous session.
+function _initDefaultOpenState() {
+  const layout = document.getElementById('layout');
+  if (!layout) return;
+  const saved = safeLocalGet(INSPECTOR_OPEN_KEY, null);
+  const shouldOpen =
+    saved !== null ? saved === '1' : window.innerWidth >= INSPECTOR_DEFAULT_OPEN_MIN_WIDTH;
+  layout.classList.toggle('inspector-open', shouldOpen);
 }
 
 export function initInspectorContext() {
@@ -142,6 +178,7 @@ export function initInspectorContext() {
   window.addEventListener('zgl:passchange', () => _renderPassInfo());
   _initSliderHover();
   _initUniformHover();
+  _initDefaultOpenState();
 }
 
 export { setInspectorMode };
