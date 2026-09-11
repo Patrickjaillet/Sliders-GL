@@ -686,6 +686,53 @@
         <line x1="6" y1="1.5" x2="6" y2="14.5" stroke="currentColor" stroke-width="1.2" />
         <line x1="1.5" y1="10" x2="6" y2="10" stroke="currentColor" stroke-width="1.2" />
       </symbol>
+
+      <!-- §4 roadmap — Icônes du tool shelf (outils jusqu'ici accessibles
+           seulement via palette de commandes ou raccourci caché). -->
+
+      <!-- Loupe sur document (Shader Anatomy overlay) -->
+      <symbol id="icon-anatomy" viewBox="0 0 16 16">
+        <path
+          stroke="currentColor"
+          stroke-width="1.4"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M3 1.5h6l3 3v9.5H3z"
+        />
+        <path stroke="currentColor" stroke-width="1.2" stroke-linecap="round" d="M5 8h4M5 10.5h3" />
+        <circle cx="10.5" cy="11" r="2.2" stroke="currentColor" stroke-width="1.2" fill="none" />
+        <line
+          x1="12.2"
+          y1="12.7"
+          x2="14"
+          y2="14.5"
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linecap="round"
+        />
+      </symbol>
+
+      <!-- Point d'interrogation dans un cadre (Which-key overlay) -->
+      <symbol id="icon-whichkey" viewBox="0 0 16 16">
+        <rect
+          x="1.5"
+          y="3"
+          width="13"
+          height="10"
+          rx="1.2"
+          stroke="currentColor"
+          stroke-width="1.4"
+          fill="none"
+        />
+        <path
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          d="M6.2 6.6c0-1 0.8-1.7 1.8-1.7s1.8 0.6 1.8 1.6c0 1.3-1.8 1.2-1.8 2.7"
+        />
+        <circle cx="8" cy="10.7" r="0.75" fill="currentColor" />
+      </symbol>
     </defs>
   </svg>
 
@@ -1063,11 +1110,15 @@
 
   <div class="layout" id="layout">
     <!-- Tool shelf (Blender's "T"-panel equivalent) -->
+    <!-- §4 roadmap — grouped Navigation / Edit / Render / Export / Library /
+         Help, each tool with a rich tooltip (description + shortcut where
+         one exists — reused verbatim by tooltip.js from the title attr). -->
     <div class="tool-shelf" id="toolShelf" role="toolbar" aria-label="Tool shelf">
+      <!-- Navigation -->
       <button
         class="ts-tool"
         data-action="resetSliders"
-        title="Reset View / Sliders"
+        title="Reset sliders to their default values"
         aria-label="Reset sliders"
       >
         ↺
@@ -1075,16 +1126,17 @@
       <button
         class="ts-tool"
         data-action="randomizeUnpinnedSliders"
-        title="Randomize unpinned sliders"
+        title="Randomize all unpinned sliders"
         aria-label="Randomize unpinned sliders"
       >
         🎲
       </button>
       <div class="ts-sep"></div>
+      <!-- Render -->
       <button
         class="ts-tool"
         data-action="togglePause"
-        title="Play / Pause"
+        title="Play / pause rendering — Space"
         aria-label="Toggle pause"
       >
         ⏯
@@ -1092,16 +1144,17 @@
       <button
         class="ts-tool"
         data-action="toggleFullscreenVP"
-        title="Fullscreen Viewport (F11)"
+        title="Fullscreen viewport — F11"
         aria-label="Toggle fullscreen viewport"
       >
         ⛶
       </button>
       <div class="ts-sep"></div>
+      <!-- Export -->
       <button
         class="ts-tool"
         data-action="openExportModal"
-        title="Export / Snapshot"
+        title="Export image, video, or code"
         aria-label="Open export dialog"
       >
         ⇩
@@ -1109,10 +1162,50 @@
       <button
         class="ts-tool"
         data-action="openSTModal"
-        title="Import from ShaderToy"
+        title="Import a shader from ShaderToy"
         aria-label="Import from ShaderToy"
       >
         ◈
+      </button>
+      <div class="ts-sep"></div>
+      <!-- Library — §4 roadmap: shader library and includes manager were
+           previously only reachable via the command palette or Ctrl+Shift+F. -->
+      <button
+        class="ts-tool"
+        data-action="openShaderLibrary"
+        title="Shader Library — browse and search saved shaders (Ctrl+Shift+F)"
+        aria-label="Open shader library"
+      >
+        <svg><use href="#icon-library" /></svg>
+      </button>
+      <button
+        class="ts-tool"
+        data-action="toggleIncludesPanel"
+        title="Includes Manager — edit reusable #include files"
+        aria-label="Open includes manager"
+      >
+        <svg><use href="#icon-hash" /></svg>
+      </button>
+      <div class="ts-sep"></div>
+      <!-- Help — §4 roadmap: shader anatomy overlay and which-key were
+           previously only reachable via the command palette or the "?" key. -->
+      <button
+        class="ts-tool"
+        id="shaderAnatomyBtn"
+        data-action="toggleShaderAnatomyBtn"
+        title="Toggle Shader Anatomy overlay — annotates mainImage, uniforms, constants, and channels inline"
+        aria-label="Toggle shader anatomy overlay"
+        aria-pressed="false"
+      >
+        <svg><use href="#icon-anatomy" /></svg>
+      </button>
+      <button
+        class="ts-tool"
+        data-action="openWhichKey"
+        title="Show the keyboard shortcut map — ?"
+        aria-label="Show keyboard shortcut map"
+      >
+        <svg><use href="#icon-whichkey" /></svg>
       </button>
       <div class="ts-sep"></div>
       <button
@@ -1201,8 +1294,8 @@
             <button class="pb" data-menu-action="resCustom">Custom…</button>
           </div>
           <div class="prop-hint">
-            Internal canvas render resolution used for export. The live viewport preview always
-            stays fixed at 800×450.
+            Internal canvas render resolution used for export. The live viewport preview fills the
+            available viewport space and adapts to the window size.
           </div>
         </div>
         <div class="prop-section">
@@ -1536,7 +1629,8 @@
           </div>
         </div>
 
-        <!-- Viewport column (right): area-type header + fixed 800×450 canvas + timeline -->
+        <!-- Viewport column (right): area-type header + adaptive canvas (fills
+             available space, see layout.css .cw) + timeline -->
         <div class="viewport-col" id="viewportCol">
           <!-- §1 Main editor area — per-area header: area-type dropdown (Blender's
            editor-type selector, adapted) + contextual icon toolbar row, mirroring

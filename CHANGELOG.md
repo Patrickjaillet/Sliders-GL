@@ -5,6 +5,22 @@ All notable changes to Sliders GL are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] — 2026-09-12
+
+### Added
+
+- The tool shelf now has direct buttons for four features that were
+  previously only reachable through the hidden command palette or a
+  keyboard shortcut: the Shader Library, the Includes Manager, the Shader
+  Anatomy overlay (with a visible on/off state), and the keyboard shortcut
+  map ("which-key").
+- Tool shelf tooltips are now full descriptions rather than short labels.
+
+### Changed
+
+- Tool shelf icons are now grouped into clearer sections: Navigation,
+  Render, Export, Library, and Help.
+
 ## [1.2.0] — 2026-09-11
 
 ### Added
@@ -92,6 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   locally — zero network dependency for core functionality.
 - MIT license.
 
+[1.3.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.3.0
 [1.2.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.2.0
 [1.1.1]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.1.1
 [1.1.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.1.0

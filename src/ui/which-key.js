@@ -5,52 +5,73 @@
 // de raccourcis recherchable (qui, lui, est configurable et persistant).
 
 const GROUPS = [
-  { title: 'Editor', keys: [
-    ['Ctrl+Enter / Ctrl+S', 'Apply & parse'],
-    ['Ctrl+Shift+P / Ctrl+K', 'Command palette'],
-    ['Alt+drag number', 'Scrub value live'],
-    ['Ctrl+= / Ctrl+- / Ctrl+0', 'Font size'],
-    ['Ctrl+D / Ctrl+Shift+L', 'Multi-cursor'],
-    ['Shift+Alt+F', 'Format'],
-  ] },
-  { title: 'View', keys: [
-    ['Ctrl+Shift+F', 'Code focus'],
-    ['F11', 'Fullscreen viewport'],
-    ['Space', 'Pause / resume'],
-  ] },
-  { title: 'Canvas', keys: [
-    ['H', 'Toggle HUD'],
-    ['G', 'Toggle guides'],
-    ['R (hold)', 'Pixel ruler'],
-    ['B (hold)', 'Before / after compare'],
-    ['Ctrl+scroll', 'Zoom · Ctrl+0 reset'],
-    ['Ctrl+Shift+C', 'Copy frame'],
-    ['Right-click', 'Canvas menu'],
-  ] },
-  { title: 'Tools', keys: [
-    ['Ctrl+Shift+G', 'Performance panel'],
-    ['Ctrl+Shift+B', 'Color blindness'],
-    ['Ctrl+Shift+U', 'LUT library'],
-    ['F1', 'Help center'],
-    ['?', 'This keyboard map'],
-  ] },
+  {
+    title: 'Editor',
+    keys: [
+      ['Ctrl+Enter / Ctrl+S', 'Apply & parse'],
+      ['Ctrl+Shift+P / Ctrl+K', 'Command palette'],
+      ['Alt+drag number', 'Scrub value live'],
+      ['Ctrl+= / Ctrl+- / Ctrl+0', 'Font size'],
+      ['Ctrl+D / Ctrl+Shift+L', 'Multi-cursor'],
+      ['Shift+Alt+F', 'Format'],
+    ],
+  },
+  {
+    title: 'View',
+    keys: [
+      ['Ctrl+Shift+F', 'Code focus'],
+      ['F11', 'Fullscreen viewport'],
+      ['Space', 'Pause / resume'],
+    ],
+  },
+  {
+    title: 'Canvas',
+    keys: [
+      ['H', 'Toggle HUD'],
+      ['G', 'Toggle guides'],
+      ['R (hold)', 'Pixel ruler'],
+      ['B (hold)', 'Before / after compare'],
+      ['Ctrl+scroll', 'Zoom · Ctrl+0 reset'],
+      ['Ctrl+Shift+C', 'Copy frame'],
+      ['Right-click', 'Canvas menu'],
+    ],
+  },
+  {
+    title: 'Tools',
+    keys: [
+      ['Ctrl+Shift+G', 'Performance panel'],
+      ['Ctrl+Shift+B', 'Color blindness'],
+      ['Ctrl+Shift+U', 'LUT library'],
+      ['F1', 'Help center'],
+      ['?', 'This keyboard map'],
+    ],
+  },
 ];
 
 let _el = null;
 
 function _typing(t) {
-  return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || (t.closest && t.closest('.monaco-editor')));
+  return (
+    t &&
+    (t.tagName === 'INPUT' ||
+      t.tagName === 'TEXTAREA' ||
+      (t.closest && t.closest('.monaco-editor')))
+  );
 }
 
 function _close() {
   if (!_el) return;
   _el.classList.remove('open');
-  const el = _el; _el = null;
+  const el = _el;
+  _el = null;
   setTimeout(() => el.remove(), 200);
 }
 
 function _open() {
-  if (_el) { _close(); return; }
+  if (_el) {
+    _close();
+    return;
+  }
   _el = document.createElement('div');
   _el.id = 'which-key';
   _el.className = 'which-key';
@@ -60,21 +81,35 @@ function _open() {
     <div class="wk-card">
       <div class="wk-head"><span>Keyboard map</span><span class="wk-hint">Esc to close</span></div>
       <div class="wk-grid">
-        ${GROUPS.map(g => `
+        ${GROUPS.map(
+          (g) => `
           <div class="wk-group">
             <div class="wk-group-title">${g.title}</div>
             ${g.keys.map(([k, d]) => `<div class="wk-row"><kbd>${k}</kbd><span>${d}</span></div>`).join('')}
-          </div>`).join('')}
+          </div>`
+        ).join('')}
       </div>
     </div>`;
   document.body.appendChild(_el);
   requestAnimationFrame(() => _el.classList.add('open'));
-  _el.addEventListener('mousedown', (e) => { if (e.target === _el) _close(); });
+  _el.addEventListener('mousedown', (e) => {
+    if (e.target === _el) _close();
+  });
+}
+
+// §4 roadmap — exported so the tool shelf's "which-key" button can open the
+// overlay directly, not just the "?" keydown handler below.
+export function openWhichKey() {
+  _open();
 }
 
 export function initWhichKey() {
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && _el) { e.preventDefault(); _close(); return; }
+    if (e.key === 'Escape' && _el) {
+      e.preventDefault();
+      _close();
+      return;
+    }
     if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey && !_typing(e.target)) {
       e.preventDefault();
       _open();

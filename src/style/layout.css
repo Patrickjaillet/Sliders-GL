@@ -248,6 +248,17 @@ html.no-transition * {
     border-color var(--dur) var(--ease);
 }
 
+/* §4 roadmap — SVG icon tools alongside the pre-existing emoji/glyph ones */
+.ts-tool svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}
+
 .ts-tool:hover {
   background: var(--bg-raised);
   color: var(--text-primary);
@@ -257,6 +268,14 @@ html.no-transition * {
 .ts-tool:active {
   background: var(--accent-dim);
   color: var(--accent);
+}
+
+/* §4 roadmap — persistent toggle state (shader anatomy overlay, etc.),
+   distinct from the momentary :active mousedown flash above. */
+.ts-tool.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 .ts-sep {

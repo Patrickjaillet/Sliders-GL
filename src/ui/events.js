@@ -56,6 +56,8 @@ import {
 } from './editor.js';
 import { toggleInspectorPanel } from './inspector-context.js';
 import { toggleSettingsPanel } from './settings-panel.js';
+import { toggleShaderAnatomy } from './shader-anatomy.js';
+import { openWhichKey } from './which-key.js';
 import { playSound, toggleSound, isSoundEnabled } from './sound.js';
 import {
   toggleFileMenu,
@@ -170,6 +172,19 @@ const ACTIONS = {
   toggleSettingsPanel,
   toggleIncludesPanel,
   openShaderLibrary,
+  openWhichKey,
+  // §4 roadmap — tool shelf: reflect the overlay's on/off state on the
+  // triggering button (toggleShaderAnatomy() returns the new state). Looked
+  // up by id rather than via the click event's target/currentTarget — the
+  // generic dispatcher above delegates from `document`, so e.currentTarget
+  // would resolve to document, not the button (see the click listener a few
+  // lines below the ACTIONS map).
+  toggleShaderAnatomyBtn: () => {
+    const on = toggleShaderAnatomy();
+    const btn = document.getElementById('shaderAnatomyBtn');
+    btn?.classList.toggle('active', on);
+    btn?.setAttribute('aria-pressed', String(on));
+  },
   // §1 Main editor area — viewport header's contextual icon toolbar row,
   // reusing canvas-tools.js functions previously only reachable via
   // keyboard shortcuts or the right-click context menu.
@@ -328,8 +343,8 @@ export function initEvents() {
     // the nearest positioned ancestor like absolute would be.
     if (open) {
       const rect = btn.getBoundingClientRect();
-      menu.style.left = `${Math.round(rect.left)  }px`;
-      menu.style.top = `${Math.round(rect.bottom + 4)  }px`;
+      menu.style.left = `${Math.round(rect.left)}px`;
+      menu.style.top = `${Math.round(rect.bottom + 4)}px`;
     }
   });
   document.addEventListener('click', (e) => {
