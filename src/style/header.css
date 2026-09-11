@@ -20,7 +20,9 @@
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease);
 }
 
 .hb:hover,
@@ -66,7 +68,10 @@
   vector-effect: non-scaling-stroke;
 }
 
-.hb svg.filled { fill: currentColor; stroke: none; }
+.hb svg.filled {
+  fill: currentColor;
+  stroke: none;
+}
 
 /* ── Badge de statut de compilation ── */
 
@@ -92,14 +97,16 @@
   flex-shrink: 0;
 }
 
-.status-badge.ready   { color: var(--text-dim); }
+.status-badge.ready {
+  color: var(--text-dim);
+}
 
 .status-badge.live,
 .status-badge.ok {
   color: var(--accent);
 }
 .status-badge.live .status-dot,
-.status-badge.ok   .status-dot {
+.status-badge.ok .status-dot {
   background: var(--accent);
   animation: pulse-dot 1.9s ease-in-out infinite;
 }
@@ -113,6 +120,7 @@
 
 /* Dirty indicator — petit rond 4px couleur warn */
 .fmenu-dirty {
+  position: relative;
   display: inline-block;
   width: 4px;
   height: 4px;
@@ -121,7 +129,23 @@
   margin-left: 3px;
   flex-shrink: 0;
 }
-.fmenu-dirty[hidden] { display: none; }
+.fmenu-dirty[hidden] {
+  display: none;
+}
+
+/* §3 roadmap — "saved" confirmation: a brief accent-colored ring that
+   expands and fades from the dot's own position, played once right after
+   a save completes (project-ui.js toggles this class on, the animation
+   removes itself via `animation-fill-mode: forwards` staying at opacity:0
+   so it doesn't need a JS cleanup timer). */
+.fmenu-dirty-saved-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  animation: dirtySavedPulse 500ms ease-out forwards;
+  pointer-events: none;
+}
 
 /* ── TAA velocity summary ── */
 
@@ -176,7 +200,9 @@
   vector-effect: non-scaling-stroke;
 }
 
-canvas.fps-spark { display: none !important; }
+canvas.fps-spark {
+  display: none !important;
+}
 
 /* ── File Menu ── */
 
@@ -195,7 +221,7 @@ canvas.fps-spark { display: none !important; }
 
 .file-menu-popup {
   position: absolute;
-  top: calc(100% + 4px);      /* opens downward — toolbar is now the topbar */
+  top: calc(100% + 4px); /* opens downward — toolbar is now the topbar */
   left: 0;
   z-index: 2000;
   min-width: 180px;
@@ -203,7 +229,7 @@ canvas.fps-spark { display: none !important; }
   border: 1px solid var(--border-mid);
   border-radius: var(--radius-md);
   padding: 4px 0;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 /* ── Generic topbar dropdown menus (Edit / Render / Window / Help) ── */
@@ -226,7 +252,7 @@ canvas.fps-spark { display: none !important; }
   border: 1px solid var(--border-mid);
   border-radius: var(--radius-md);
   padding: 4px 0;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 /* ── Workspace tabs (topbar, left) ── */
@@ -239,6 +265,9 @@ canvas.fps-spark { display: none !important; }
 }
 
 .ws-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font: 12px var(--font-ui);
   color: var(--text-dim);
   background: transparent;
@@ -246,7 +275,19 @@ canvas.fps-spark { display: none !important; }
   border-radius: var(--radius-sm);
   padding: 5px 10px;
   cursor: pointer;
-  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+
+.ws-tab svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
 }
 
 .ws-tab:hover {
@@ -286,10 +327,23 @@ canvas.fps-spark { display: none !important; }
 
 .fmenu-icon {
   width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   flex-shrink: 0;
   color: var(--text-dim);
   font-size: 12px;
+}
+
+.fmenu-icon svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
 }
 
 .fmenu-shortcut {
@@ -322,7 +376,9 @@ canvas.fps-spark { display: none !important; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease);
 }
 
 .fmenu-mru-item:hover {
@@ -345,8 +401,12 @@ canvas.fps-spark { display: none !important; }
   color: var(--accent);
   background: var(--accent-dim);
 }
-.fmenu-item--active .fmenu-icon { color: var(--accent); }
-.fmenu-item--active:hover { filter: brightness(1.1); }
+.fmenu-item--active .fmenu-icon {
+  color: var(--accent);
+}
+.fmenu-item--active:hover {
+  filter: brightness(1.1);
+}
 
 /* Cohérence icônes stroke */
 .hb svg,
@@ -384,7 +444,7 @@ canvas.fps-spark { display: none !important; }
   border: 1px solid var(--border-mid);
   border-radius: var(--radius-md);
   padding: 4px 0;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   animation: popup-up 80ms var(--ease);
 }
 
@@ -404,7 +464,7 @@ canvas.fps-spark { display: none !important; }
 }
 
 .lp-item:hover,
-.lp-item[aria-pressed="true"] {
+.lp-item[aria-pressed='true'] {
   background: var(--accent-dim);
   color: var(--text-primary);
 }
@@ -475,7 +535,9 @@ canvas.fps-spark { display: none !important; }
   border-bottom: 1px solid var(--border-sub);
 }
 
-.caps-row:last-child { border-bottom: none; }
+.caps-row:last-child {
+  border-bottom: none;
+}
 
 .caps-header {
   font-weight: 700;
@@ -485,14 +547,36 @@ canvas.fps-spark { display: none !important; }
   border-bottom: 1px solid var(--border-mid);
 }
 
-.caps-label  { color: var(--text-dim); flex: 0 0 100px; }
-.caps-val    { text-align: right; }
-.caps-gpu-str{ font-size: 9px; color: var(--text-dim); text-align: right; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.caps-yes    { color: var(--accent); }
-.caps-no     { color: var(--text-dim); }
-.caps-loading{ opacity: 0.7; font-style: italic; }
+.caps-label {
+  color: var(--text-dim);
+  flex: 0 0 100px;
+}
+.caps-val {
+  text-align: right;
+}
+.caps-gpu-str {
+  font-size: 9px;
+  color: var(--text-dim);
+  text-align: right;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.caps-yes {
+  color: var(--accent);
+}
+.caps-no {
+  color: var(--text-dim);
+}
+.caps-loading {
+  opacity: 0.7;
+  font-style: italic;
+}
 
-.perf-timebar-val.gpu-real { color: var(--accent); }
+.perf-timebar-val.gpu-real {
+  color: var(--accent);
+}
 
 .perf-btns-wrap {
   flex-wrap: wrap;
@@ -511,7 +595,9 @@ canvas.fps-spark { display: none !important; }
   min-width: 0;
 }
 
-.perf-input-sm:focus { border-color: var(--border-hot); }
+.perf-input-sm:focus {
+  border-color: var(--border-hot);
+}
 
 /* ── Barre de statut bas ── */
 
@@ -522,10 +608,23 @@ canvas.fps-spark { display: none !important; }
   min-width: 0;
 }
 
-.sb-left   { flex: 1 1 0; justify-content: flex-start; }
-.sb-center { flex: 0 0 auto; justify-content: center; }
-.sb-right  { flex: 1 1 0; justify-content: flex-end; }
-.sb-info   { justify-content: center; font-size: 9px; color: var(--text-dim); }
+.sb-left {
+  flex: 1 1 0;
+  justify-content: flex-start;
+}
+.sb-center {
+  flex: 0 0 auto;
+  justify-content: center;
+}
+.sb-right {
+  flex: 1 1 0;
+  justify-content: flex-end;
+}
+.sb-info {
+  justify-content: center;
+  font-size: 9px;
+  color: var(--text-dim);
+}
 
 .sb-sep {
   color: var(--text-ghost);
@@ -545,37 +644,55 @@ canvas.fps-spark { display: none !important; }
   padding: 0 6px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--error);
-  background: rgba(255,76,76,0.10);
+  background: rgba(255, 76, 76, 0.1);
   color: var(--error);
   font: 600 10px/1 var(--font-mono);
   cursor: pointer;
 }
 
-.sb-errcount[hidden] { display: none; }
+.sb-errcount[hidden] {
+  display: none;
+}
 
 .sb-errcount.has-errors {
   animation: errShake 200ms ease-in-out;
 }
 
 @keyframes errShake {
-  0%   { transform: translateX(0); }
-  20%  { transform: translateX(-3px); }
-  40%  { transform: translateX(3px); }
-  60%  { transform: translateX(-2px); }
-  80%  { transform: translateX(2px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-3px);
+  }
+  40% {
+    transform: translateX(3px);
+  }
+  60% {
+    transform: translateX(-2px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 #sbPassBadge {
   color: var(--accent);
   cursor: pointer;
 }
-#sbPassBadge:hover { color: var(--accent-hover); }
+#sbPassBadge:hover {
+  color: var(--accent-hover);
+}
 
 .curpos {
   cursor: pointer;
 }
-.curpos:hover { color: var(--text-primary); }
+.curpos:hover {
+  color: var(--text-primary);
+}
 
 .sb-cb {
   display: inline-flex;
@@ -590,18 +707,20 @@ canvas.fps-spark { display: none !important; }
   cursor: pointer;
 }
 
-.sb-cb[hidden] { display: none; }
+.sb-cb[hidden] {
+  display: none;
+}
 
 /* Teinte statusbar en erreur */
 .app-statusbar.err {
-  background: rgba(255,76,76,0.05);
-  border-top-color: rgba(255,76,76,0.20);
+  background: rgba(255, 76, 76, 0.05);
+  border-top-color: rgba(255, 76, 76, 0.2);
 }
 
 /* ── Bouton parse en rotation ── */
 
 .parsing .icon-parse,
-button[data-action="applyAndParse"].parsing svg,
-button[data-action="applyAndParseActive"].parsing svg {
+button[data-action='applyAndParse'].parsing svg,
+button[data-action='applyAndParseActive'].parsing svg {
   animation: spin 600ms linear infinite;
 }

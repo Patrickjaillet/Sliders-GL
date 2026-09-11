@@ -5,6 +5,24 @@ All notable changes to Sliders GL are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] — 2026-09-11
+
+### Added
+
+- Workspace tabs (Editor / Shading / Layout) now have distinct icons instead
+  of text-only labels.
+- Two new topbar quick-access buttons: **Shader Library** and **Includes
+  Manager** — both were already fully implemented but only reachable via
+  the hidden command palette or a keyboard shortcut.
+- The File menu button now shows a tooltip with the exact time of the last
+  save, and plays a brief confirmation pulse right when a save completes.
+
+### Changed
+
+- All topbar menu icons (File/Edit/Render/Window/Help) are now 100% SVG,
+  replacing the previous mix of Unicode emoji and SVG icons, for a more
+  consistent, professional look.
+
 ## [1.1.1] — 2026-09-11
 
 ### Fixed
@@ -74,6 +92,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   locally — zero network dependency for core functionality.
 - MIT license.
 
+[1.2.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.2.0
 [1.1.1]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.1.1
 [1.1.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.1.0
 [1.0.1]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.0.1

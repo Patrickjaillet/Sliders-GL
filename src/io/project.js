@@ -58,8 +58,19 @@ const AUTOSAVE_DIRTY = 'sl_autosave_dirty'; // bool — unsaved changes exist
 const MAX_MRU = 10;
 
 // ── Module state ──────────────────────────────────────────────────────────────
-/** @type {{ path: string|null, name: string, dirty: boolean }} */
-const _proj = { path: null, name: 'Untitled', dirty: false };
+/** @type {{ path: string|null, name: string, dirty: boolean, lastSavedAt: number|null }} */
+const _proj = { path: null, name: 'Untitled', dirty: false, lastSavedAt: null };
+
+/**
+ * §3 roadmap — timestamp (ms epoch) of the last successful explicit save
+ * (Save / Save As, not auto-save), or null if nothing has been saved yet
+ * this session. Used by blender-shell.js to build the File-menu button's
+ * "last saved at HH:MM:SS" tooltip.
+ * @returns {number|null}
+ */
+export function getLastSavedAt() {
+  return _proj.lastSavedAt;
+}
 
 /** Active file-watcher unlisten callback (or null). */
 let _watchUnlisten = null;
@@ -118,7 +129,7 @@ export function isProjectDirty() {
 export function markDirty() {
   if (_proj.dirty) return;
   _proj.dirty = true;
-  _cb.setTitle(`${_proj.name  } •`);
+  _cb.setTitle(`${_proj.name} •`);
   safeLocalSet(AUTOSAVE_DIRTY, '1');
 }
 
@@ -206,7 +217,7 @@ export async function openProject(pathOverride) {
       await _loadFromPath(filePath);
     } catch (err) {
       console.error('[project] open failed:', err);
-      _cb.toast(`Failed to open project: ${  err.message}`, 'err');
+      _cb.toast(`Failed to open project: ${err.message}`, 'err');
       _removeFromMru(filePath);
     }
   };
@@ -247,7 +258,7 @@ export async function saveProjectAs() {
     return;
   }
 
-  const suggested = `${_proj.name.replace(/[^a-z0-9_\-. ]/gi, '_') || 'shader'  }.zgl`;
+  const suggested = `${_proj.name.replace(/[^a-z0-9_\-. ]/gi, '_') || 'shader'}.zgl`;
   const path = await saveFileDialog({
     defaultPath: suggested,
     filters: [
@@ -313,9 +324,9 @@ async function _doAutoSave() {
     // Fix 1.4 — Tauri v2 : utiliser @tauri-apps/plugin-fs au lieu de window.__TAURI__.fs
     const tmpDir = await _tauri_appLocalDataDir();
     if (!tmpDir) return;
-    await _tauriFsWriteText(`${tmpDir  }autosave.json`, payload);
-    safeLocalSet(AUTOSAVE_KEY, `${tmpDir  }autosave.json`);
-    console.debug('[project] auto-saved to', `${tmpDir  }autosave.json`);
+    await _tauriFsWriteText(`${tmpDir}autosave.json`, payload);
+    safeLocalSet(AUTOSAVE_KEY, `${tmpDir}autosave.json`);
+    console.debug('[project] auto-saved to', `${tmpDir}autosave.json`);
   } catch (err) {
     console.warn('[project] auto-save failed:', err);
   }
@@ -325,7 +336,7 @@ async function _tauri_appLocalDataDir() {
   try {
     // Fix 1.4 — Tauri v2 : @tauri-apps/api/path au lieu de window.__TAURI__.path
     const { appLocalDataDir } = await import('@tauri-apps/api/path');
-    return `${await appLocalDataDir()  }/`;
+    return `${await appLocalDataDir()}/`;
   } catch {
     return null;
   }
@@ -355,10 +366,10 @@ async function _offerCrashRecovery() {
           _proj.path = data.path || null;
           _proj.name = data.name || 'Recovered';
           _proj.dirty = true;
-          _cb.setTitle(`${_proj.name  } • (recovered)`);
+          _cb.setTitle(`${_proj.name} • (recovered)`);
           _cb.toast('Session recovered — remember to save!', 'warn');
         } catch (err) {
-          _cb.toast(`Recovery failed: ${  err.message}`, 'err');
+          _cb.toast(`Recovery failed: ${err.message}`, 'err');
         }
       }
     );
@@ -527,6 +538,7 @@ async function _writeToDisk(filePath) {
 
   _proj.path = filePath;
   _proj.name = name;
+  _proj.lastSavedAt = Date.now();
   _markClean();
   _cb.setTitle(name);
   _cb.toast(`Saved: ${name}`, 'ok');
@@ -549,7 +561,7 @@ async function _startWatchFile(filePath) {
           _cb.applyShader(code);
           _cb.toast('Hot-reloaded from disk', 'info');
         } catch (err) {
-          _cb.toast(`Watch reload failed: ${  err.message}`, 'err');
+          _cb.toast(`Watch reload failed: ${err.message}`, 'err');
         }
       }, 120);
     });

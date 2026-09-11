@@ -18,18 +18,46 @@
  * §5.3 — Met à jour le fil d'Ariane du projet dans le bouton du menu File
  * (nom du projet + point de modification). Le nom reçu peut contenir un
  * suffixe " •" (modifié) ou " • (recovered)".
+ *
+ * §3 roadmap — étend le point "modifié" existant avec un tooltip
+ * d'horodatage du dernier save (réutilise project.js's getLastSavedAt())
+ * et une micro-animation "pulse" au moment précis où l'état passe de
+ * modifié à sauvegardé, pour rendre la transition perceptible plutôt que
+ * silencieuse.
  * @param {string} rawName
  */
 export function setProjectBreadcrumb(rawName) {
-  const nameEl  = document.getElementById('projectName');
+  const nameEl = document.getElementById('projectName');
   const dirtyEl = document.getElementById('projectDirty');
+  const btnEl = document.getElementById('fileMenuBtn');
   if (!nameEl) return;
   const raw = String(rawName || '');
   const dirty = raw.includes('•');
   const clean = raw.replace(/\s*•.*$/, '').trim() || 'Untitled';
+  const wasDirty = dirtyEl ? !dirtyEl.hidden : false;
   nameEl.textContent = clean;
   if (dirtyEl) dirtyEl.hidden = !dirty;
   document.title = `${dirty ? '• ' : ''}${clean} — Sliders GL`;
+
+  if (btnEl) {
+    const savedAt = getLastSavedAt();
+    btnEl.title = dirty
+      ? 'Unsaved changes'
+      : savedAt
+        ? `Saved at ${new Date(savedAt).toLocaleTimeString()}`
+        : 'Project — click for File menu';
+  }
+
+  // Pulse only on the dirty→clean transition (i.e. right after a save) —
+  // not on every re-render, and not when going clean→dirty (that's a plain
+  // state change, not a confirmation worth celebrating).
+  if (wasDirty && !dirty && dirtyEl) {
+    dirtyEl.classList.remove('fmenu-dirty-saved-pulse');
+    // Force reflow so re-adding the class restarts the animation even if
+    // two saves happen in quick succession.
+    void dirtyEl.offsetWidth;
+    dirtyEl.classList.add('fmenu-dirty-saved-pulse');
+  }
 }
 
 import {
@@ -42,6 +70,7 @@ import {
   enableWatchFile,
   disableWatchFile,
   isWatchingFile,
+  getLastSavedAt,
 } from './project.js';
 import { isTauri } from '../native/tauri.js';
 import { exportCurrentFrame } from '../export/export.js';
@@ -57,7 +86,7 @@ export function toggleFileMenu() {
 function _openFileMenu() {
   _menuOpen = true;
   const popup = document.getElementById('fileMenuPopup');
-  const btn   = document.getElementById('fileMenuBtn');
+  const btn = document.getElementById('fileMenuBtn');
   if (!popup || !btn) return;
 
   _renderMruList();
@@ -73,15 +102,15 @@ function _openFileMenu() {
 
   // Focus first item
   const firstItem = popup.querySelector('.fmenu-item:not(.disabled)');
-  if (firstItem) (/** @type {HTMLElement} */ (firstItem)).focus();
+  if (firstItem) /** @type {HTMLElement} */ (firstItem).focus();
 }
 
 function _closeFileMenu() {
   _menuOpen = false;
   const popup = document.getElementById('fileMenuPopup');
-  const btn   = document.getElementById('fileMenuBtn');
+  const btn = document.getElementById('fileMenuBtn');
   if (popup) popup.hidden = true;
-  if (btn)   btn.setAttribute('aria-expanded', 'false');
+  if (btn) btn.setAttribute('aria-expanded', 'false');
   document.removeEventListener('pointerdown', _onOutsideClick, { capture: true });
 }
 
@@ -95,7 +124,7 @@ function _onOutsideClick(e) {
 
 function _renderMruList() {
   const section = document.getElementById('fmenuMruSection');
-  const list    = document.getElementById('fmenuMruList');
+  const list = document.getElementById('fmenuMruList');
   if (!section || !list) return;
 
   const mru = getMruList();
@@ -105,15 +134,17 @@ function _renderMruList() {
   }
 
   section.style.display = '';
-  list.innerHTML = mru.map((path, i) => {
-    const name = path.split(/[\\/]/).pop();
-    const dir  = path.split(/[\\/]/).slice(0, -1).join('/').slice(-40);
-    return `<div class="fmenu-mru-item" role="menuitem" tabindex="-1"
+  list.innerHTML = mru
+    .map((path, i) => {
+      const name = path.split(/[\\/]/).pop();
+      const dir = path.split(/[\\/]/).slice(0, -1).join('/').slice(-40);
+      return `<div class="fmenu-mru-item" role="menuitem" tabindex="-1"
                  data-action="openMruEntry" data-args="${i}"
                  title="${_esc(path)}">
               ${_esc(name)} <span class="fmenu-mru-badge">${_esc(dir)}</span>
             </div>`;
-  }).join('');
+    })
+    .join('');
 }
 
 function _esc(s) {
@@ -124,15 +155,16 @@ function _esc(s) {
 
 function _updateWatchItem() {
   const item = document.getElementById('watchFileItem');
-  const btn  = document.getElementById('fileMenuBtn');
+  const btn = document.getElementById('fileMenuBtn');
   if (!item) return;
 
   const watching = isWatchingFile();
 
-  // Label + icon
+  // Label + icon — §3 roadmap: 100% SVG sprite, no emoji, matching the
+  // static menu items already converted in ui.html.
   item.innerHTML = watching
-    ? `<span class="fmenu-icon">◉</span> Stop Watching File`
-    : `<span class="fmenu-icon">&#128065;</span> Watch File`;
+    ? `<span class="fmenu-icon"><svg><use href="#icon-eye"/></svg></span> Stop Watching File`
+    : `<span class="fmenu-icon"><svg><use href="#icon-eye"/></svg></span> Watch File`;
 
   // Visual active state on the item itself (not just the header button)
   item.classList.toggle('fmenu-item--active', watching);

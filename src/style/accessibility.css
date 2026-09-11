@@ -1,7 +1,9 @@
 /* Sliders GL — accessibility.css */
 
 /* Remove browser default outlines — managed explicitly below */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   outline: none;
 }
 
@@ -16,10 +18,10 @@ button:focus-visible,
 select:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
-[role="menuitem"]:focus-visible,
-[role="option"]:focus-visible,
-[role="tab"]:focus-visible,
-[role="button"]:focus-visible {
+[role='menuitem']:focus-visible,
+[role='option']:focus-visible,
+[role='tab']:focus-visible,
+[role='button']:focus-visible {
   outline: 2px solid var(--border-hot);
   outline-offset: 2px;
   border-radius: inherit;
@@ -31,7 +33,7 @@ textarea:focus-visible,
   outline-offset: 1px;
 }
 
-[role="slider"]:focus-visible,
+[role='slider']:focus-visible,
 .sl-track:focus-visible,
 .panel-dock-chip:focus-visible,
 .pass-nav-node:focus-visible,
@@ -46,15 +48,17 @@ textarea:focus-visible,
 /* Met en évidence le pouce du curseur lorsque la piste a le focus clavier */
 .sl-track:focus-visible .sl-thumb {
   opacity: 1;
-  box-shadow: 0 0 0 3px var(--accent-dim), 0 0 0 1px var(--accent);
+  box-shadow:
+    0 0 0 3px var(--accent-dim),
+    0 0 0 1px var(--accent);
 }
 
-input[type="range"]:focus-visible {
+input[type='range']:focus-visible {
   outline: 2px solid var(--border-hot);
   outline-offset: 3px;
 }
 
-input[type="checkbox"]:focus-visible {
+input[type='checkbox']:focus-visible {
   outline: 2px solid var(--border-hot);
   outline-offset: 2px;
 }
@@ -135,16 +139,34 @@ html[data-zoom] {
   border-radius: var(--radius-sm);
   font: 11px var(--font-mono);
   color: var(--text-primary);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   opacity: 0;
+  visibility: hidden;
   transform: translateY(4px);
-  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+  transition:
+    opacity var(--dur) var(--ease),
+    transform var(--dur) var(--ease),
+    visibility 0s linear var(--dur);
   pointer-events: none;
 }
 
+/* §3 roadmap a11y audit — opacity:0 alone left this element hit-testable by
+   automated contrast scanners (axe-core) even at rest: it can't always
+   resolve effective contrast through a fully transparent layer and may
+   fall back to flagging its resting colors as if opaque. visibility:hidden
+   is an unambiguous "not rendered for accessibility" signal that fixes
+   that false positive while still allowing the opacity/transform fade to
+   animate (unlike display:none, which can't transition) — the visibility
+   transition is delayed by --dur on the way out so it flips only after the
+   fade-out finishes, and set to 0s (instant) via .visible below on the way in. */
 #zoom-indicator.visible {
   opacity: 1;
+  visibility: visible;
   transform: translateY(0);
+  transition:
+    opacity var(--dur) var(--ease),
+    transform var(--dur) var(--ease),
+    visibility 0s linear 0s;
 }
 
 /* ── Reduced motion ─────────────────────────────────────────────────────── */
@@ -172,15 +194,15 @@ html[data-zoom] {
 
 /* Contraste AAA : texte et bordures poussés au maximum sur le thème gris clair */
 :root.comfort-aaa {
-  --text-primary:   #000000;
+  --text-primary: #000000;
   --text-secondary: #1a1a1a;
-  --text-disabled:  #3d3d3d;
-  --border:         #3d3d3d;
-  --border-strong:  #000000;
+  --text-disabled: #3d3d3d;
+  --border: #3d3d3d;
+  --border-strong: #000000;
 }
 /* Police adaptée dyslexie : empilement lisible + espacement accru */
 :root.comfort-dyslexia {
-  --font-ui:    'Atkinson Hyperlegible', 'OpenDyslexic', 'Verdana', 'Segoe UI', sans-serif;
+  --font-ui: 'Atkinson Hyperlegible', 'OpenDyslexic', 'Verdana', 'Segoe UI', sans-serif;
   --font-prose: 'Atkinson Hyperlegible', 'OpenDyslexic', 'Verdana', 'Segoe UI', sans-serif;
 }
 :root.comfort-dyslexia body {
