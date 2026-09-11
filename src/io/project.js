@@ -445,6 +445,9 @@ async function _loadZglBundle(filePath, name) {
     try {
       const tlData = JSON.parse(await tlFile.async('string'));
       _cb.setTimeline(tlData);
+      // §6 roadmap — lets the timeline strip (ui/viewport.js) re-render its
+      // keyframe markers once a project with saved timeline data loads.
+      window.dispatchEvent(new CustomEvent('zgl:project-loaded'));
     } catch {
       /* non-fatal */
     }

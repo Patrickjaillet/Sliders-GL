@@ -41,10 +41,39 @@
   white-space: nowrap;
 }
 
-.timeline-strip .vp-scrub-range {
+/* §6 roadmap — the range input now sits inside .tl-track-wrap (with the
+   keyframe-marker overlay), so this wrapper takes the flex:1 the input
+   itself used to have. */
+.tl-track-wrap {
+  position: relative;
   flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.timeline-strip .vp-scrub-range {
+  width: 100%;
   height: 3px;
   accent-color: var(--accent);
+}
+
+/* Keyframe tick marks, positioned via inline left:%. Empty/no-op when
+   state.timeline.keys has no entries (the common case today — there is no
+   keyframe editor yet, only project save/load round-trips this data). */
+.tl-markers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.tl-marker {
+  position: absolute;
+  top: 50%;
+  width: 2px;
+  height: 8px;
+  transform: translate(-1px, -50%);
+  background: var(--warn);
+  border-radius: 1px;
 }
 
 .timeline-strip .vp-scrub-reset {
@@ -64,6 +93,22 @@
 .timeline-strip .vp-scrub-reset:hover {
   color: var(--text-primary);
   background: var(--bg-raised);
+}
+
+.timeline-strip .vp-scrub-reset.active,
+.timeline-strip .vp-scrub-reset[aria-pressed='true'] {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.timeline-strip .vp-scrub-reset svg {
+  width: 11px;
+  height: 11px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
 }
 
 .eb {
@@ -638,6 +683,17 @@
 .eb-more-menu .ebn {
   width: 100%;
   text-align: left;
+}
+
+/* §6 roadmap — HUD density caret: narrow trigger button appended right next
+   to the "hud" toggle, opening a menu of density presets. */
+.hud-density-caret {
+  padding: 0 4px !important;
+  font-size: 9px;
+}
+.hud-density-item[aria-checked='true']::before {
+  content: '✓ ';
+  color: var(--accent);
 }
 
 /* ══════════════════════════════════════════════

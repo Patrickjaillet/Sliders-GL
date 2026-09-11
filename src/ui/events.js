@@ -55,7 +55,7 @@ import {
   openShaderLibrary,
 } from './editor.js';
 import { toggleInspectorPanel } from './inspector-context.js';
-import { toggleSettingsPanel } from './settings-panel.js';
+import { toggleSettingsPanel, getEditorPrefs, patchEditorPref } from './settings-panel.js';
 import { toggleShaderAnatomy } from './shader-anatomy.js';
 import { openWhichKey } from './which-key.js';
 import { playSound, toggleSound, isSoundEnabled } from './sound.js';
@@ -83,7 +83,9 @@ import {
   resetZoom,
   saveReference,
   copyFrameToClipboard,
+  toggleCompareView,
 } from './canvas-tools.js';
+import { toggleCanvasGizmos } from './canvas-gizmos.js';
 
 const ACTIONS = {
   // Wrapped so the click Event (or a Monaco command accessor, see editor.js)
@@ -193,6 +195,34 @@ const ACTIONS = {
   resetZoom,
   saveReference,
   copyFrameToClipboard,
+  // §6 roadmap — vp-header: canvas gizmos and compare-view toggles, both
+  // previously only reachable via the canvas right-click menu / hold-B.
+  // Looked up by id (see toggleShaderAnatomyBtn's comment above for why —
+  // the click dispatcher delegates from `document`).
+  toggleCanvasGizmosBtn: () => {
+    const on = toggleCanvasGizmos();
+    const btn = document.getElementById('vpGizmosBtn');
+    btn?.classList.toggle('active', on);
+    btn?.setAttribute('aria-pressed', String(on));
+  },
+  toggleCompareViewBtn: () => toggleCompareView(),
+  // §6 roadmap — word wrap / auto-format quick toggles in the editor's
+  // "⋯ More options" menu, reading/writing the same persisted prefs as the
+  // full Editor Settings sub-panel (settings-panel.js patchEditorPref()).
+  toggleWordWrapQuick: () => {
+    const on = getEditorPrefs().wordWrap !== 'on';
+    patchEditorPref('wordWrap', on ? 'on' : 'off');
+    const btn = document.getElementById('wordWrapBtn');
+    btn?.classList.toggle('active', on);
+    btn?.setAttribute('aria-pressed', String(on));
+  },
+  toggleAutoFormatQuick: () => {
+    const on = !getEditorPrefs().autoFormat;
+    patchEditorPref('autoFormat', on);
+    const btn = document.getElementById('autoFormatBtn');
+    btn?.classList.toggle('active', on);
+    btn?.setAttribute('aria-pressed', String(on));
+  },
   // Phase 7.4 — Onboarding & Help
   showWelcomeScreen,
   startTutorial,

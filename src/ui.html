@@ -1704,6 +1704,32 @@
                   >
                     ⛶ focus
                   </button>
+                  <!-- §6 roadmap — word wrap and auto-format quick toggles,
+                       previously only reachable by opening the full Editor
+                       Settings sub-panel (settings-panel.js already manages
+                       both, this just exposes them here too). -->
+                  <button
+                    class="ebn"
+                    id="wordWrapBtn"
+                    data-action="toggleWordWrapQuick"
+                    title="Toggle word wrap"
+                    aria-label="Toggle word wrap"
+                    aria-pressed="false"
+                    role="menuitem"
+                  >
+                    ↵ wrap
+                  </button>
+                  <button
+                    class="ebn"
+                    id="autoFormatBtn"
+                    data-action="toggleAutoFormatQuick"
+                    title="Auto-format on compile"
+                    aria-label="Toggle auto-format on compile"
+                    aria-pressed="false"
+                    role="menuitem"
+                  >
+                    ✎ auto-fmt
+                  </button>
                 </div>
               </div>
               <!-- snippets ▾ button removed (10.1) — use snippets ✦ library instead -->
@@ -1762,15 +1788,49 @@
             >
               ⊹ guides
             </button>
-            <button
-              class="ebn"
-              data-action="toggleHUD"
-              id="vpHudBtn"
-              title="Toggle HUD (H)"
-              aria-label="Toggle HUD"
-            >
-              ◱ hud
-            </button>
+            <div class="eb-more-wrap">
+              <button
+                class="ebn"
+                data-action="toggleHUD"
+                id="vpHudBtn"
+                title="Toggle HUD (H)"
+                aria-label="Toggle HUD"
+              >
+                ◱ hud
+              </button>
+              <!-- §6 roadmap — HUD density menu: compact (FPS only) vs
+                   detailed (FPS + resolution + time + frame), instead of a
+                   single on/off. Separate trigger from the toggle button
+                   above so a plain click still just toggles HUD on/off. -->
+              <button
+                class="ebn hud-density-caret"
+                id="vpHudDensityBtn"
+                title="HUD density"
+                aria-label="HUD density options"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                ▾
+              </button>
+              <div class="eb-more-menu" id="vpHudDensityMenu" role="menu" aria-label="HUD density">
+                <button
+                  class="ebn hud-density-item"
+                  data-density="compact"
+                  role="menuitemradio"
+                  aria-checked="false"
+                >
+                  Compact (FPS only)
+                </button>
+                <button
+                  class="ebn hud-density-item"
+                  data-density="detailed"
+                  role="menuitemradio"
+                  aria-checked="true"
+                >
+                  Detailed (all readouts)
+                </button>
+              </div>
+            </div>
             <button
               class="ebn"
               data-action="resetZoom"
@@ -1779,13 +1839,38 @@
             >
               ⤢ zoom
             </button>
+            <!-- §6 roadmap — canvas gizmos toggle: previously only reachable
+                 via the canvas right-click context menu. -->
+            <button
+              class="ebn"
+              data-action="toggleCanvasGizmosBtn"
+              id="vpGizmosBtn"
+              title="Toggle position gizmos on vec2 UV literals"
+              aria-label="Toggle canvas gizmos"
+              aria-pressed="false"
+            >
+              ⊕ gizmos
+            </button>
             <button
               class="ebn"
               data-action="saveReference"
-              title="Save reference frame (hold B to compare)"
+              title="Save reference frame (hold B, or toggle 'compare')"
               aria-label="Save reference frame"
             >
               ⧉ ref
+            </button>
+            <!-- §6 roadmap — persistent before/after compare toggle (was
+                 hold-B only), with a real split/blend mode picker. -->
+            <button
+              class="ebn"
+              data-action="toggleCompareViewBtn"
+              id="vpCompareBtn"
+              title="Toggle before/after compare view"
+              aria-label="Toggle before/after compare view"
+              aria-pressed="false"
+              disabled
+            >
+              ⇆ compare
             </button>
             <button
               class="ebn"
@@ -1827,18 +1912,44 @@
 
           <!-- Timeline area (Blender-style transport strip, bound to state.simTime) -->
           <div class="timeline-strip" id="timelineStrip">
+            <!-- §6 roadmap — play/pause and loop directly in the timeline,
+                 instead of only the global pause button in the topbar. -->
+            <button
+              id="tlPlayPauseBtn"
+              class="vp-scrub-reset"
+              type="button"
+              title="Play / pause (Space)"
+              aria-label="Play / pause"
+              aria-pressed="false"
+            >
+              <svg width="11" height="11"><use href="#icon-pause" /></svg>
+            </button>
             <span class="tl-icon" aria-hidden="true">⏱</span>
             <span class="vp-scrub-t" id="vpScrubT">t = 0.00 s</span>
-            <input
-              type="range"
-              id="timeScrubber"
-              class="vp-scrub-range"
-              min="0"
-              max="60"
-              step="0.01"
-              value="0"
-              aria-label="Scrub simulation time"
-            />
+            <div class="tl-track-wrap" id="tlTrackWrap">
+              <input
+                type="range"
+                id="timeScrubber"
+                class="vp-scrub-range"
+                min="0"
+                max="60"
+                step="0.01"
+                value="0"
+                aria-label="Scrub simulation time"
+              />
+              <!-- Populated by timeline-markers.js from state.timeline.keys, if any. -->
+              <div class="tl-markers" id="tlMarkers" aria-hidden="true"></div>
+            </div>
+            <button
+              id="tlLoopBtn"
+              class="vp-scrub-reset"
+              type="button"
+              title="Loop playback"
+              aria-label="Toggle loop playback"
+              aria-pressed="false"
+            >
+              ⟲
+            </button>
             <button
               id="timeScrubberReset"
               class="vp-scrub-reset"

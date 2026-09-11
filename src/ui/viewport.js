@@ -9,6 +9,11 @@ import { closeSTModal } from '../io/shadertoy.js';
 import { doResize } from '../gl/renderer.js';
 import { safeLocalGet, safeLocalSet } from '../core/utils.js';
 import { toggleInspectorPanel } from './inspector-context.js';
+import {
+  setTimelineLoop,
+  isTimelineLoopEnabled,
+  setTimelineLoopDuration,
+} from '../render/raf-loop.js';
 
 let vpFullscreen = false;
 function toggleFullscreenVP() {
@@ -141,6 +146,15 @@ function togglePause() {
     // existing .hb.active styling: accent-dim background, accent text/icon)
     btn.classList.toggle('active', pausedB);
   }
+  // §6 roadmap — keep the timeline strip's own play/pause button in sync
+  // regardless of which trigger (topbar #pbtn, Space, #tpill) called this.
+  const tlBtn = document.getElementById('tlPlayPauseBtn');
+  if (tlBtn) {
+    const iconUse = tlBtn.querySelector('svg use');
+    if (iconUse) iconUse.setAttribute('href', pausedB ? '#icon-play' : '#icon-pause');
+    tlBtn.setAttribute('aria-pressed', String(pausedB));
+    tlBtn.title = pausedB ? 'Play (Space)' : 'Pause (Space)';
+  }
 }
 
 // ── Phase R — Time scrubber bar ───────────────────────────────────────────────
@@ -154,6 +168,50 @@ function _initTimeScrubber() {
   const tpill = document.getElementById('tpill');
   const fpspill = document.getElementById('fpspill');
   if (!bar || !range) return;
+
+  // §6 roadmap — play/pause and loop directly in the timeline strip,
+  // instead of only the topbar's global pause button (#pbtn).
+  const playPauseBtn = document.getElementById('tlPlayPauseBtn');
+  playPauseBtn?.addEventListener('click', () => togglePause());
+
+  const loopBtn = document.getElementById('tlLoopBtn');
+  const loopOn = safeLocalGet('sl_timelineLoop', '0') === '1';
+  setTimelineLoop(loopOn);
+  loopBtn?.classList.toggle('active', loopOn);
+  loopBtn?.setAttribute('aria-pressed', String(loopOn));
+  loopBtn?.addEventListener('click', () => {
+    const on = !isTimelineLoopEnabled();
+    if (on) setTimelineLoopDuration(parseFloat(range.max) || 10);
+    setTimelineLoop(on);
+    safeLocalSet('sl_timelineLoop', on ? '1' : '0');
+    loopBtn.classList.toggle('active', on);
+    loopBtn.setAttribute('aria-pressed', String(on));
+  });
+  setTimelineLoopDuration(parseFloat(range.max) || 10);
+
+  // §6 roadmap — keyframe markers from state.timeline.keys (populated only
+  // by a project .zgl that already had a timeline — there is no in-app
+  // keyframe editor yet, so this is usually empty and renders nothing).
+  function _renderMarkers() {
+    const wrap = document.getElementById('tlMarkers');
+    if (!wrap) return;
+    const keys = state.timeline?.keys;
+    if (!keys || typeof keys !== 'object') {
+      wrap.innerHTML = '';
+      return;
+    }
+    const max = parseFloat(range.max) || 1;
+    wrap.innerHTML = Object.keys(keys)
+      .map(Number)
+      .filter((t) => Number.isFinite(t) && t >= 0 && t <= max)
+      .map(
+        (t) =>
+          `<div class="tl-marker" style="left:${(t / max) * 100}%" title="Keyframe at t=${t.toFixed(2)}s"></div>`
+      )
+      .join('');
+  }
+  _renderMarkers();
+  window.addEventListener('zgl:project-loaded', _renderMarkers);
 
   let dragging = false;
 
@@ -173,7 +231,7 @@ function _initTimeScrubber() {
   range.addEventListener('input', () => {
     const v = parseFloat(range.value) || 0;
     state.simTime = v;
-    if (label) label.textContent = `t = ${  v.toFixed(2)  } s`;
+    if (label) label.textContent = `t = ${v.toFixed(2)} s`;
   });
 
   resetBtn?.addEventListener('click', () => {
@@ -200,7 +258,7 @@ function _initTimeScrubber() {
       const v = state.simTime || 0;
       if (v > parseFloat(range.max)) range.max = String(Math.ceil(v / 10) * 10 + 10);
       range.value = String(v);
-      if (label) label.textContent = `t = ${  v.toFixed(2)  } s`;
+      if (label) label.textContent = `t = ${v.toFixed(2)} s`;
     }
     requestAnimationFrame(_sync);
   }

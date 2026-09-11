@@ -17,6 +17,52 @@ const NUM_RE = /-?(?:\d+\.\d+|\.\d+|\d+)/g;
 let _hudEl = null;
 let _applyDeb = null;
 
+// §6 roadmap — discoverability hint: previously nothing indicated a number
+// was Alt-drag-scrubbable until the drag was already underway (cursor only
+// changed to ew-resize inside _onMouseDown, after the fact). Now, holding
+// Alt while hovering a numeric literal underlines it with the scrub cursor,
+// so the affordance is visible before committing to the drag.
+let _altHeld = false;
+let _hoverDecoIds = [];
+let _hoverStyleInjected = false;
+
+function _injectHoverStyle() {
+  if (_hoverStyleInjected) return;
+  _hoverStyleInjected = true;
+  const s = document.createElement('style');
+  s.id = 'zgl-scrub-hover-style';
+  s.textContent = `
+    .zgl-scrub-hoverable {
+      text-decoration: underline dotted #39FF6A99;
+      text-underline-offset: 2px;
+      cursor: ew-resize;
+    }
+  `;
+  document.head.appendChild(s);
+}
+
+function _updateHoverDecoAt(clientX, clientY) {
+  if (!state.editor) return;
+  const model = state.editor.getModel();
+  if (!model) return;
+  if (!_altHeld) {
+    if (_hoverDecoIds.length) _hoverDecoIds = state.editor.deltaDecorations(_hoverDecoIds, []);
+    return;
+  }
+  const tgt = state.editor.getTargetAtClientPoint(clientX, clientY);
+  const num = tgt?.position ? _numberAt(model, tgt.position) : null;
+  if (!num) {
+    if (_hoverDecoIds.length) _hoverDecoIds = state.editor.deltaDecorations(_hoverDecoIds, []);
+    return;
+  }
+  _injectHoverStyle();
+  const ln = tgt.position.lineNumber;
+  _hoverDecoIds = state.editor.deltaDecorations(_hoverDecoIds, [{
+    range: new monaco.Range(ln, num.start + 1, ln, num.start + 1 + num.text.length),
+    options: { inlineClassName: 'zgl-scrub-hoverable' },
+  }]);
+}
+
 function _hud() {
   if (!_hudEl) {
     _hudEl = document.createElement('div');
@@ -81,8 +127,8 @@ function _onMouseDown(e) {
     }]);
     curLen = str.length;
     hud.textContent = str;
-    hud.style.left = (ev.clientX + 14) + 'px';
-    hud.style.top = (ev.clientY - 10) + 'px';
+    hud.style.left = `${ev.clientX + 14  }px`;
+    hud.style.top = `${ev.clientY - 10  }px`;
     _liveApply();
   };
   const onUp = () => {
@@ -141,4 +187,25 @@ export function initValueScrub() {
   document.addEventListener('mousedown', _onMouseDown, true);
   // Keyboard scrub via Monaco's key handler (so we can pre-empt Alt+↑/↓).
   state.editor.onKeyDown(_onKeyDown);
+
+  // §6 roadmap — discoverability hint (see _updateHoverDecoAt above).
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Alt' || _altHeld) return;
+    _altHeld = true;
+  }, true);
+  document.addEventListener('keyup', (e) => {
+    if (e.key !== 'Alt') return;
+    _altHeld = false;
+    if (_hoverDecoIds.length && state.editor) _hoverDecoIds = state.editor.deltaDecorations(_hoverDecoIds, []);
+  }, true);
+  // window blur (e.g. Alt+Tab) also releases Alt without a keyup event.
+  window.addEventListener('blur', () => {
+    _altHeld = false;
+    if (_hoverDecoIds.length && state.editor) _hoverDecoIds = state.editor.deltaDecorations(_hoverDecoIds, []);
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (!_altHeld) return;
+    if (!e.target || !/** @type {Element} */ (e.target).closest?.('.monaco-editor')) return;
+    _updateHoverDecoAt(e.clientX, e.clientY);
+  });
 }

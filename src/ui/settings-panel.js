@@ -49,10 +49,40 @@ function _applyEditorPrefs(prefs) {
   });
 }
 
+/**
+ * §6 roadmap — patch a single editor preference and persist+apply it
+ * immediately, for quick-access toggles (e.g. the editor's "⋯ More options"
+ * menu) that shouldn't need the full Settings sub-panel open. Also syncs
+ * the full panel's own input, if it happens to be in the DOM, so the two
+ * surfaces never disagree.
+ * @param {keyof typeof EDITOR_PREFS_DEFAULT} key
+ * @param {*} value
+ */
+export function patchEditorPref(key, value) {
+  const next = { ...getEditorPrefs(), [key]: value };
+  _saveEditorPrefs(next);
+  _applyEditorPrefs(next);
+}
+
 /** Call once at startup to apply saved editor prefs. */
 export function initEditorPrefs() {
   const prefs = getEditorPrefs();
   state.prefs = { ...(state.prefs || {}), ...prefs };
+
+  // §6 roadmap — reflect persisted wordWrap/autoFormat on the editor's
+  // "⋯ More options" quick-toggle buttons, same as minimapBtn's own
+  // startup sync in editor.js.
+  const wwBtn = document.getElementById('wordWrapBtn');
+  if (wwBtn) {
+    const on = prefs.wordWrap === 'on';
+    wwBtn.classList.toggle('active', on);
+    wwBtn.setAttribute('aria-pressed', String(on));
+  }
+  const afBtn = document.getElementById('autoFormatBtn');
+  if (afBtn) {
+    afBtn.classList.toggle('active', !!prefs.autoFormat);
+    afBtn.setAttribute('aria-pressed', String(!!prefs.autoFormat));
+  }
   // Editor may not be ready yet — defer if needed
   if (state.editor) {
     _applyEditorPrefs(prefs);
@@ -278,7 +308,7 @@ export function initSettingsPanel() {
   // §H.4 — Comfort & accessibility toggles
   const _comfort = getComfort();
   ['aaa', 'dyslexia', 'reduceMotion'].forEach(opt => {
-    const cb = document.getElementById('comfort-' + opt);
+    const cb = document.getElementById(`comfort-${  opt}`);
     if (!cb) return;
     cb.checked = !!_comfort[opt];
     cb.addEventListener('change', () => setComfort(opt, cb.checked));
@@ -406,8 +436,8 @@ function makeDraggable(element) {
     initialY = rect.top;
     
     element.style.position = 'fixed';
-    element.style.left = initialX + 'px';
-    element.style.top = initialY + 'px';
+    element.style.left = `${initialX  }px`;
+    element.style.top = `${initialY  }px`;
     element.style.right = 'auto';
     element.style.bottom = 'auto';
   });
@@ -418,8 +448,8 @@ function makeDraggable(element) {
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
     
-    element.style.left = (initialX + dx) + 'px';
-    element.style.top = (initialY + dy) + 'px';
+    element.style.left = `${initialX + dx  }px`;
+    element.style.top = `${initialY + dy  }px`;
   });
   
   document.addEventListener('mouseup', () => {

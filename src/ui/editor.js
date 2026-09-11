@@ -16,13 +16,16 @@ import { initValueScrub } from './value-scrub.js';
 import { initColorInline } from './color-inline.js';
 import { initHoverInspector, findSliderEntry } from './hover-inspector.js';
 import { initShaderAnatomy, toggleShaderAnatomy } from './shader-anatomy.js';
-import { applyAndParse } from '../io/actions.js';
-import { toast } from '../io/actions.js';
+import { applyAndParse , toast , loadExample, copyCode } from '../io/actions.js';
 
-import { registerGLSLLanguage, BUILTIN_FUNCTIONS, BUILTIN_VARIABLES, SEMANTIC_LEGEND } from './glsl-language.js';
+import {
+  registerGLSLLanguage,
+  BUILTIN_FUNCTIONS,
+  BUILTIN_VARIABLES,
+  SEMANTIC_LEGEND,
+} from './glsl-language.js';
 import { registerGLSLCodeActions } from './glsl-code-actions.js';
 import { formatGLSL, flashFormattedStatus } from '../shader/glsl-formatter.js';
-import { loadExample, copyCode } from '../io/actions.js';
 import { loadPreset } from '../io/library.js';
 import { loadUserPresets } from '../io/presets.js';
 import { toggleInspectorPanel } from './inspector-context.js';
@@ -34,13 +37,27 @@ import { toggleSettingsPanel } from './settings-panel.js';
 export { toggleSettingsPanel };
 // 1.4: GLSL completions — token lists come from glsl-language.js
 const GLSL_BUILTINS = [
-  ...BUILTIN_FUNCTIONS.map(label => ({ label, kind: 1, insertText: label, detail: 'GLSL built-in function' })),
-  ...BUILTIN_VARIABLES.map(label => ({ label, kind: 5, insertText: label, detail: 'GLSL built-in variable' })),
+  ...BUILTIN_FUNCTIONS.map((label) => ({
+    label,
+    kind: 1,
+    insertText: label,
+    detail: 'GLSL built-in function',
+  })),
+  ...BUILTIN_VARIABLES.map((label) => ({
+    label,
+    kind: 5,
+    insertText: label,
+    detail: 'GLSL built-in variable',
+  })),
 ];
 
 // ShaderToy uniforms
 const SHADERTOY_UNIFORMS = [
-  { label: 'iResolution', insertText: 'iResolution', detail: 'vec3 — viewport size (xy) + pixel ratio (z)' },
+  {
+    label: 'iResolution',
+    insertText: 'iResolution',
+    detail: 'vec3 — viewport size (xy) + pixel ratio (z)',
+  },
   { label: 'iTime', insertText: 'iTime', detail: 'float — elapsed time' },
   { label: 'iTimeDelta', insertText: 'iTimeDelta', detail: 'float — frame delta' },
   { label: 'iFrame', insertText: 'iFrame', detail: 'int — frame index' },
@@ -49,7 +66,7 @@ const SHADERTOY_UNIFORMS = [
   { label: 'iChannel1', insertText: 'iChannel1', detail: 'sampler2D' },
   { label: 'iChannel2', insertText: 'iChannel2', detail: 'sampler2D' },
   { label: 'iChannel3', insertText: 'iChannel3', detail: 'sampler2D' },
-].map(item => ({ ...item, kind: 3 }));
+].map((item) => ({ ...item, kind: 3 }));
 
 function getWordRange(position, word) {
   return {
@@ -63,7 +80,8 @@ function getWordRange(position, word) {
 function collectUniformSuggestions(code, range) {
   const seen = new Set();
   const out = [];
-  const re = /\buniform\s+(float|int|bool|vec[234]|mat[234]|sampler2D|samplerCube)\s+([A-Za-z_]\w*)/g;
+  const re =
+    /\buniform\s+(float|int|bool|vec[234]|mat[234]|sampler2D|samplerCube)\s+([A-Za-z_]\w*)/g;
   let m;
   while ((m = re.exec(code)) !== null) {
     const type = m[1];
@@ -125,7 +143,9 @@ function collectASTSymbolCompletions(code, range) {
   const items = [];
 
   for (const fn of functions) {
-    const paramStr = fn.params.map(p => (p.qualifier ? p.qualifier + ' ' : '') + p.type + (p.name ? ' ' + p.name : '')).join(', ');
+    const paramStr = fn.params
+      .map((p) => (p.qualifier ? `${p.qualifier  } ` : '') + p.type + (p.name ? ` ${  p.name}` : ''))
+      .join(', ');
     items.push({
       label: fn.name,
       kind: 1, // Function
@@ -168,7 +188,6 @@ function collectASTSymbolCompletions(code, range) {
  * Clears all previous markers under that owner first.
  */
 function applyTypeCheckMarkers(editor) {
-  
   const model = editor.getModel();
   if (!model) return;
   const code = model.getValue();
@@ -194,7 +213,7 @@ function renameWordAtCursor(editor) {
   if (!/^[A-Za-z_]\w*$/.test(newName)) return;
   const matches = model.findMatches(`\\b${oldName}\\b`, false, true, true, null, true);
   if (!matches.length) return;
-  const edits = matches.map(m => ({ range: m.range, text: newName }));
+  const edits = matches.map((m) => ({ range: m.range, text: newName }));
   model.pushEditOperations([], edits, () => null);
   setTimeout(() => applyAndParse(), 60);
 }
@@ -212,41 +231,97 @@ function buildPaletteCommands() {
   // at the top of this file.
   return [
     // ── Shader ──────────────────────────────────────────────────────────────
-    { label: 'Apply & Parse Shader',          keys: 'Ctrl+S / Ctrl+Enter', run: () => applyAndParse() },
+    { label: 'Apply & Parse Shader', keys: 'Ctrl+S / Ctrl+Enter', run: () => applyAndParse() },
     // ── Editor ──────────────────────────────────────────────────────────────
-    { label: 'Find / Replace with Regex',     keys: 'Ctrl+Alt+H',          run: () => state.editor?.trigger('palette', 'editor.action.startFindReplaceAction', null) },
-    { label: 'Format Document (GLSL)',        keys: 'Ctrl+Shift+F',        run: () => state.editor?.trigger('palette', 'editor.action.formatDocument', null) },
-    { label: 'Rename Symbol',                 keys: 'Ctrl+Shift+R',        run: () => renameWordAtCursor(state.editor) },
-    { label: 'Find Usages',                   keys: 'Shift+F12',           run: () => state.editor?.trigger('palette', 'editor.action.referenceSearch.trigger', null) },
-    { label: 'Select All Occurrences',        keys: 'Ctrl+Shift+L',        run: () => state.editor?.trigger('palette', 'editor.action.selectHighlights', null) },
-    { label: 'Add Cursor at Next Occurrence', keys: 'Ctrl+D',              run: () => state.editor?.trigger('palette', 'editor.action.addSelectionToNextFindMatch', null) },
-    { label: 'Add Cursor Above',              keys: 'Ctrl+Alt+↑',          run: () => state.editor?.trigger('palette', 'editor.action.insertCursorAbove', null) },
-    { label: 'Add Cursor Below',              keys: 'Ctrl+Alt+↓',          run: () => state.editor?.trigger('palette', 'editor.action.insertCursorBelow', null) },
-    { label: 'Toggle Column Selection Mode',  keys: 'Shift+Alt+Ins',       run: () => { const c = state.editor?.getOption(monaco.editor.EditorOption.columnSelection); state.editor?.updateOptions({ columnSelection: !c }); } },
-    { label: 'Toggle Minimap',                keys: '',                     run: () => toggleMinimap() },
-    { label: 'Go to Line…',                   keys: 'Ctrl+G',              run: () => state.editor?.trigger('palette', 'editor.action.gotoLine', null) },
-    { label: 'Go to Symbol…',                 keys: 'Ctrl+Shift+O',        run: () => state.editor?.trigger('palette', 'editor.action.gotoSymbol', null) },
-    { label: 'Fold All',                      keys: '',                     run: () => state.editor?.trigger('palette', 'editor.foldAll', null) },
-    { label: 'Unfold All',                    keys: '',                     run: () => state.editor?.trigger('palette', 'editor.unfoldAll', null) },
-    { label: 'Load Example Shader',           keys: '',                     run: () => loadExample() },
-    { label: 'Copy Shader Code',              keys: '',                     run: () => copyCode() },
+    {
+      label: 'Find / Replace with Regex',
+      keys: 'Ctrl+Alt+H',
+      run: () => state.editor?.trigger('palette', 'editor.action.startFindReplaceAction', null),
+    },
+    {
+      label: 'Format Document (GLSL)',
+      keys: 'Ctrl+Shift+F',
+      run: () => state.editor?.trigger('palette', 'editor.action.formatDocument', null),
+    },
+    { label: 'Rename Symbol', keys: 'Ctrl+Shift+R', run: () => renameWordAtCursor(state.editor) },
+    {
+      label: 'Find Usages',
+      keys: 'Shift+F12',
+      run: () => state.editor?.trigger('palette', 'editor.action.referenceSearch.trigger', null),
+    },
+    {
+      label: 'Select All Occurrences',
+      keys: 'Ctrl+Shift+L',
+      run: () => state.editor?.trigger('palette', 'editor.action.selectHighlights', null),
+    },
+    {
+      label: 'Add Cursor at Next Occurrence',
+      keys: 'Ctrl+D',
+      run: () =>
+        state.editor?.trigger('palette', 'editor.action.addSelectionToNextFindMatch', null),
+    },
+    {
+      label: 'Add Cursor Above',
+      keys: 'Ctrl+Alt+↑',
+      run: () => state.editor?.trigger('palette', 'editor.action.insertCursorAbove', null),
+    },
+    {
+      label: 'Add Cursor Below',
+      keys: 'Ctrl+Alt+↓',
+      run: () => state.editor?.trigger('palette', 'editor.action.insertCursorBelow', null),
+    },
+    {
+      label: 'Toggle Column Selection Mode',
+      keys: 'Shift+Alt+Ins',
+      run: () => {
+        const c = state.editor?.getOption(monaco.editor.EditorOption.columnSelection);
+        state.editor?.updateOptions({ columnSelection: !c });
+      },
+    },
+    { label: 'Toggle Minimap', keys: '', run: () => toggleMinimap() },
+    {
+      label: 'Go to Line…',
+      keys: 'Ctrl+G',
+      run: () => state.editor?.trigger('palette', 'editor.action.gotoLine', null),
+    },
+    {
+      label: 'Go to Symbol…',
+      keys: 'Ctrl+Shift+O',
+      run: () => state.editor?.trigger('palette', 'editor.action.gotoSymbol', null),
+    },
+    {
+      label: 'Fold All',
+      keys: '',
+      run: () => state.editor?.trigger('palette', 'editor.foldAll', null),
+    },
+    {
+      label: 'Unfold All',
+      keys: '',
+      run: () => state.editor?.trigger('palette', 'editor.unfoldAll', null),
+    },
+    { label: 'Load Example Shader', keys: '', run: () => loadExample() },
+    { label: 'Copy Shader Code', keys: '', run: () => copyCode() },
     // ── Performance ─────────────────────────────────────────────────────────
     { label: 'Toggle Settings (Phase 21.1)', keys: 'Ctrl+,', run: () => toggleSettingsPanel() },
-    { label: 'Toggle Inspector Panel',        keys: 'Ctrl+Shift+G',         run: () => toggleInspectorPanel() },
-    { label: 'Toggle Includes Manager (F-8.2)',          keys: '',          run: () => toggleIncludesPanel() },
-    { label: 'Toggle Shader Anatomy overlay',  keys: '',                    run: () => toggleShaderAnatomy() },
+    { label: 'Toggle Inspector Panel', keys: 'Ctrl+Shift+G', run: () => toggleInspectorPanel() },
+    { label: 'Toggle Includes Manager (F-8.2)', keys: '', run: () => toggleIncludesPanel() },
+    { label: 'Toggle Shader Anatomy overlay', keys: '', run: () => toggleShaderAnatomy() },
     // ── Project management ───────────────────────────────────────────────────
-    { label: 'Toggle Shader Library (Phase 20.3)',  keys: 'Ctrl+Shift+F', run: () => toggleShaderLibrary() },
+    {
+      label: 'Toggle Shader Library (Phase 20.3)',
+      keys: 'Ctrl+Shift+F',
+      run: () => toggleShaderLibrary(),
+    },
     // ── Export ──────────────────────────────────────────────────────────────
-    { label: 'Export → Screenshot',           keys: '',                     run: () => exportScreenshot() },
-    { label: 'Export → Standalone HTML',      keys: '',                     run: () => openExportModal() },
+    { label: 'Export → Screenshot', keys: '', run: () => exportScreenshot() },
+    { label: 'Export → Standalone HTML', keys: '', run: () => openExportModal() },
     // ── Viewport ────────────────────────────────────────────────────────────
-    { label: 'Toggle Fullscreen Viewport',    keys: '',                     run: () => toggleFullscreenVP() },
-    { label: 'Toggle Pause Rendering',        keys: '',                     run: () => togglePause() },
+    { label: 'Toggle Fullscreen Viewport', keys: '', run: () => toggleFullscreenVP() },
+    { label: 'Toggle Pause Rendering', keys: '', run: () => togglePause() },
     // ── Theme ───────────────────────────────────────────────────────────────
     // ── Presets (Phase T) — user's own saved presets only; the full builtin
     // catalog (dozens of entries) would drown out everything else here.
-    ...loadUserPresets().map(p => ({
+    ...loadUserPresets().map((p) => ({
       label: `Load: ${p.name}`,
       detail: 'from Library',
       run: () => loadPreset(p.id),
@@ -259,15 +334,23 @@ let _paletteEl = null;
 // §5.1 — Frecency (fréquence × récence) + recherche floue pour la palette.
 const _CMD_FRECENCY_KEY = 'sl_cmdFrecency';
 function _loadFrecency() {
-  try { return JSON.parse(localStorage.getItem(_CMD_FRECENCY_KEY) || '{}') || {}; }
-  catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem(_CMD_FRECENCY_KEY) || '{}') || {};
+  } catch {
+    return {};
+  }
 }
 function _recordCmd(label) {
   const f = _loadFrecency();
   const e = f[label] || { count: 0, last: 0 };
-  e.count += 1; e.last = Date.now();
+  e.count += 1;
+  e.last = Date.now();
   f[label] = e;
-  try { localStorage.setItem(_CMD_FRECENCY_KEY, JSON.stringify(f)); } catch { /* noop */ }
+  try {
+    localStorage.setItem(_CMD_FRECENCY_KEY, JSON.stringify(f));
+  } catch {
+    /* noop */
+  }
 }
 function _frecencyScore(label, f) {
   const e = f[label];
@@ -277,27 +360,34 @@ function _frecencyScore(label, f) {
 }
 // Score de correspondance floue (sous-séquence) ; -1 si aucune correspondance.
 function _fuzzyScore(query, text) {
-  const q = query.toLowerCase(), t = text.toLowerCase();
-  let qi = 0, score = 0, prev = -2;
+  const q = query.toLowerCase(),
+    t = text.toLowerCase();
+  let qi = 0,
+    score = 0,
+    prev = -2;
   for (let i = 0; i < t.length && qi < q.length; i++) {
     if (t[i] === q[qi]) {
       score += 1;
-      if (prev === i - 1) score += 2;                                  // consécutif
+      if (prev === i - 1) score += 2; // consécutif
       if (i === 0 || t[i - 1] === ' ' || t[i - 1] === '-') score += 3; // début de mot
-      prev = i; qi += 1;
+      prev = i;
+      qi += 1;
     }
   }
   return qi === q.length ? score : -1;
 }
 
 function openCommandPalette() {
-  if (_paletteEl) { closePalette(); return; }
+  if (_paletteEl) {
+    closePalette();
+    return;
+  }
 
   const commands = buildPaletteCommands();
   // Tri initial par frecency (commandes récentes / fréquentes en tête).
   const _frec = _loadFrecency();
   commands.sort((a, b) => _frecencyScore(b.label, _frec) - _frecencyScore(a.label, _frec));
-  let recentCount = Math.min(5, commands.filter(c => _frec[c.label]).length);
+  const recentCount = Math.min(5, commands.filter((c) => _frec[c.label]).length);
   let filtered = commands.slice();
   let activeIdx = 0;
   let showRecent = true; // §5.1 — affiche le bloc "récents" quand la requête est vide
@@ -348,7 +438,7 @@ function openCommandPalette() {
         list.appendChild(sep);
       }
       const row = document.createElement('div');
-      row.className = 'zcp-item' + (i === activeIdx ? ' zcp-active' : '');
+      row.className = `zcp-item${  i === activeIdx ? ' zcp-active' : ''}`;
       row.setAttribute('role', 'option');
       row.setAttribute('aria-selected', String(i === activeIdx));
       row.dataset.idx = String(i);
@@ -371,7 +461,10 @@ function openCommandPalette() {
         kbd.textContent = cmd.keys;
         row.appendChild(kbd);
       }
-      row.addEventListener('mouseenter', () => { activeIdx = i; renderList(); });
+      row.addEventListener('mouseenter', () => {
+        activeIdx = i;
+        renderList();
+      });
       row.addEventListener('click', () => runActive());
       list.appendChild(row);
     });
@@ -391,17 +484,17 @@ function openCommandPalette() {
       // (catégorie/source), pas seulement le label, pour retrouver une
       // commande en tapant par ex. "ctrl+s" ou "library".
       filtered = commands
-        .map(c => ({
+        .map((c) => ({
           c,
           s: Math.max(
             _fuzzyScore(q, c.label),
             c.keys ? _fuzzyScore(q, c.keys) : -1,
-            c.detail ? _fuzzyScore(q, c.detail) : -1,
+            c.detail ? _fuzzyScore(q, c.detail) : -1
           ),
         }))
-        .filter(x => x.s >= 0)
+        .filter((x) => x.s >= 0)
         .sort((a, b) => b.s - a.s)
-        .map(x => x.c);
+        .map((x) => x.c);
     }
     activeIdx = 0;
     renderList();
@@ -410,16 +503,26 @@ function openCommandPalette() {
   function runActive() {
     const cmd = filtered[activeIdx];
     closePalette();
-    if (cmd) { _recordCmd(cmd.label); cmd.run(); }
+    if (cmd) {
+      _recordCmd(cmd.label);
+      cmd.run();
+    }
   }
 
   function closePalette() {
-    if (_paletteEl) { _paletteEl.remove(); _paletteEl = null; }
+    if (_paletteEl) {
+      _paletteEl.remove();
+      _paletteEl = null;
+    }
     document.removeEventListener('keydown', onKey, true);
   }
 
   function onKey(e) {
-    if (e.code === 'Escape') { e.preventDefault(); closePalette(); return; }
+    if (e.code === 'Escape') {
+      e.preventDefault();
+      closePalette();
+      return;
+    }
     if (e.code === 'ArrowDown') {
       e.preventDefault();
       activeIdx = Math.min(activeIdx + 1, filtered.length - 1);
@@ -434,16 +537,15 @@ function openCommandPalette() {
     }
   }
 
-  overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) closePalette(); });
+  overlay.addEventListener('mousedown', (e) => {
+    if (e.target === overlay) closePalette();
+  });
   input.addEventListener('input', () => filterCommands(input.value));
   document.addEventListener('keydown', onKey, true);
 
   renderList();
   requestAnimationFrame(() => input.focus());
 }
-
-
-
 
 (function initMonaco() {
   registerGLSLLanguage(monaco);
@@ -454,42 +556,62 @@ function openCommandPalette() {
   // The selector used in theme rules for semantic tokens is the token-type name.
   const SHADERTOY_TOKEN_TYPE = SEMANTIC_LEGEND.tokenTypes[0]; // "shadertoyUniform"
 
-
   monaco.editor.defineTheme('z-gl-dark', {
-    base:'vs-dark',
-    inherit:false,
-    rules:[
-      { token:'', foreground:'E8EAF0' },
-      { token:'keyword', foreground:'4FA3FF', fontStyle:'bold' },
-      { token:'type', foreground:'39FF6A' },
-      { token:'number', foreground:'FF9A3C' },
-      { token:'comment', foreground:'99A6C0', fontStyle:'italic' },
-      { token:'string', foreground:'C084FC' },
-      { token:'operator', foreground:'B8C0CC' },
-      { token:'identifier', foreground:'E8EAF0' },
+    base: 'vs-dark',
+    inherit: false,
+    rules: [
+      { token: '', foreground: 'E8EAF0' },
+      { token: 'keyword', foreground: '4FA3FF', fontStyle: 'bold' },
+      { token: 'type', foreground: '39FF6A' },
+      { token: 'number', foreground: 'FF9A3C' },
+      { token: 'comment', foreground: '99A6C0', fontStyle: 'italic' },
+      { token: 'string', foreground: 'C084FC' },
+      { token: 'operator', foreground: 'B8C0CC' },
+      { token: 'identifier', foreground: 'E8EAF0' },
       // ShaderToy uniforms — phosphor accent, italic
       { token: SHADERTOY_TOKEN_TYPE, foreground: '39FF6A', fontStyle: 'italic' },
     ],
-    colors:{
-      'editor.background':'#13161D',
-      'editor.foreground':'#E8EAF0',
-      'editorLineNumber.foreground':'#99A6C0',
-      'editorLineNumber.activeForeground':'#B8C0CC',
-      'editor.selectionBackground':'#39FF6A22',
-      'editor.lineHighlightBackground':'#1A1E2780',
-      'editorCursor.foreground':'#39FF6A',
-      'scrollbarSlider.background':'#FFFFFF1E',
-      'scrollbarSlider.hoverBackground':'#FFFFFF38',
-      'editor.errorBackground':'rgba(239,68,68,0.10)',
-      'editorInlayHint.background':'#1A1E2700',
-      'editorInlayHint.foreground':'#8B9AB8',
+    colors: {
+      'editor.background': '#13161D',
+      'editor.foreground': '#E8EAF0',
+      'editorLineNumber.foreground': '#99A6C0',
+      'editorLineNumber.activeForeground': '#B8C0CC',
+      'editor.selectionBackground': '#39FF6A22',
+      'editor.lineHighlightBackground': '#1A1E2780',
+      'editorCursor.foreground': '#39FF6A',
+      'scrollbarSlider.background': '#FFFFFF1E',
+      'scrollbarSlider.hoverBackground': '#FFFFFF38',
+      'editor.errorBackground': 'rgba(239,68,68,0.10)',
+      'editorInlayHint.background': '#1A1E2700',
+      'editorInlayHint.foreground': '#8B9AB8',
       // Bracket-pair colorization — buf-a/b/c/d palette
       'editorBracketHighlight.foreground1': '#4FA3FF',
       'editorBracketHighlight.foreground2': '#39FF6A',
       'editorBracketHighlight.foreground3': '#FF9A3C',
       'editorBracketHighlight.foreground4': '#C084FC',
       'editorBracketHighlight.unexpectedBracket.foreground': '#EF4444',
-    }
+      // §6 roadmap — hover-inspector.js's tooltips render inside Monaco's
+      // built-in hover widget, which otherwise falls back to Monaco's
+      // generic vs-dark widget colors (a slightly different gray/border
+      // than this theme's own palette) rather than matching z-gl-dark.
+      'editorHoverWidget.background': '#1A1E27',
+      'editorHoverWidget.border': '#39FF6A33',
+      'editorHoverWidget.foreground': '#E8EAF0',
+      'editorHoverWidget.statusBarBackground': '#13161D',
+      'editorWidget.background': '#1A1E27',
+      'editorWidget.border': '#39FF6A33',
+      'editorWidget.foreground': '#E8EAF0',
+      // §6 roadmap — glsl-code-actions.js's quick fixes render via Monaco's
+      // own built-in lightbulb + suggest widget, themed here for the same
+      // reason as the hover/generic widget colors above.
+      'editorLightBulb.foreground': '#39FF6A',
+      'editorLightBulbAutoFix.foreground': '#FF9A3C',
+      'editorSuggestWidget.background': '#1A1E27',
+      'editorSuggestWidget.border': '#39FF6A33',
+      'editorSuggestWidget.foreground': '#E8EAF0',
+      'editorSuggestWidget.selectedBackground': '#39FF6A22',
+      'editorSuggestWidget.highlightForeground': '#39FF6A',
+    },
   });
 
   // 1.1: Add CSS for error line decoration
@@ -540,10 +662,10 @@ function openCommandPalette() {
     },
     scrollBeyondLastLine: false,
     renderLineHighlight: 'gutter',
-    padding: { top:6, bottom:6 },
+    padding: { top: 6, bottom: 6 },
     tabSize: 4,
     automaticLayout: true,
-    scrollbar: { verticalScrollbarSize:3, horizontalScrollbarSize:3 },
+    scrollbar: { verticalScrollbarSize: 3, horizontalScrollbarSize: 3 },
     folding: true,
     glyphMargin: true,
     suggestOnTriggerCharacters: true,
@@ -557,8 +679,8 @@ function openCommandPalette() {
     // 2.1: Multi-cursor — Alt+Click adds cursors; Ctrl+Alt+Up/Down adds cursor above/below.
     // Column (box) selection via Shift+Alt+drag or Shift+Alt+Arrow.
     multiCursorModifier: 'alt',
-    columnSelection: false,           // false = Shift+Alt+drag activates box-select
-    multiCursorPaste: 'spread',       // paste N lines → spread across N cursors
+    columnSelection: false, // false = Shift+Alt+drag activates box-select
+    multiCursorPaste: 'spread', // paste N lines → spread across N cursors
     // Find widget — expose full regex replace UI
     find: {
       addExtraSpaceOnTop: false,
@@ -587,13 +709,19 @@ function openCommandPalette() {
       const fnRe = /\b(?:float|vec[234]|mat[234]|int|bool|void)\s+([a-zA-Z_]\w*)\s*\(/g;
       let m;
       while ((m = fnRe.exec(code)) !== null) {
-        if (!astSymbols.some(s => s.label === m[1])) {
-          userSymbols.push({ label: m[1], kind: 1, insertText: m[1], detail: 'user function', range });
+        if (!astSymbols.some((s) => s.label === m[1])) {
+          userSymbols.push({
+            label: m[1],
+            kind: 1,
+            insertText: m[1],
+            detail: 'user function',
+            range,
+          });
         }
       }
       const varRe = /\b(?:float|vec[234]|mat[234]|int|bool)\s+([a-zA-Z_]\w*)\s*[=;,)]/g;
       while ((m = varRe.exec(code)) !== null) {
-        if (!astSymbols.some(s => s.label === m[1])) {
+        if (!astSymbols.some((s) => s.label === m[1])) {
           userSymbols.push({ label: m[1], kind: 4, insertText: m[1], detail: 'variable', range });
         }
       }
@@ -601,15 +729,15 @@ function openCommandPalette() {
       const sliderSymbols = collectSliderSuggestions(range);
       return {
         suggestions: [
-          ...GLSL_BUILTINS.map(s => ({...s, range})),
-          ...SHADERTOY_UNIFORMS.map(s => ({...s, range})),
+          ...GLSL_BUILTINS.map((s) => ({ ...s, range })),
+          ...SHADERTOY_UNIFORMS.map((s) => ({ ...s, range })),
           ...collectUniformSuggestions(code, range),
           ...collectSliderSuggestions(range),
           ...astSymbols,
           ...userSymbols,
-        ]
+        ],
       };
-    }
+    },
   });
 
   // §3.1 — sticky scroll : garde la signature de fonction visible en haut
@@ -617,25 +745,39 @@ function openCommandPalette() {
   // Fix 5.6 — upgraded to monaco-editor 0.55.1 (from 0.34.1). stickyScroll and
   // inlayHints are now officially typed in IEditorOptions; the @type cast is no longer
   // needed but kept as a no-op for forward compat with any future strict type checks.
-  state.editor.updateOptions(/** @type {any} */ ({
-    stickyScroll: { enabled: true, maxLineCount: 3 },
-  }));
+  state.editor.updateOptions(
+    /** @type {any} */ ({
+      stickyScroll: { enabled: true, maxLineCount: 3 },
+    })
+  );
 
   // §3.1 — Contrôle de la taille de police (Ctrl+= / Ctrl+- / Ctrl+0),
   // comme un navigateur. Persisté dans localStorage (sl_editorFont).
-  const _FONT_MIN = 8, _FONT_MAX = 32, _FONT_DEFAULT = 12;
+  const _FONT_MIN = 8,
+    _FONT_MAX = 32,
+    _FONT_DEFAULT = 12;
   function _adjustFontSize(delta) {
     if (!state.editor) return;
     const cur = state.editor.getOption(monaco.editor.EditorOption.fontInfo).fontSize;
-    const next = delta === 0 ? _FONT_DEFAULT : Math.max(_FONT_MIN, Math.min(_FONT_MAX, Math.round(cur + delta)));
+    const next =
+      delta === 0
+        ? _FONT_DEFAULT
+        : Math.max(_FONT_MIN, Math.min(_FONT_MAX, Math.round(cur + delta)));
     state.editor.updateOptions({ fontSize: next });
-    try { localStorage.setItem('sl_editorFont', String(next)); } catch { /* noop */ }
+    try {
+      localStorage.setItem('sl_editorFont', String(next));
+    } catch {
+      /* noop */
+    }
   }
   // Restaure la taille mémorisée
   try {
     const savedFont = parseInt(localStorage.getItem('sl_editorFont') || '', 10);
-    if (savedFont >= _FONT_MIN && savedFont <= _FONT_MAX) state.editor.updateOptions({ fontSize: savedFont });
-  } catch { /* noop */ }
+    if (savedFont >= _FONT_MIN && savedFont <= _FONT_MAX)
+      state.editor.updateOptions({ fontSize: savedFont });
+  } catch {
+    /* noop */
+  }
   state.editor.addAction({
     id: 'z-gl.font-zoom-in',
     label: 'Editor: Increase Font Size',
@@ -668,7 +810,9 @@ function openCommandPalette() {
   state.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => applyAndParse());
   // Ctrl+Enter also
   state.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => applyAndParse());
-  state.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyR, () => renameWordAtCursor(state.editor));
+  state.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyR, () =>
+    renameWordAtCursor(state.editor)
+  );
 
   state.editor.addAction({
     id: 'z-gl.rename-symbol',
@@ -743,10 +887,12 @@ function openCommandPalette() {
   monaco.languages.registerDocumentFormattingEditProvider('glsl', {
     provideDocumentFormattingEdits(model) {
       const formatted = formatGLSL(model.getValue());
-      return [{
-        range: model.getFullModelRange(),
-        text: formatted,
-      }];
+      return [
+        {
+          range: model.getFullModelRange(),
+          text: formatted,
+        },
+      ];
     },
   });
 
@@ -788,12 +934,12 @@ function openCommandPalette() {
       const highlights = [];
 
       const WRITE_RE = new RegExp(
-        '(?:^|[^.\\w])' + name + '\\s*(?:[+\\-*\\/&|^%]?=(?!=)|\\+\\+|--)',
+        `(?:^|[^.\\w])${  name  }\\s*(?:[+\\-*\\/&|^%]?=(?!=)|\\+\\+|--)`
       );
 
       for (let li = 0; li < lines.length; li++) {
         const line = lines[li];
-        const tokenRe = new RegExp('(?<![.\\w])' + name + '(?![\\w])', 'g');
+        const tokenRe = new RegExp(`(?<![.\\w])${  name  }(?![\\w])`, 'g');
         let m;
         while ((m = tokenRe.exec(line)) !== null) {
           const col = m.index + 1;
@@ -834,7 +980,7 @@ function openCommandPalette() {
       const lines = model.getValue().split('\n');
       const refs = [];
       for (let li = 0; li < lines.length; li++) {
-        const tokenRe = new RegExp('(?<![.\\w])' + name + '(?![\\w])', 'g');
+        const tokenRe = new RegExp(`(?<![.\\w])${  name  }(?![\\w])`, 'g');
         let m;
         while ((m = tokenRe.exec(lines[li])) !== null) {
           refs.push({
@@ -858,44 +1004,54 @@ function openCommandPalette() {
   });
 
   // 1.4: Cursor position in header
-  state.editor.onDidChangeCursorPosition(e => {
+  state.editor.onDidChangeCursorPosition((e) => {
     document.getElementById('curpos').textContent =
       `Ln ${e.position.lineNumber}, Col ${e.position.column}`;
   });
 
   document.getElementById('curpos')?.addEventListener('click', () => {
     const pos = state.editor?.getPosition();
-    if (pos) { state.editor.revealLineInCenter(pos.lineNumber); state.editor.focus(); }
+    if (pos) {
+      state.editor.revealLineInCenter(pos.lineNumber);
+      state.editor.focus();
+    }
   });
 
   document.getElementById('sbPassBadge')?.addEventListener('click', () => {
     const id = state.mp?.active;
     if (!id) return;
-    document.getElementById('ptab-' + id)?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    document
+      .getElementById(`ptab-${  id}`)
+      ?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   });
 
   // Phase Y — drag a slider row from the sidebar (via its ⠿ handle, see
   // slDragStart in drag-drop.js) and drop it onto the editor → insert the
   // variable name at the drop position.
   const mcEl = document.getElementById('mc');
-  mcEl?.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
-  mcEl?.addEventListener('drop', e => {
+  mcEl?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  });
+  mcEl?.addEventListener('drop', (e) => {
     const name = e.dataTransfer.getData('text/plain');
     if (!name) return;
     const target = state.editor.getTargetAtClientPoint(e.clientX, e.clientY);
     const pos = target?.position;
     if (!pos) return;
     e.preventDefault();
-    state.editor.executeEdits('slider-drag-insert', [{
-      range: new monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column),
-      text: name,
-    }]);
+    state.editor.executeEdits('slider-drag-insert', [
+      {
+        range: new monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column),
+        text: name,
+      },
+    ]);
     state.editor.focus();
   });
 
   // Phase Y — Ctrl+click on a #define / slider name in the editor → jump to
   // its row in the sidebar (scroll + temporary highlight).
-  state.editor.onMouseDown(e => {
+  state.editor.onMouseDown((e) => {
     if (!e.event.ctrlKey) return;
     const pos = e.target?.position;
     const model = pos && state.editor.getModel();
@@ -903,7 +1059,7 @@ function openCommandPalette() {
     const entry = word && findSliderEntry(word.word);
     if (!entry) return;
     e.event.preventDefault();
-    const row = document.getElementById('sr-' + entry.id);
+    const row = document.getElementById(`sr-${  entry.id}`);
     if (!row) return;
     row.scrollIntoView({ behavior: 'smooth', block: 'center' });
     row.classList.remove('sl-flash');
@@ -935,12 +1091,12 @@ function openCommandPalette() {
     // §7.3 — badge de complexité du shader
     initComplexityBadge();
     // UI v2 — manipulation directe & inspecteur
-    initValueScrub();     // §A.3 scrub de nombres
-    initColorInline();    // §A.2 couleurs inline
+    initValueScrub(); // §A.3 scrub de nombres
+    initColorInline(); // §A.2 couleurs inline
     initHoverInspector(); // §E.1 inspecteur au survol
-    initShaderAnatomy();  // §G.3 overlay anatomie
+    initShaderAnatomy(); // §G.3 overlay anatomie
   })();
-})()
+})();
 
 // Toggle the minimap on/off and keep the toolbar button in sync.
 export function toggleMinimap() {
@@ -963,10 +1119,10 @@ _ensureBrowserFileDrop();
 
 if (typeof state.editor !== 'undefined' && state.editor) {
   state.editor.addAction({
-    id:    'z-gl.toggle-settings-panel',
+    id: 'z-gl.toggle-settings-panel',
     label: 'Toggle Settings (Phase 21.1)',
     keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Comma],
-    run:   () => toggleSettingsPanel(),
+    run: () => toggleSettingsPanel(),
   });
 }
 export function _ensureBrowserFileDrop() {
@@ -976,7 +1132,7 @@ export function _ensureBrowserFileDrop() {
 // ── F-8.2 — Includes Manager Panel ───────────────────────────────────────────
 
 export function toggleIncludesPanel() {
-  import('./includes-panel.js').then(m => m.toggle());
+  import('./includes-panel.js').then((m) => m.toggle());
 }
 
 // ── Phase 20.3 — Bibliothèque de shaders ─────────────────────────────────────
@@ -984,10 +1140,10 @@ export function toggleIncludesPanel() {
 // Monaco action — Ctrl+Shift+F
 if (typeof monaco !== 'undefined' && state.editor) {
   state.editor.addAction({
-    id:    'z-gl.toggle-shader-library',
+    id: 'z-gl.toggle-shader-library',
     label: 'Toggle Shader Library (Phase 20.3)',
     keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyF],
-    run:   () => toggleShaderLibrary(),
+    run: () => toggleShaderLibrary(),
   });
 }
 
@@ -1016,4 +1172,3 @@ export async function toggleShaderLibrary() {
   const p = await _ensureLibPanel();
   p.toggle();
 }
-

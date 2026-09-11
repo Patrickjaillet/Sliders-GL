@@ -17,10 +17,18 @@ function _injectStyle() {
   _styleInjected = true;
   const s = document.createElement('style');
   s.id = 'zgl-slider-gutter-style';
+  // §6 roadmap — this glyph sits inside Monaco's own 'z-gl-dark' theme
+  // (editor.js), which stays dark independent of the app's light-gray
+  // surfaces (see --bg-editor in tokens.css). The app's --accent (a dark
+  // teal, #0b5650) reads at only ~2.1:1 against that dark background —
+  // nearly invisible. #39FF6A is the editor theme's own established
+  // accent (cursor, bracket highlight, keyword/type tokens), chosen
+  // specifically to read on dark, so this glyph uses that fixed color
+  // directly instead of the light-theme's --accent token.
   s.textContent = `
     .zgl-slider-gutter-dot::before {
       content: '·';
-      color: var(--accent, #39FF6A);
+      color: #39FF6A;
       font-size: 20px;
       line-height: 1;
       display: inline-block;
@@ -35,8 +43,8 @@ function _refreshGutterDots(entries) {
   if (!state.editor) return;
   _injectStyle();
   const decos = (entries || [])
-    .filter(e => Number.isFinite(e.line))
-    .map(e => ({
+    .filter((e) => Number.isFinite(e.line))
+    .map((e) => ({
       range: new monaco.Range(e.line + 1, 1, e.line + 1, 1),
       options: {
         glyphMarginClassName: 'zgl-slider-gutter-dot',

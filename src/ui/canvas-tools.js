@@ -16,25 +16,38 @@ import { safeLocalGet, safeLocalSet } from '../core/utils.js';
 import { toggleCanvasGizmos } from './canvas-gizmos.js';
 import { exportScreenshot } from '../export/export.js';
 
-let _cw = null;   // #cwrap
-let _glc = null;  // #glc
-let _overlay = null;     // <canvas> 2D de guides (4.2)
+let _cw = null; // #cwrap
+let _glc = null; // #glc
+let _overlay = null; // <canvas> 2D de guides (4.2)
 let _octx = null;
 
 // ── État zoom/pan (4.3) ───────────────────────────────────────────────
-let _zoom = 1, _panX = 0, _panY = 0;
+let _zoom = 1,
+  _panX = 0,
+  _panY = 0;
 
 // ── État guides (4.2) ─────────────────────────────────────────────────
-let _guides = false;   // safe-zones + croix (toggle)
-let _ruler = false;    // règle (maintien R)
+let _guides = false; // safe-zones + croix (toggle)
+let _ruler = false; // règle (maintien R)
 
 // ── État HUD (4.1) ────────────────────────────────────────────────────
 let _hudOn = safeLocalGet('sl_hud', '1') !== '0';
+// §6 roadmap — HUD density: 'compact' shows only the FPS pill, 'detailed'
+// shows all four (FPS/resolution/time/frame), instead of a single on/off.
+let _hudDensity = safeLocalGet('sl_hudDensity', 'detailed') === 'compact' ? 'compact' : 'detailed';
 
 // ── Référence avant/après (4.5) ───────────────────────────────────────
 let _refURL = null;
 let _compareEl = null;
 let _splitFrac = 0.5;
+// §6 roadmap — the compare view used to only be reachable by holding "B"
+// (closes the instant the key is released) and only offered a drag-to-split
+// view. It now also has a persistent toggle (vpCompareBtn) and a second
+// "blend" mode with a real 0-100% opacity fade slider, alongside the
+// original split-drag mode — both read from the same _refURL/_compareEl.
+let _compareOpen = false; // persistent toggle state (independent of hold-B)
+let _compareMode = 'split'; // 'split' | 'blend'
+let _blendPct = 50; // 0-100, blend mode only
 
 // ════════════════════════════════════════════════════════════════════
 // Capture de frame (sert à 4.4, 4.5, 5.2). Le renderer principal utilise
@@ -43,13 +56,19 @@ let _splitFrac = 0.5;
 function _captureBlob() {
   return new Promise((resolve) => {
     if (!_glc) return resolve(null);
-    try { _glc.toBlob(b => resolve(b), 'image/png'); }
-    catch { resolve(null); }
+    try {
+      _glc.toBlob((b) => resolve(b), 'image/png');
+    } catch {
+      resolve(null);
+    }
   });
 }
 function _captureDataURL() {
-  try { return _glc ? _glc.toDataURL('image/png') : null; }
-  catch { return null; }
+  try {
+    return _glc ? _glc.toDataURL('image/png') : null;
+  } catch {
+    return null;
+  }
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -57,7 +76,10 @@ function _captureDataURL() {
 // ════════════════════════════════════════════════════════════════════
 export async function copyFrameToClipboard() {
   const blob = await _captureBlob();
-  if (!blob) { toast('Could not capture frame', 'err'); return; }
+  if (!blob) {
+    toast('Could not capture frame', 'err');
+    return;
+  }
   try {
     if (navigator.clipboard && window.ClipboardItem) {
       await navigator.clipboard.write([new window.ClipboardItem({ 'image/png': blob })]);
@@ -85,7 +107,10 @@ function _flashCanvas(text) {
   f.textContent = text;
   _cw.appendChild(f);
   requestAnimationFrame(() => f.classList.add('show'));
-  setTimeout(() => { f.classList.remove('show'); setTimeout(() => f.remove(), 250); }, 700);
+  setTimeout(() => {
+    f.classList.remove('show');
+    setTimeout(() => f.remove(), 250);
+  }, 700);
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -95,6 +120,53 @@ export function toggleHUD(force) {
   _hudOn = force !== undefined ? force : !_hudOn;
   if (_cw) _cw.classList.toggle('hud-off', !_hudOn);
   safeLocalSet('sl_hud', _hudOn ? '1' : '0');
+}
+
+/**
+ * §6 roadmap — set HUD density ('compact' = FPS pill only, 'detailed' = all
+ * readouts), instead of the previous single on/off. Accepts a plain string
+ * (e.g. a dataset value straight off a button) — anything other than the
+ * literal 'compact' is treated as 'detailed'.
+ * @param {string} density
+ */
+export function setHUDDensity(density) {
+  _hudDensity = density === 'compact' ? 'compact' : 'detailed';
+  safeLocalSet('sl_hudDensity', _hudDensity);
+  if (_cw) _cw.classList.toggle('hud-compact', _hudDensity === 'compact');
+  document.querySelectorAll('.hud-density-item').forEach((btn) => {
+    const isActive = /** @type {HTMLElement} */ (btn).dataset.density === _hudDensity;
+    btn.setAttribute('aria-checked', String(isActive));
+  });
+}
+
+export function getHUDDensity() {
+  return _hudDensity;
+}
+
+function _initHUDDensityMenu() {
+  const caretBtn = document.getElementById('vpHudDensityBtn');
+  const menu = document.getElementById('vpHudDensityMenu');
+  if (!caretBtn || !menu) return;
+
+  caretBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = menu.classList.toggle('open');
+    caretBtn.setAttribute('aria-expanded', String(open));
+  });
+  menu.querySelectorAll('.hud-density-item').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setHUDDensity(/** @type {HTMLElement} */ (btn).dataset.density);
+      menu.classList.remove('open');
+      caretBtn.setAttribute('aria-expanded', 'false');
+    });
+  });
+  document.addEventListener('click', (e) => {
+    if (caretBtn.closest('.eb-more-wrap')?.contains(/** @type {Node} */ (e.target))) return;
+    if (menu.classList.contains('open')) {
+      menu.classList.remove('open');
+      caretBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -111,7 +183,9 @@ function _applyTransform() {
   }
 }
 export function resetZoom() {
-  _zoom = 1; _panX = 0; _panY = 0;
+  _zoom = 1;
+  _panX = 0;
+  _panY = 0;
   _applyTransform();
 }
 function _onWheel(e) {
@@ -129,25 +203,33 @@ function _onWheel(e) {
   _panY = cy - (cy - _panY) * ratio;
   _applyTransform();
 }
-let _panning = false, _panSX = 0, _panSY = 0;
+let _panning = false,
+  _panSX = 0,
+  _panSY = 0;
 function _onPanDown(e) {
   if (e.button !== 1) return; // bouton du milieu
   e.preventDefault();
-  _panning = true; _panSX = e.clientX - _panX; _panSY = e.clientY - _panY;
+  _panning = true;
+  _panSX = e.clientX - _panX;
+  _panSY = e.clientY - _panY;
   _cw.style.cursor = 'grabbing';
 }
 function _onPanMove(e) {
   if (!_panning) return;
-  _panX = e.clientX - _panSX; _panY = e.clientY - _panSY;
+  _panX = e.clientX - _panSX;
+  _panY = e.clientY - _panSY;
   _applyTransform();
 }
 function _onPanUp() {
   if (!_panning) return;
-  _panning = false; _cw.style.cursor = '';
+  _panning = false;
+  _cw.style.cursor = '';
 }
 
 // §8.2 — pinch-zoom + two-finger pan
-let _touchDist = 0, _touchMidX = 0, _touchMidY = 0;
+let _touchDist = 0,
+  _touchMidX = 0,
+  _touchMidY = 0;
 function _touchInfo(t) {
   const dx = t[0].clientX - t[1].clientX;
   const dy = t[0].clientY - t[1].clientY;
@@ -161,7 +243,9 @@ function _onTouchStart(e) {
   if (e.touches.length !== 2) return;
   e.preventDefault();
   const info = _touchInfo(e.touches);
-  _touchDist = info.dist; _touchMidX = info.mx; _touchMidY = info.my;
+  _touchDist = info.dist;
+  _touchMidX = info.mx;
+  _touchMidY = info.my;
 }
 function _onTouchMove(e) {
   if (e.touches.length !== 2) return;
@@ -181,7 +265,9 @@ function _onTouchMove(e) {
     _panX = cx - (cx - _panX) * ratio;
     _panY = cy - (cy - _panY) * ratio;
   }
-  _touchDist = info.dist; _touchMidX = info.mx; _touchMidY = info.my;
+  _touchDist = info.dist;
+  _touchMidX = info.mx;
+  _touchMidY = info.my;
   _applyTransform();
 }
 
@@ -197,9 +283,13 @@ function _resizeOverlay() {
 }
 function _drawGuides() {
   if (!_octx || !_overlay) return;
-  const w = _overlay.width, h = _overlay.height;
+  const w = _overlay.width,
+    h = _overlay.height;
   _octx.clearRect(0, 0, w, h);
-  if (!_guides && !_ruler) { _overlay.style.display = 'none'; return; }
+  if (!_guides && !_ruler) {
+    _overlay.style.display = 'none';
+    return;
+  }
   _overlay.style.display = 'block';
 
   if (_guides) {
@@ -207,12 +297,15 @@ function _drawGuides() {
     _octx.strokeStyle = 'rgba(255,255,255,0.35)';
     _octx.lineWidth = 1;
     for (const frac of [0.9, 0.8]) {
-      const mw = w * (1 - frac) / 2, mh = h * (1 - frac) / 2;
+      const mw = (w * (1 - frac)) / 2,
+        mh = (h * (1 - frac)) / 2;
       _octx.strokeRect(mw, mh, w - 2 * mw, h - 2 * mh);
     }
     _octx.beginPath();
-    _octx.moveTo(w / 2, 0); _octx.lineTo(w / 2, h);
-    _octx.moveTo(0, h / 2); _octx.lineTo(w, h / 2);
+    _octx.moveTo(w / 2, 0);
+    _octx.lineTo(w / 2, h);
+    _octx.moveTo(0, h / 2);
+    _octx.lineTo(w, h / 2);
     _octx.strokeStyle = 'rgba(255,255,255,0.5)';
     _octx.stroke();
   }
@@ -225,11 +318,13 @@ function _drawGuides() {
     const step = 50;
     _octx.beginPath();
     for (let x = 0; x <= w; x += step) {
-      _octx.moveTo(x, 0); _octx.lineTo(x, 8);
+      _octx.moveTo(x, 0);
+      _octx.lineTo(x, 8);
       if (x > 0) _octx.fillText(String(x), x + 2, 16);
     }
     for (let y = 0; y <= h; y += step) {
-      _octx.moveTo(0, y); _octx.lineTo(8, y);
+      _octx.moveTo(0, y);
+      _octx.lineTo(8, y);
       if (y > 0) _octx.fillText(String(y), 2, y + 10);
     }
     _octx.stroke();
@@ -250,9 +345,14 @@ function _setRuler(on) {
 // ════════════════════════════════════════════════════════════════════
 export function saveReference() {
   const url = _captureDataURL();
-  if (!url) { toast('Could not capture reference', 'err'); return; }
+  if (!url) {
+    toast('Could not capture reference', 'err');
+    return;
+  }
   _refURL = url;
-  toast('Reference frame saved — hold B to compare', 'ok');
+  const btn = document.getElementById('vpCompareBtn');
+  if (btn) btn.disabled = false;
+  toast('Reference frame saved — hold B, or click "compare" to toggle', 'ok');
 }
 function _buildCompare() {
   if (_compareEl || !_cw) return;
@@ -262,10 +362,16 @@ function _buildCompare() {
     <img class="cc-ref" alt="reference frame" draggable="false"/>
     <div class="cc-split"><div class="cc-handle">⇆</div></div>
     <div class="cc-label cc-label-ref">REF</div>
-    <div class="cc-label cc-label-live">LIVE</div>`;
+    <div class="cc-label cc-label-live">LIVE</div>
+    <div class="cc-blend-bar">
+      <button class="cc-mode-btn" type="button" data-mode="split" title="Split view — drag the line">⇆ split</button>
+      <button class="cc-mode-btn" type="button" data-mode="blend" title="Blend view — fade between reference and live">◐ blend</button>
+      <input class="cc-blend-slider" type="range" min="0" max="100" step="1" aria-label="Reference/live blend amount" />
+      <span class="cc-blend-pct">50%</span>
+    </div>`;
   _cw.appendChild(_compareEl);
 
-  // Glisser la ligne de séparation
+  // Glisser la ligne de séparation (mode split)
   const split = _compareEl.querySelector('.cc-split');
   const onMove = (e) => {
     const r = _cw.getBoundingClientRect();
@@ -273,18 +379,56 @@ function _buildCompare() {
     _layoutCompare();
   };
   split.addEventListener('mousedown', (e) => {
-    e.preventDefault(); e.stopPropagation();
+    e.preventDefault();
+    e.stopPropagation();
     document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', () => document.removeEventListener('mousemove', onMove), { once: true });
+    document.addEventListener('mouseup', () => document.removeEventListener('mousemove', onMove), {
+      once: true,
+    });
+  });
+
+  // §6 roadmap — mode buttons (split vs blend) + blend opacity slider
+  _compareEl.querySelectorAll('.cc-mode-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      _compareMode = /** @type {HTMLElement} */ (btn).dataset.mode;
+      safeLocalSet('sl_compareMode', _compareMode);
+      _layoutCompare();
+    });
+  });
+  const slider = /** @type {HTMLInputElement} */ (_compareEl.querySelector('.cc-blend-slider'));
+  slider.value = String(_blendPct);
+  slider.addEventListener('input', () => {
+    _blendPct = Number(slider.value);
+    _layoutCompare();
   });
 }
 function _layoutCompare() {
   if (!_compareEl) return;
-  const pct = (_splitFrac * 100).toFixed(1) + '%';
-  const ref = _compareEl.querySelector('.cc-ref');
-  const split = _compareEl.querySelector('.cc-split');
-  ref.style.clipPath = `inset(0 ${(100 - _splitFrac * 100).toFixed(1)}% 0 0)`;
-  split.style.left = pct;
+  const ref = /** @type {HTMLElement} */ (_compareEl.querySelector('.cc-ref'));
+  const split = /** @type {HTMLElement} */ (_compareEl.querySelector('.cc-split'));
+  const slider = /** @type {HTMLElement} */ (_compareEl.querySelector('.cc-blend-slider'));
+  const pctLabel = _compareEl.querySelector('.cc-blend-pct');
+
+  _compareEl.classList.toggle('mode-blend', _compareMode === 'blend');
+  _compareEl.querySelectorAll('.cc-mode-btn').forEach((btn) => {
+    btn.classList.toggle('active', /** @type {HTMLElement} */ (btn).dataset.mode === _compareMode);
+  });
+
+  if (_compareMode === 'blend') {
+    split.style.display = 'none';
+    slider.style.display = '';
+    pctLabel.textContent = `${_blendPct}%`;
+    ref.style.clipPath = 'none';
+    ref.style.opacity = String(_blendPct / 100);
+  } else {
+    split.style.display = '';
+    slider.style.display = 'none';
+    pctLabel.textContent = '';
+    ref.style.opacity = '1';
+    const pct = `${(_splitFrac * 100).toFixed(1)  }%`;
+    ref.style.clipPath = `inset(0 ${(100 - _splitFrac * 100).toFixed(1)}% 0 0)`;
+    split.style.left = pct;
+  }
 }
 function _showCompare(on) {
   if (on) {
@@ -298,6 +442,28 @@ function _showCompare(on) {
   }
 }
 
+/**
+ * §6 roadmap — persistent compare toggle for the vp-header button, distinct
+ * from the "hold B" momentary compare (both share the same _refURL/_compareEl
+ * so saving a reference works identically for either trigger).
+ * @param {boolean} [force]
+ * @returns {boolean} the new toggle state
+ */
+export function toggleCompareView(force) {
+  if (!_refURL) {
+    toast('Save a reference frame first ("ref" button)', 'warn');
+    return false;
+  }
+  _compareOpen = force !== undefined ? force : !_compareOpen;
+  _showCompare(_compareOpen);
+  const btn = document.getElementById('vpCompareBtn');
+  if (btn) {
+    btn.classList.toggle('active', _compareOpen);
+    btn.setAttribute('aria-pressed', String(_compareOpen));
+  }
+  return _compareOpen;
+}
+
 // ════════════════════════════════════════════════════════════════════
 // 5.2 — Menu contextuel du canvas
 // ════════════════════════════════════════════════════════════════════
@@ -307,7 +473,9 @@ function _showCompare(on) {
 let _pickMode = false;
 let _pickEl = null;
 
-export function isPickModeActive() { return _pickMode; }
+export function isPickModeActive() {
+  return _pickMode;
+}
 
 export function togglePickMode(force) {
   _pickMode = force !== undefined ? !!force : !_pickMode;
@@ -318,7 +486,10 @@ export function togglePickMode(force) {
   } else {
     _cw.classList.remove('pick-active');
     _cw.removeEventListener('click', _onPickClick);
-    if (_pickEl) { _pickEl.remove(); _pickEl = null; }
+    if (_pickEl) {
+      _pickEl.remove();
+      _pickEl = null;
+    }
   }
   return _pickMode;
 }
@@ -328,11 +499,18 @@ function _buildPickOverlay() {
   _pickEl = document.createElement('div');
   _pickEl.id = 'pickOverlay';
   _pickEl.style.cssText = [
-    'position:absolute', 'bottom:40px', 'left:8px', 'z-index:60',
-    'background:rgba(0,0,0,0.65)', 'border:1px solid rgba(255,255,255,0.15)',
-    'border-radius:4px', 'padding:4px 8px',
-    "font:10px 'JetBrains Mono',monospace", 'color:rgba(255,255,255,0.85)',
-    'pointer-events:none', 'transition:opacity .2s',
+    'position:absolute',
+    'bottom:40px',
+    'left:8px',
+    'z-index:60',
+    'background:rgba(0,0,0,0.65)',
+    'border:1px solid rgba(255,255,255,0.15)',
+    'border-radius:4px',
+    'padding:4px 8px',
+    "font:10px 'JetBrains Mono',monospace",
+    'color:rgba(255,255,255,0.85)',
+    'pointer-events:none',
+    'transition:opacity .2s',
   ].join(';');
   _pickEl.textContent = 'Pick — cliquer le canvas pour lire les coordonnées';
   _cw.appendChild(_pickEl);
@@ -343,8 +521,10 @@ function _onPickClick(e) {
   const r = _cw.getBoundingClientRect();
   const u = (e.clientX - r.left) / r.width;
   const v = 1 - (e.clientY - r.top) / r.height;
-  const fx = Math.round(u * r.width), fy = Math.round(v * r.height);
-  const uStr = u.toFixed(4), vStr = v.toFixed(4);
+  const fx = Math.round(u * r.width),
+    fy = Math.round(v * r.height);
+  const uStr = u.toFixed(4),
+    vStr = v.toFixed(4);
   if (_pickEl) _pickEl.innerHTML = `UV: (${uStr}, ${vStr})<br>fragCoord: (${fx}, ${fy})`;
   toast(`Picked UV (${uStr}, ${vStr})`, 'ok');
   // Store on state.cam3 for shader access
@@ -354,7 +534,12 @@ function _onPickClick(e) {
 }
 
 let _ctxEl = null;
-function _closeCtx() { if (_ctxEl) { _ctxEl.remove(); _ctxEl = null; } }
+function _closeCtx() {
+  if (_ctxEl) {
+    _ctxEl.remove();
+    _ctxEl = null;
+  }
+}
 function _openCtx(x, y) {
   _closeCtx();
   const items = [
@@ -375,14 +560,18 @@ function _openCtx(x, y) {
     b.className = 'canvas-ctx-item';
     b.type = 'button';
     b.textContent = it.label;
-    b.addEventListener('click', () => { _closeCtx(); it.fn(); });
+    b.addEventListener('click', () => {
+      _closeCtx();
+      it.fn();
+    });
     menu.appendChild(b);
   }
   document.body.appendChild(menu);
   // Position dans la fenêtre
-  const mw = menu.offsetWidth, mh = menu.offsetHeight;
-  menu.style.left = Math.min(x, window.innerWidth - mw - 4) + 'px';
-  menu.style.top = Math.min(y, window.innerHeight - mh - 4) + 'px';
+  const mw = menu.offsetWidth,
+    mh = menu.offsetHeight;
+  menu.style.left = `${Math.min(x, window.innerWidth - mw - 4)  }px`;
+  menu.style.top = `${Math.min(y, window.innerHeight - mh - 4)  }px`;
   _ctxEl = menu;
   setTimeout(() => document.addEventListener('mousedown', _closeCtx, { once: true }), 0);
 }
@@ -392,26 +581,48 @@ function _openCtx(x, y) {
 // ════════════════════════════════════════════════════════════════════
 function _typing(e) {
   const t = e.target;
-  return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || (t.closest && t.closest('.monaco-editor')));
+  return (
+    t &&
+    (t.tagName === 'INPUT' ||
+      t.tagName === 'TEXTAREA' ||
+      (t.closest && t.closest('.monaco-editor')))
+  );
 }
 function _onKeyDown(e) {
   if (e.repeat) return;
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
-    e.preventDefault(); copyFrameToClipboard(); return;
+    e.preventDefault();
+    copyFrameToClipboard();
+    return;
   }
-  if ((e.ctrlKey || e.metaKey) && (e.key === '0')) {
+  if ((e.ctrlKey || e.metaKey) && e.key === '0') {
     // ne pas voler le zoom UI global si la cible est un input
-    if (!_typing(e)) { e.preventDefault(); resetZoom(); return; }
+    if (!_typing(e)) {
+      e.preventDefault();
+      resetZoom();
+      return;
+    }
   }
   if (_typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
-  if (e.key === 'h' || e.key === 'H') { e.preventDefault(); toggleHUD(); }
-  else if (e.key === 'g' || e.key === 'G') { e.preventDefault(); toggleGuides(); }
-  else if (e.key === 'r' || e.key === 'R') { e.preventDefault(); _setRuler(true); }
-  else if (e.key === 'b' || e.key === 'B') { e.preventDefault(); _showCompare(true); }
+  if (e.key === 'h' || e.key === 'H') {
+    e.preventDefault();
+    toggleHUD();
+  } else if (e.key === 'g' || e.key === 'G') {
+    e.preventDefault();
+    toggleGuides();
+  } else if (e.key === 'r' || e.key === 'R') {
+    e.preventDefault();
+    _setRuler(true);
+  } else if (e.key === 'b' || e.key === 'B') {
+    e.preventDefault();
+    if (!_compareOpen) _showCompare(true);
+  }
 }
 function _onKeyUp(e) {
   if (e.key === 'r' || e.key === 'R') _setRuler(false);
-  else if (e.key === 'b' || e.key === 'B') _showCompare(false);
+  // §6 roadmap — hold-B only hides the compare view it opened; if the
+  // persistent toggle (vpCompareBtn) is on, releasing B must not close it.
+  else if ((e.key === 'b' || e.key === 'B') && !_compareOpen) _showCompare(false);
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -422,6 +633,13 @@ export function initCanvasTools() {
 
   // HUD : état initial
   if (!_hudOn) _cw.classList.add('hud-off');
+  setHUDDensity(_hudDensity);
+  _initHUDDensityMenu();
+
+  // §6 roadmap — restore persisted compare mode (split/blend); the "ref"
+  // button and vpCompareBtn's disabled state don't need restoring since
+  // _refURL never persists across reloads (it's a live capture).
+  _compareMode = safeLocalGet('sl_compareMode', 'split') === 'blend' ? 'blend' : 'split';
 
   // Pick mode cursor style
   if (!document.getElementById('pickModeStyle')) {
@@ -453,7 +671,10 @@ export function initCanvasTools() {
   _cw.addEventListener('touchmove', _onTouchMove, { passive: false });
 
   // Menu contextuel
-  _cw.addEventListener('contextmenu', (e) => { e.preventDefault(); _openCtx(e.clientX, e.clientY); });
+  _cw.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    _openCtx(e.clientX, e.clientY);
+  });
 
   // Clavier
   document.addEventListener('keydown', _onKeyDown);

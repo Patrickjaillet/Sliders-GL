@@ -802,6 +802,51 @@ html.no-transition * {
   right: 8px;
 }
 
+/* §6 roadmap — split/blend mode bar. In blend mode the split line and
+   handle are hidden (JS toggles their display) and .cc-ref fades via
+   opacity instead of clip-path. */
+.canvas-compare .cc-blend-bar {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  border-radius: var(--radius);
+  background: rgba(13, 15, 20, 0.85);
+}
+.canvas-compare .cc-mode-btn {
+  height: 20px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.65);
+  font: 10px var(--font-mono);
+  cursor: pointer;
+}
+.canvas-compare .cc-mode-btn:hover {
+  color: #fff;
+}
+.canvas-compare .cc-mode-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(255, 255, 255, 0.08);
+}
+.canvas-compare .cc-blend-slider {
+  width: 120px;
+  accent-color: var(--accent);
+}
+.canvas-compare .cc-blend-pct {
+  min-width: 32px;
+  font: 10px var(--font-mono);
+  color: rgba(255, 255, 255, 0.85);
+  text-align: right;
+}
+
 /* 5.2 — Menu contextuel canvas */
 .canvas-ctx {
   position: fixed;
@@ -1114,6 +1159,13 @@ canvas#glc {
 .hud-l {
   top: 10px;
   left: 10px;
+}
+
+/* §6 roadmap — HUD density: 'compact' keeps only the FPS pill (.hud-l),
+   hiding the resolution/time/frame pills (.hud). Independent from
+   .hud-off/.cw.hud-off above (that's the master on/off switch). */
+.cw.hud-compact .hud {
+  display: none;
 }
 
 /* Pills HUD (FPS, résolution, temps) — floats over arbitrary rendered shader

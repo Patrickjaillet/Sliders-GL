@@ -5,6 +5,31 @@ All notable changes to Sliders GL are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] — 2026-09-12
+
+### Added
+
+- The editor's "⋯ More options" menu now has quick toggles for word wrap
+  and auto-format on compile, in sync with the full Editor Settings panel.
+- The viewport header gained three new controls: a canvas position-gizmos
+  toggle, a persistent before/after compare toggle (previously only a
+  hidden "hold B" shortcut) with both a split-line and a new opacity-blend
+  mode, and a HUD density menu (compact FPS-only vs. detailed).
+- The timeline strip now has its own play/pause and loop buttons, in sync
+  with the topbar's global pause button regardless of which one is used.
+
+### Fixed
+
+- Fixed a near-invisible slider-gutter indicator dot in the code editor —
+  it used the app's light-theme accent color, which has very poor contrast
+  against the (intentionally dark) code editor background.
+- The editor's hover tooltips, quick-fix lightbulb, and suggestion widget
+  now use colors matching the custom editor theme instead of Monaco's
+  generic defaults.
+- Alt-dragging a number in the code editor to scrub its value now shows a
+  visual hint (underline + cursor) on hover, before the drag starts, so the
+  feature is discoverable.
+
 ## [1.4.0] — 2026-09-12
 
 ### Added
@@ -133,6 +158,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   locally — zero network dependency for core functionality.
 - MIT license.
 
+[1.5.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.5.0
 [1.4.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.4.0
 [1.3.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.3.0
 [1.2.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.2.0
