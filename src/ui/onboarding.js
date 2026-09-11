@@ -89,7 +89,7 @@ export function showWelcomeScreen() {
           <div class="welcome-card-desc">Keyboard cheat sheet</div>
         </button>
       </div>
-      <div style="border-top:1px solid var(--b1);padding-top:10px;font-size:10px;color:var(--t3);font-family:var(--font-mono)">
+      <div style="border-top:1px solid var(--b1);padding-top:10px;font-size:10px;color:var(--t2);font-family:var(--font-mono)">
         <strong style="color:var(--t2)">Ctrl+E</strong> — export frame &nbsp;·&nbsp;
         <strong style="color:var(--t2)">Ctrl+Enter</strong> — apply shader &nbsp;·&nbsp;
         <strong style="color:var(--t2)">F</strong> — fullscreen &nbsp;·&nbsp;
@@ -250,10 +250,10 @@ function _showTutorialStep(idx) {
   // Position highlight
   if (target && _tutorialHighlight) {
     const rect = target.getBoundingClientRect();
-    _tutorialHighlight.style.left = rect.left - 6 + 'px';
-    _tutorialHighlight.style.top = rect.top - 6 + 'px';
-    _tutorialHighlight.style.width = rect.width + 12 + 'px';
-    _tutorialHighlight.style.height = rect.height + 12 + 'px';
+    _tutorialHighlight.style.left = `${rect.left - 6  }px`;
+    _tutorialHighlight.style.top = `${rect.top - 6  }px`;
+    _tutorialHighlight.style.width = `${rect.width + 12  }px`;
+    _tutorialHighlight.style.height = `${rect.height + 12  }px`;
     _tutorialHighlight.style.opacity = '1';
   } else if (_tutorialHighlight) {
     _tutorialHighlight.style.opacity = '0';
@@ -274,7 +274,7 @@ function _showTutorialStep(idx) {
     pointer-events:auto;`;
 
   tooltip.innerHTML = `
-    <div style="font-size:10px;color:var(--t3);font-family:var(--font-mono);margin-bottom:4px">
+    <div style="font-size:10px;color:var(--t2);font-family:var(--font-mono);margin-bottom:4px">
       Step ${idx + 1} of ${TUTORIAL_STEPS.length}
     </div>
     <div style="font-size:14px;font-weight:600;color:var(--t1);margin-bottom:6px">${step.title}</div>
@@ -289,7 +289,7 @@ function _showTutorialStep(idx) {
         ${idx === TUTORIAL_STEPS.length - 1 ? 'Done ✓' : 'Next →'}
       </button>
     </div>
-    <button id="tut-exit" style="position:absolute;top:10px;right:10px;font-size:10px;color:var(--t3);background:none;border:none;cursor:pointer" aria-label="Exit tutorial">✕</button>`;
+    <button id="tut-exit" style="position:absolute;top:10px;right:10px;font-size:10px;color:var(--t2);background:none;border:none;cursor:pointer" aria-label="Exit tutorial">✕</button>`;
 
   // Position tooltip near target
   if (target) {
@@ -312,8 +312,8 @@ function _showTutorialStep(idx) {
       top = Math.max(10, rect.top - 180);
     }
 
-    tooltip.style.left = left + 'px';
-    tooltip.style.top = top + 'px';
+    tooltip.style.left = `${left  }px`;
+    tooltip.style.top = `${top  }px`;
   } else {
     // Center of screen
     tooltip.style.left = '50%';
@@ -695,7 +695,7 @@ export function openGLSLReference() {
       </div>
       <div id="glsl-ref-list" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:3px" role="list" aria-label="GLSL function list">
       </div>
-      <div style="font-size:9px;color:var(--t3);font-family:var(--font-mono);margin-top:6px;text-align:right">
+      <div style="font-size:9px;color:var(--t2);font-family:var(--font-mono);margin-top:6px;text-align:right">
         ${GLSL_REFERENCE.length} entries · GLSL ES 3.0 + ShaderToy · Works offline
       </div>
     </div>`;
@@ -725,14 +725,14 @@ export function openGLSLReference() {
           <div style="padding:8px;background:var(--bg2);border-radius:6px;border:1px solid var(--b1)" role="listitem">
             <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:2px">
               <code style="font-size:12px;font-family:var(--font-mono);color:var(--spark);font-weight:600">${e.name}</code>
-              <span style="font-size:9px;color:var(--t3);font-family:var(--font-mono)">${e.cat}</span>
+              <span style="font-size:9px;color:var(--t2);font-family:var(--font-mono)">${e.cat}</span>
             </div>
             <div style="font-size:10px;font-family:var(--font-mono);color:var(--t2);margin-bottom:3px">${e.sig}</div>
             <div style="font-size:11px;color:var(--t2)">${e.desc}</div>
           </div>`
           )
           .join('')
-      : `<div style="color:var(--t3);font-size:12px;text-align:center;padding:20px">No matches for "${search.value}"</div>`;
+      : `<div style="color:var(--t2);font-size:12px;text-align:center;padding:20px">No matches for "${search.value}"</div>`;
   }
 
   search.addEventListener('input', renderList);

@@ -1465,7 +1465,11 @@ canvas#glc {
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: var(--text-ghost);
+  /* --text-ghost is reserved for disabled controls (WCAG-exempt) — this is
+     visible placeholder text ("No active pass.", "Hover a slider…"), so it
+     needs the AA-cleared --text-dim instead (2.55:1 measured on --bg-surface
+     with --text-ghost vs. the required 4.5:1 — see docs/design-system.md). */
+  color: var(--text-dim);
   font: 11px var(--font-mono);
   padding: 20px;
 }

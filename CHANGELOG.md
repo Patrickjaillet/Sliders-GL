@@ -5,6 +5,15 @@ All notable changes to Sliders GL are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] — 2026-09-11
+
+### Fixed
+
+- Fixed insufficient WCAG AA color contrast on the empty-state Inspector
+  panes ("No active pass.", "Hover a slider…") and several onboarding/
+  welcome-modal captions, which used the disabled-control-only
+  `--text-ghost` token for visible, non-disabled text.
+
 ## [1.1.0] — 2026-09-11
 
 ### Added
@@ -65,6 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   locally — zero network dependency for core functionality.
 - MIT license.
 
+[1.1.1]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.1.1
 [1.1.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.1.0
 [1.0.1]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.0.1
 [1.0.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.0.0
