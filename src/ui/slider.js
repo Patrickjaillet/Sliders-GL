@@ -7,30 +7,60 @@ import { clampPct, fmtN, esc, escAttr, encArg, safeLocalGet, safeLocalSet } from
 import { parseShader } from '../shader/parser.js';
 import { toast } from '../io/actions.js';
 import {
-  patchLine, fmtNum, isFromSlider, setFromMonaco,
-  setSliderHooks, sliderHooks, _liveDebounce, snapToStep,
+  patchLine,
+  fmtNum,
+  isFromSlider,
+  setFromMonaco,
+  setSliderHooks,
+  sliderHooks,
+  _liveDebounce,
+  snapToStep,
 } from './slider-logic.js';
 import { applyCustomizations } from './slider-customizations.js';
 import { groupEntriesForRender, detectColorScale, componentsToHex } from './slider-color.js';
 import { openHSLPicker } from './color-picker.js';
 
-const CAT_ORDER = ['globals','iterations','rotation','camera','fractal','glow','color','vectors','misc'];
+const CAT_ORDER = [
+  'globals',
+  'iterations',
+  'rotation',
+  'camera',
+  'fractal',
+  'glow',
+  'color',
+  'vectors',
+  'misc',
+];
 // Phase E — a small monochrome glyph per category for faster visual scanning.
 const CAT_ICONS = {
-  globals: '◆', iterations: '↻', rotation: '⟳', camera: '◫', fractal: '❉',
-  glow: '✦', color: '◉', vectors: '⊹', misc: '•', _: '▸',
+  globals: '◆',
+  iterations: '↻',
+  rotation: '⟳',
+  camera: '◫',
+  fractal: '❉',
+  glow: '✦',
+  color: '◉',
+  vectors: '⊹',
+  misc: '•',
+  _: '▸',
 };
 const collapsedGroups = new Set(
-  (() => { try { return JSON.parse(safeLocalGet('sl_collapsed_groups', '[]')) || []; } catch { return []; } })()
+  (() => {
+    try {
+      return JSON.parse(safeLocalGet('sl_collapsed_groups', '[]')) || [];
+    } catch {
+      return [];
+    }
+  })()
 );
 
 // ── RAF batching for fill updates ────────────────────────────────────────────
 // Phase 8.2 — Toutes les mises à jour DOM visuelles sont groupées dans un seul
 // requestAnimationFrame par frame. Jamais en direct depuis oninput/pointermove.
 let _rafPending = false;
-const _fillQueue  = new Set();   // ids dont le fill (--fill-pct) doit être mis à jour
-const _domQueue   = new Map();   // id → { val, decimals } pour sv + aria + modified
-const _xyByComp   = new Map();   // component id → XY-pad group id (Phase B)
+const _fillQueue = new Set(); // ids dont le fill (--fill-pct) doit être mis à jour
+const _domQueue = new Map(); // id → { val, decimals } pour sv + aria + modified
+const _xyByComp = new Map(); // component id → XY-pad group id (Phase B)
 
 // ── Soft range — Blender's "soft_min/soft_max" concept ──────────────────────
 // The filled bar and drag-scaling travel across the *soft* range, while the
@@ -68,11 +98,11 @@ function _flushFrame() {
   for (const id of _fillQueue) {
     const e = state.varMap[id];
     if (!e) continue;
-    const field = document.getElementById('sl-' + id);
+    const field = document.getElementById(`sl-${  id}`);
     const { min: softMin, max: softMax } = _softRange(e);
-    const pct   = e.isLog ? _logPct(e.value, softMin, softMax) : clampPct(e.value, softMin, softMax);
-    if (field) field.style.setProperty('--fill-pct', pct + '%');
-    _updateDial(id);   // no-op unless an angle dial exists for this id
+    const pct = e.isLog ? _logPct(e.value, softMin, softMax) : clampPct(e.value, softMin, softMax);
+    if (field) field.style.setProperty('--fill-pct', `${pct  }%`);
+    _updateDial(id); // no-op unless an angle dial exists for this id
     const xyg = _xyByComp.get(id);
     if (xyg) _updateXY(xyg);
   }
@@ -80,9 +110,9 @@ function _flushFrame() {
 
   // ── Flush sv + aria + modified ────────────────────────────────
   for (const [id, { val, decimals }] of _domQueue) {
-    const e   = state.varMap[id];
-    const sv  = document.getElementById('sv-'  + id);
-    const row = document.getElementById('sr-'  + id);
+    const e = state.varMap[id];
+    const sv = document.getElementById(`sv-${  id}`);
+    const row = document.getElementById(`sr-${  id}`);
 
     if (sv && document.activeElement !== sv) {
       // Ne pas écraser la valeur si l'input est en cours d'édition
@@ -107,61 +137,78 @@ function _flushFrame() {
 }
 
 // Alias rétrocompat — conservé pour actions.js / ux.js
-function _flushFills() { _flushFrame(); }
+function _flushFills() {
+  _flushFrame();
+}
 
 // ── Build UI ─────────────────────────────────────────────────────────────────
 function buildUI(entries) {
   state.vars = entries;
   state.varMap = {};
   state.defaultValues = {};
-  _xyByComp.clear();   // rebuilt below as XY pads are rendered
+  _xyByComp.clear(); // rebuilt below as XY pads are rendered
   // Notify registered post-buildUI hooks (e.g. MIDI target selector refresh).
   // Use state.callbacks.onBuildUI instead of window.buildUI monkey-patching.
   if (typeof state.callbacks.onBuildUI === 'function') state.callbacks.onBuildUI(entries);
-  entries.forEach(e => { state.varMap[e.id] = e; state.defaultValues[e.id] = e.defaultValue; });
+  entries.forEach((e) => {
+    state.varMap[e.id] = e;
+    state.defaultValues[e.id] = e.defaultValue;
+  });
   const parseWarnings = Array.isArray(state.parseWarnings) ? state.parseWarnings : [];
 
   const root = document.getElementById('sw');
   if (entries.length === 0) {
-    const warnBlock = parseWarnings.length > 0
-      ? `<div class="es" style="margin-bottom:8px">
+    const warnBlock =
+      parseWarnings.length > 0
+        ? `<div class="es" style="margin-bottom:8px">
       <div class="es-title">Ignored #define expressions (${parseWarnings.length})</div>
       <div class="es-sub">Only literal numeric #define values are currently slider-enabled.</div>
     </div>`
-      : '';
-    root.innerHTML = `${warnBlock}<div class="es">
+        : '';
+    root.innerHTML = `${warnBlock}<div class="es" id="es">
       <div class="es-icon">◈</div>
       <div class="es-title">Paste a ShaderToy shader</div>
       <div class="es-sub">Paste any ShaderToy code in the editor below.<br>
       Press <span class="es-key">Ctrl+S</span> or click<br>
-      <span style="color:var(--ac3)">⟳ parse</span> to extract all constants.</div></div>`;
+      <span style="color:var(--ac3)">⟳ parse</span> to extract all constants.</div>
+      <div class="es-actions">
+        <button class="pb" data-action="loadExample">▶ Load Example Shader</button>
+        <button class="pb" data-action="openShaderLibrary"><svg><use href="#icon-library"/></svg> Browse Shader Library</button>
+      </div>
+    </div>`;
     return;
   }
 
   const groups = {};
   const pinnedEntries = [];
-  entries.forEach(e => {
-    if (state.pinnedIds.has(e.stableKey)) { pinnedEntries.push(e); return; }
+  entries.forEach((e) => {
+    if (state.pinnedIds.has(e.stableKey)) {
+      pinnedEntries.push(e);
+      return;
+    }
     if (!groups[e.category]) groups[e.category] = [];
     groups[e.category].push(e);
   });
 
-  const allCats = [...new Set([...CAT_ORDER, ...Object.keys(groups)])].filter(c => groups[c]);
+  const allCats = [...new Set([...CAT_ORDER, ...Object.keys(groups)])].filter((c) => groups[c]);
 
   // Sécurité UX : si TOUS les groupes sont marqués repliés, c'est presque toujours
   // un état stale/accidentel (personne ne replie volontairement chaque groupe).
   // On déplie tout pour que les sliders soient visibles d'emblée, et on purge la
   // préférence persistée correspondante. Évite le panneau « vide » au démarrage.
-  if (allCats.length > 0 && allCats.every(c => collapsedGroups.has(c))) {
-    allCats.forEach(c => collapsedGroups.delete(c));
-    try { safeLocalSet('sl_collapsed_groups', JSON.stringify([...collapsedGroups])); } catch {}
+  if (allCats.length > 0 && allCats.every((c) => collapsedGroups.has(c))) {
+    allCats.forEach((c) => collapsedGroups.delete(c));
+    try {
+      safeLocalSet('sl_collapsed_groups', JSON.stringify([...collapsedGroups]));
+    } catch {}
   }
 
   let html = '';
 
   if (parseWarnings.length > 0) {
-    const preview = parseWarnings.slice(0, 3)
-      .map(w => `L${w.line} ${esc(w.name)} = ${esc(w.raw)}`)
+    const preview = parseWarnings
+      .slice(0, 3)
+      .map((w) => `L${w.line} ${esc(w.name)} = ${esc(w.raw)}`)
       .join('<br>');
     const more = parseWarnings.length > 3 ? '<br>...' : '';
     html += `<div class="es" style="margin-bottom:8px">
@@ -178,16 +225,16 @@ function buildUI(entries) {
     </div>`;
   }
 
-  allCats.forEach(cat => {
+  allCats.forEach((cat) => {
     if (!groups[cat]) return;
     const isCollapsed = collapsedGroups.has(cat);
     const isGlobal = cat === 'globals';
     const catArg = encArg(cat);
-    html += `<div class="sh${isGlobal?' globals-header':''}${isCollapsed?' collapsed':''}"
+    html += `<div class="sh${isGlobal ? ' globals-header' : ''}${isCollapsed ? ' collapsed' : ''}"
       onclick="toggleGroup(decodeURIComponent('${catArg}'),event)"
       oncontextmenu="openGroupCtxMenu(event,decodeURIComponent('${catArg}'))" data-cat="${escAttr(cat)}">
       <span class="sh-arrow">▾</span>
-      <span><span class="sh-ico" aria-hidden="true">${CAT_ICONS[cat] || CAT_ICONS._}</span>${esc(cat)}${isGlobal?' <span style="color:var(--ac4);font-size:7px">DEFINES + CONSTS</span>':''}</span>
+      <span><span class="sh-ico" aria-hidden="true">${CAT_ICONS[cat] || CAT_ICONS._}</span>${esc(cat)}${isGlobal ? ' <span style="color:var(--ac4);font-size:7px">DEFINES + CONSTS</span>' : ''}</span>
     </div>`;
 
     if (!isCollapsed) {
@@ -238,7 +285,10 @@ function initSliderFilter() {
   const modBtn = document.getElementById('slFilterModified');
   if (input && !input._slBound) {
     input._slBound = true;
-    input.addEventListener('input', () => { _filterQuery = input.value || ''; _applyFilter(); });
+    input.addEventListener('input', () => {
+      _filterQuery = input.value || '';
+      _applyFilter();
+    });
   }
   if (modBtn && !modBtn._slBound) {
     modBtn._slBound = true;
@@ -310,16 +360,19 @@ function _enumRowHTML(e) {
   const isModified = Math.abs(e.value - e.defaultValue) > 1e-9;
   const idArg = encArg(e.id);
   const current = Math.round(e.value);
-  const buttons = e.enumOptions.map((opt, i) =>
-    `<button class="sl-enum-btn${i === current ? ' active' : ''}"
+  const buttons = e.enumOptions
+    .map(
+      (opt, i) =>
+        `<button class="sl-enum-btn${i === current ? ' active' : ''}"
       onclick="enumSetVal(decodeURIComponent('${idArg}'),${i})"
       role="radio" aria-checked="${i === current}">${esc(opt)}</button>`
-  ).join('');
+    )
+    .join('');
   return `
-<div class="sr sr-enum${isPinned?' pinned':''}${isModified?' modified':''}" id="sr-${e.id}" title="${esc(e.hint)}">
+<div class="sr sr-enum${isPinned ? ' pinned' : ''}${isModified ? ' modified' : ''}" id="sr-${e.id}" title="${esc(e.hint)}">
   <div class="sr-top">
     <span class="sr-drag" draggable="true" ondragstart="slDragStart(event,decodeURIComponent('${idArg}'))" title="Drag to reorder" tabindex="0" aria-label="Drag to reorder">⠿</span>
-    <button class="pin-btn${isPinned?' pinned':''}" onclick="togglePin(decodeURIComponent('${idArg}'))" aria-label="${isPinned?'Unpin':'Pin'}">${isPinned?'&#128204;':'&#8857;'}</button>
+    <button class="pin-btn${isPinned ? ' pinned' : ''}" onclick="togglePin(decodeURIComponent('${idArg}'))" aria-label="${isPinned ? 'Unpin' : 'Pin'}">${isPinned ? '&#128204;' : '&#8857;'}</button>
     <span class="sn" id="sn-${e.id}">${esc(e.label)}</span>
     <span class="sn-tag">ENUM</span>
   </div>
@@ -332,7 +385,7 @@ function enumSetVal(id, idx) {
   if (!e) return;
   onValChange(id, idx);
   // Update button states
-  const sr = document.getElementById('sr-' + id);
+  const sr = document.getElementById(`sr-${  id}`);
   sr?.querySelectorAll('.sl-enum-btn').forEach((btn, i) => {
     btn.classList.toggle('active', i === idx);
     btn.setAttribute('aria-checked', String(i === idx));
@@ -350,12 +403,12 @@ function _boolRowHTML(e) {
   const idArg = encArg(e.id);
   const isOn = e.value > 0.5;
   return `
-<div class="sr sr-bool${isPinned?' pinned':''}${isModified?' modified':''}" id="sr-${e.id}" title="${esc(e.hint)}">
+<div class="sr sr-bool${isPinned ? ' pinned' : ''}${isModified ? ' modified' : ''}" id="sr-${e.id}" title="${esc(e.hint)}">
   <div class="sr-top">
     <span class="sr-drag" draggable="true" ondragstart="slDragStart(event,decodeURIComponent('${idArg}'))" title="Drag to reorder" tabindex="0" aria-label="Drag to reorder">⠿</span>
-    <button class="pin-btn${isPinned?' pinned':''}" onclick="togglePin(decodeURIComponent('${idArg}'))" aria-label="${isPinned?'Unpin':'Pin'}">${isPinned?'&#128204;':'&#8857;'}</button>
+    <button class="pin-btn${isPinned ? ' pinned' : ''}" onclick="togglePin(decodeURIComponent('${idArg}'))" aria-label="${isPinned ? 'Unpin' : 'Pin'}">${isPinned ? '&#128204;' : '&#8857;'}</button>
     <span class="sn" id="sn-${e.id}">${esc(e.label)}</span>
-    <button class="sl-bool-btn${isOn?' on':''}" id="bool-${e.id}"
+    <button class="sl-bool-btn${isOn ? ' on' : ''}" id="bool-${e.id}"
       role="switch" aria-checked="${isOn}"
       onclick="boolToggle(decodeURIComponent('${idArg}'))"
       aria-label="${esc(e.label)} toggle">${isOn ? 'ON' : 'OFF'}</button>
@@ -368,13 +421,13 @@ function boolToggle(id) {
   if (!e) return;
   const newVal = e.value > 0.5 ? 0 : 1;
   onValChange(id, newVal);
-  const btn = document.getElementById('bool-' + id);
+  const btn = document.getElementById(`bool-${  id}`);
   if (btn) {
     btn.classList.toggle('on', newVal > 0.5);
     btn.setAttribute('aria-checked', String(newVal > 0.5));
     btn.textContent = newVal > 0.5 ? 'ON' : 'OFF';
   }
-  const row = document.getElementById('sr-' + id);
+  const row = document.getElementById(`sr-${  id}`);
   if (row) row.classList.toggle('modified', Math.abs(newVal - e.defaultValue) > 1e-9);
 }
 
@@ -385,17 +438,19 @@ function boolToggle(id) {
 const TWO_PI = Math.PI * 2;
 function _isAngle(e) {
   if (!e || e.isColor || e.decimals === 0) return false;
-  if (e.angleUnit) return true;  // explicit @angle annotation
+  if (e.angleUnit) return true; // explicit @angle annotation
   return Math.abs(e.min + TWO_PI) < 1e-3 && Math.abs(e.max - TWO_PI) < 1e-3;
 }
 
-const _DIAL_CX = 22, _DIAL_CY = 22, _DIAL_R = 15;
+const _DIAL_CX = 22,
+  _DIAL_CY = 22,
+  _DIAL_R = 15;
 function _needleXY(value) {
   return { x: _DIAL_CX + _DIAL_R * Math.cos(value), y: _DIAL_CY + _DIAL_R * Math.sin(value) };
 }
 function _deg(value, e) {
-  if (e?.angleUnit === 'rad') return value.toFixed(3) + ' rad';
-  return Math.round((value * 180) / Math.PI) + '°';
+  if (e?.angleUnit === 'rad') return `${value.toFixed(3)  } rad`;
+  return `${Math.round((value * 180) / Math.PI)  }°`;
 }
 
 function _dialRowHTML(e) {
@@ -405,19 +460,19 @@ function _dialRowHTML(e) {
   const { x, y } = _needleXY(e.value);
   const unitLabel = e.angleUnit === 'rad' ? 'rad' : '°';
   return `
-<div class="sr sr-dial${isPinned?' pinned':''}${isModified?' modified':''}" id="sr-${e.id}" title="${esc(e.hint)}"
+<div class="sr sr-dial${isPinned ? ' pinned' : ''}${isModified ? ' modified' : ''}" id="sr-${e.id}" title="${esc(e.hint)}"
   ondragover="slDragOver(event,decodeURIComponent('${idArg}'))"
   ondrop="slDrop(event,decodeURIComponent('${idArg}'))"
   ondragleave="slDragLeave(event)"
   oncontextmenu="openCtxMenu(event,decodeURIComponent('${idArg}'))">
   <div class="sr-top">
     <span class="sr-drag" draggable="true" ondragstart="slDragStart(event,decodeURIComponent('${idArg}'))" title="Drag to reorder" tabindex="0" aria-label="Drag to reorder">⠿</span>
-    <button class="pin-btn${isPinned?' pinned':''}" onclick="togglePin(decodeURIComponent('${idArg}'))" title="${isPinned?'Unpin':'Pin — exclude from re-parse'}" aria-label="${isPinned?'Unpin slider':'Pin slider'}">
-      ${isPinned?'&#128204;':'&#8857;'}
+    <button class="pin-btn${isPinned ? ' pinned' : ''}" onclick="togglePin(decodeURIComponent('${idArg}'))" title="${isPinned ? 'Unpin' : 'Pin — exclude from re-parse'}" aria-label="${isPinned ? 'Unpin slider' : 'Pin slider'}">
+      ${isPinned ? '&#128204;' : '&#8857;'}
     </button>
     <span class="sn" id="sn-${e.id}" ondblclick="startRename(decodeURIComponent('${idArg}'))" title="Double-click to rename">${esc(e.label)}</span>
     <input class="sv" type="number" id="sv-${e.id}" aria-label="${esc(e.label)} value (radians)"
-      value="${fmtN(e.value,e.decimals)}" step="${e.step}" data-id="${escAttr(e.id)}">
+      value="${fmtN(e.value, e.decimals)}" step="${e.step}" data-id="${escAttr(e.id)}">
   </div>
   <div class="st st-dial">
     <svg class="sl-dial" id="dial-${e.id}" data-id="${escAttr(e.id)}" viewBox="0 0 44 44" width="44" height="44"
@@ -427,7 +482,7 @@ function _dialRowHTML(e) {
       <line class="dial-needle" id="dialN-${e.id}" x1="22" y1="22" x2="${x.toFixed(2)}" y2="${y.toFixed(2)}"/>
       <circle class="dial-handle" id="dialH-${e.id}" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="3"/>
     </svg>
-    <span class="dial-deg" id="dialD-${e.id}" data-unit="${e.angleUnit||'rad'}">${_deg(e.value, e)}</span>
+    <span class="dial-deg" id="dialD-${e.id}" data-unit="${e.angleUnit || 'rad'}">${_deg(e.value, e)}</span>
   </div>
   <div class="s-hint" title="${esc(e.hint)}">${esc(e.hint)}</div>
 </div>`;
@@ -435,16 +490,19 @@ function _dialRowHTML(e) {
 
 function _updateDial(id) {
   const e = state.varMap[id];
-  const needle = document.getElementById('dialN-' + id);
+  const needle = document.getElementById(`dialN-${  id}`);
   if (!e || !needle) return;
   const { x, y } = _needleXY(e.value);
   needle.setAttribute('x2', x.toFixed(2));
   needle.setAttribute('y2', y.toFixed(2));
-  const handle = document.getElementById('dialH-' + id);
-  if (handle) { handle.setAttribute('cx', x.toFixed(2)); handle.setAttribute('cy', y.toFixed(2)); }
-  const deg = document.getElementById('dialD-' + id);
+  const handle = document.getElementById(`dialH-${  id}`);
+  if (handle) {
+    handle.setAttribute('cx', x.toFixed(2));
+    handle.setAttribute('cy', y.toFixed(2));
+  }
+  const deg = document.getElementById(`dialD-${  id}`);
   if (deg) deg.textContent = _deg(e.value, e);
-  const svg = document.getElementById('dial-' + id);
+  const svg = document.getElementById(`dial-${  id}`);
   if (svg) svg.setAttribute('aria-valuenow', e.value.toFixed(3));
 }
 
@@ -458,14 +516,14 @@ function _initDial(svg) {
     const r = svg.getBoundingClientRect();
     return Math.atan2(ev.clientY - (r.top + r.height / 2), ev.clientX - (r.left + r.width / 2));
   };
-  svg.addEventListener('pointerdown', ev => {
+  svg.addEventListener('pointerdown', (ev) => {
     ev.preventDefault();
     svg.setPointerCapture(ev.pointerId);
     svg._drag = true;
     svg.classList.add('active');
     prevAngle = ptrAngle(ev);
   });
-  svg.addEventListener('pointermove', ev => {
+  svg.addEventListener('pointermove', (ev) => {
     if (!svg._drag) return;
     const e = state.varMap[id];
     if (!e) return;
@@ -486,11 +544,15 @@ function _initDial(svg) {
     if (!svg._drag) return;
     svg._drag = false;
     svg.classList.remove('active');
-    try { svg.releasePointerCapture(ev.pointerId); } catch { /* noop */ }
+    try {
+      svg.releasePointerCapture(ev.pointerId);
+    } catch {
+      /* noop */
+    }
   };
   svg.addEventListener('pointerup', end);
   svg.addEventListener('pointercancel', end);
-  svg.addEventListener('keydown', ev => {
+  svg.addEventListener('keydown', (ev) => {
     const e = state.varMap[id];
     if (!e) return;
     let d = 0;
@@ -521,11 +583,12 @@ const _VEC_LABELS = ['X', 'Y', 'Z', 'W'];
 const _COLOR_LABELS = ['R', 'G', 'B', 'A'];
 
 function _channelSlidersHTML(entries, labels) {
-  return `<div class="sl-channels">${entries.map((e, i) => {
-    const { min: softMin, max: softMax } = _softRange(e);
-    const pct = clampPct(e.value, softMin, softMax);
-    const idArg = encArg(e.id);
-    return `
+  return `<div class="sl-channels">${entries
+    .map((e, i) => {
+      const { min: softMin, max: softMax } = _softRange(e);
+      const pct = clampPct(e.value, softMin, softMax);
+      const idArg = encArg(e.id);
+      return `
     <div class="sl-chan">
       <span class="sl-chan-label" aria-hidden="true">${labels[i] || ''}</span>
       <div class="sl-field sl-field-mini" id="sl-${e.id}"
@@ -536,13 +599,14 @@ function _channelSlidersHTML(entries, labels) {
         oncontextmenu="openCtxMenu(event,decodeURIComponent('${idArg}'))">
         <button class="sl-nudge sl-nudge-dec" type="button" data-dir="-1" tabindex="-1" aria-label="Decrease ${esc(e.label)} (${labels[i] || 'channel'}) by one step">‹</button>
         <input class="sv" type="number" id="sv-${e.id}" aria-label="${esc(e.label)} ${labels[i] || 'channel'} value"
-          value="${fmtN(e.value,e.decimals)}" step="${e.step}" min="${e.min}" max="${e.max}"
+          value="${fmtN(e.value, e.decimals)}" step="${e.step}" min="${e.min}" max="${e.max}"
           title="${escAttr(e.id)}"
           data-id="${escAttr(e.id)}">
         <button class="sl-nudge sl-nudge-inc" type="button" data-dir="1" tabindex="-1" aria-label="Increase ${esc(e.label)} (${labels[i] || 'channel'}) by one step">›</button>
       </div>
     </div>`;
-  }).join('')}</div>`;
+    })
+    .join('')}</div>`;
 }
 
 // ── XY pad (Phase B) ─────────────────────────────────────────────────────────
@@ -583,17 +647,17 @@ function _xyRowHTML(unit) {
 }
 
 function _updateXY(gid) {
-  const pad = document.getElementById('xy-' + gid);
+  const pad = document.getElementById(`xy-${  gid}`);
   if (!pad) return;
   const ex = state.varMap[pad.dataset.xId];
   const ey = state.varMap[pad.dataset.yId];
   if (!ex || !ey) return;
-  const pt = document.getElementById('xyP-' + gid);
+  const pt = document.getElementById(`xyP-${  gid}`);
   if (pt) {
-    pt.style.left = (_frac(ex) * 100).toFixed(1) + '%';
-    pt.style.top = ((1 - _frac(ey)) * 100).toFixed(1) + '%';
+    pt.style.left = `${(_frac(ex) * 100).toFixed(1)  }%`;
+    pt.style.top = `${((1 - _frac(ey)) * 100).toFixed(1)  }%`;
   }
-  const ro = document.getElementById('xyR-' + gid);
+  const ro = document.getElementById(`xyR-${  gid}`);
   if (ro) ro.textContent = `${fmtN(ex.value, ex.decimals)}, ${fmtN(ey.value, ey.decimals)}`;
 }
 
@@ -604,11 +668,12 @@ function _initXYPad(pad) {
   const yid = pad.dataset.yId;
 
   // Drag-start snapshot for Shift (axis-lock) and Alt (circular) modes
-  let _startPx = null, _startPy = null;
-  let _axisLock = null;   // 'x' | 'y' | null
-  let _circleR  = null;   // normalised radius for Alt-constrain
+  let _startPx = null,
+    _startPy = null;
+  let _axisLock = null; // 'x' | 'y' | null
+  let _circleR = null; // normalised radius for Alt-constrain
 
-  const _gridSnap = (v) => Math.round(v * 10) / 10;   // snap to 0.1 increments
+  const _gridSnap = (v) => Math.round(v * 10) / 10; // snap to 0.1 increments
 
   const writeFromPointer = (ev) => {
     const ex = state.varMap[xid];
@@ -622,7 +687,8 @@ function _initXYPad(pad) {
       // Alt — circular constraint: keep normalised distance from drag-start
       const cx = _startPx ?? 0.5;
       const cy = _startPy ?? 0.5;
-      const dx = px - cx, dy = py - cy;
+      const dx = px - cx,
+        dy = py - cy;
       const dist = Math.sqrt(dx * dx + dy * dy) || 1e-9;
       px = cx + (_circleR * dx) / dist;
       py = cy + (_circleR * dy) / dist;
@@ -631,20 +697,24 @@ function _initXYPad(pad) {
     } else if (ev.shiftKey && _startPx !== null) {
       // Shift — axis lock: determine dominant axis on first movement
       if (_axisLock === null) {
-        const adx = Math.abs(px - _startPx), ady = Math.abs(py - _startPy);
+        const adx = Math.abs(px - _startPx),
+          ady = Math.abs(py - _startPy);
         _axisLock = adx >= ady ? 'x' : 'y';
       }
       if (_axisLock === 'x') py = _startPy;
       else px = _startPx;
     }
 
-    if (ev.ctrlKey) { px = _gridSnap(px); py = _gridSnap(py); }
+    if (ev.ctrlKey) {
+      px = _gridSnap(px);
+      py = _gridSnap(py);
+    }
 
     onValChange(xid, ex.min + px * (ex.max - ex.min));
     onValChange(yid, ey.min + (1 - py) * (ey.max - ey.min));
   };
 
-  pad.addEventListener('pointerdown', ev => {
+  pad.addEventListener('pointerdown', (ev) => {
     ev.preventDefault();
     pad.setPointerCapture(ev.pointerId);
     pad._drag = true;
@@ -658,7 +728,8 @@ function _initXYPad(pad) {
 
     // Alt: store initial radius (from pad centre) at click time
     if (ev.altKey) {
-      const dx = _startPx - 0.5, dy = _startPy - 0.5;
+      const dx = _startPx - 0.5,
+        dy = _startPy - 0.5;
       _circleR = Math.sqrt(dx * dx + dy * dy);
     } else {
       _circleR = null;
@@ -667,14 +738,15 @@ function _initXYPad(pad) {
     writeFromPointer(ev);
   });
 
-  pad.addEventListener('pointermove', ev => {
+  pad.addEventListener('pointermove', (ev) => {
     if (!pad._drag) return;
     if (ev.altKey && _circleR === null) {
       // Alt pressed mid-drag: set radius from current position
       const r = pad.getBoundingClientRect();
       const px = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
       const py = Math.max(0, Math.min(1, (ev.clientY - r.top) / r.height));
-      const dx = px - (_startPx ?? 0.5), dy = py - (_startPy ?? 0.5);
+      const dx = px - (_startPx ?? 0.5),
+        dy = py - (_startPy ?? 0.5);
       _circleR = Math.sqrt(dx * dx + dy * dy);
     } else if (!ev.altKey) {
       _circleR = null;
@@ -690,22 +762,30 @@ function _initXYPad(pad) {
     _startPx = null;
     _startPy = null;
     pad.classList.remove('active');
-    try { pad.releasePointerCapture(ev.pointerId); } catch { /* noop */ }
+    try {
+      pad.releasePointerCapture(ev.pointerId);
+    } catch {
+      /* noop */
+    }
   };
   pad.addEventListener('pointerup', end);
   pad.addEventListener('pointercancel', end);
 
-  pad.addEventListener('keydown', ev => {
+  pad.addEventListener('keydown', (ev) => {
     const ex = state.varMap[xid];
     const ey = state.varMap[yid];
     if (!ex || !ey) return;
-    let dx = 0, dy = 0;
+    let dx = 0,
+      dy = 0;
     if (ev.key === 'ArrowRight') dx = ex.step;
     else if (ev.key === 'ArrowLeft') dx = -ex.step;
     else if (ev.key === 'ArrowUp') dy = ey.step;
     else if (ev.key === 'ArrowDown') dy = -ey.step;
     else return;
-    if (ev.shiftKey) { dx *= 10; dy *= 10; }
+    if (ev.shiftKey) {
+      dx *= 10;
+      dy *= 10;
+    }
     ev.preventDefault();
     if (dx) onValChange(xid, ex.value + dx);
     if (dy) onValChange(yid, ey.value + dy);
@@ -718,7 +798,7 @@ function _initXYPad(pad) {
 const STEPPER_MAX_SPAN = 24;
 function _isStepper(e) {
   if (!e || e.isColor) return false;
-  if (e.isInt) return true;  // @int annotation forces stepper
+  if (e.isInt) return true; // @int annotation forces stepper
   if (e.decimals !== 0) return false;
   const span = e.max - e.min;
   return Number.isFinite(span) && span >= 1 && span <= STEPPER_MAX_SPAN;
@@ -730,7 +810,7 @@ function _isStepper(e) {
 function _logPct(val, min, max) {
   if (min <= 0 || max <= min) return clampPct(val, min, max);
   const lv = Math.log(Math.max(min, Math.min(max, val)));
-  return (lv - Math.log(min)) / (Math.log(max) - Math.log(min)) * 100;
+  return ((lv - Math.log(min)) / (Math.log(max) - Math.log(min))) * 100;
 }
 function _logValFromPct(pct, min, max) {
   if (min <= 0 || max <= min) return min + pct * (max - min);
@@ -742,21 +822,21 @@ function _stepperRowHTML(e) {
   const isModified = Math.abs(e.value - e.defaultValue) > 1e-9;
   const idArg = encArg(e.id);
   return `
-<div class="sr sr-stepper${isPinned?' pinned':''}${isModified?' modified':''}" id="sr-${e.id}" title="${esc(e.hint)}"
+<div class="sr sr-stepper${isPinned ? ' pinned' : ''}${isModified ? ' modified' : ''}" id="sr-${e.id}" title="${esc(e.hint)}"
   ondragover="slDragOver(event,decodeURIComponent('${idArg}'))"
   ondrop="slDrop(event,decodeURIComponent('${idArg}'))"
   ondragleave="slDragLeave(event)"
   oncontextmenu="openCtxMenu(event,decodeURIComponent('${idArg}'))">
   <div class="sr-top">
     <span class="sr-drag" draggable="true" ondragstart="slDragStart(event,decodeURIComponent('${idArg}'))" title="Drag to reorder" tabindex="0" aria-label="Drag to reorder">⠿</span>
-    <button class="pin-btn${isPinned?' pinned':''}" onclick="togglePin(decodeURIComponent('${idArg}'))" title="${isPinned?'Unpin':'Pin — exclude from re-parse'}" aria-label="${isPinned?'Unpin slider':'Pin slider'}">
-      ${isPinned?'&#128204;':'&#8857;'}
+    <button class="pin-btn${isPinned ? ' pinned' : ''}" onclick="togglePin(decodeURIComponent('${idArg}'))" title="${isPinned ? 'Unpin' : 'Pin — exclude from re-parse'}" aria-label="${isPinned ? 'Unpin slider' : 'Pin slider'}">
+      ${isPinned ? '&#128204;' : '&#8857;'}
     </button>
     <span class="sn" id="sn-${e.id}" ondblclick="startRename(decodeURIComponent('${idArg}'))" title="Double-click to rename">${esc(e.label)}</span>
     <span class="sl-stepper" data-id="${escAttr(e.id)}" data-min="${e.min}" data-max="${e.max}" data-step="${e.step}">
       <button class="step-btn step-dec" data-dir="-1" tabindex="-1" aria-label="Decrease ${esc(e.label)}">−</button>
       <input class="sv sv-step" type="number" id="sv-${e.id}" aria-label="${esc(e.label)} value"
-        value="${fmtN(e.value,e.decimals)}" step="${e.step}" min="${e.min}" max="${e.max}"
+        value="${fmtN(e.value, e.decimals)}" step="${e.step}" min="${e.min}" max="${e.max}"
         data-id="${escAttr(e.id)}">
       <button class="step-btn step-inc" data-dir="1" tabindex="-1" aria-label="Increase ${esc(e.label)}">+</button>
     </span>
@@ -781,15 +861,15 @@ function _sliderRowHTML(e) {
   const unit = e.unit ?? _extractUnit(e.label);
   const unitHtml = unit ? `<span class="sv-unit">${esc(unit)}</span>` : '';
   return `
-<div class="sr${isPinned?' pinned':''}${isModified?' modified':''}" id="sr-${e.id}" title="${esc(e.hint)}"
+<div class="sr${isPinned ? ' pinned' : ''}${isModified ? ' modified' : ''}" id="sr-${e.id}" title="${esc(e.hint)}"
   ondragover="slDragOver(event,decodeURIComponent('${idArg}'))"
   ondrop="slDrop(event,decodeURIComponent('${idArg}'))"
   ondragleave="slDragLeave(event)"
   oncontextmenu="openCtxMenu(event,decodeURIComponent('${idArg}'))">
   <div class="sr-top">
     <span class="sr-drag" draggable="true" ondragstart="slDragStart(event,decodeURIComponent('${idArg}'))" title="Drag to reorder" tabindex="0" aria-label="Drag to reorder">⠿</span>
-    <button class="pin-btn${isPinned?' pinned':''}" onclick="togglePin(decodeURIComponent('${idArg}'))" title="${isPinned?'Unpin':'Pin — exclude from re-parse'}" aria-label="${isPinned?'Unpin slider':'Pin slider — exclude from re-parse'}">
-      ${isPinned?'&#128204;':'&#8857;'}
+    <button class="pin-btn${isPinned ? ' pinned' : ''}" onclick="togglePin(decodeURIComponent('${idArg}'))" title="${isPinned ? 'Unpin' : 'Pin — exclude from re-parse'}" aria-label="${isPinned ? 'Unpin slider' : 'Pin slider — exclude from re-parse'}">
+      ${isPinned ? '&#128204;' : '&#8857;'}
     </button>
     <span class="sn" id="sn-${e.id}" ondblclick="startRename(decodeURIComponent('${idArg}'))" title="Double-click to rename">${esc(e.label)}</span>
     <div class="sl-field" id="sl-${e.id}"
@@ -799,7 +879,7 @@ function _sliderRowHTML(e) {
       style="--fill-pct:${pct}%">
       <button class="sl-nudge sl-nudge-dec" type="button" data-dir="-1" tabindex="-1" aria-label="Decrease ${esc(e.label)} by one step">‹</button>
       <input class="sv" type="number" id="sv-${e.id}" aria-label="${esc(e.label)} value"
-        value="${fmtN(e.value,e.decimals)}" step="${e.step}" min="${e.min}" max="${e.max}"
+        value="${fmtN(e.value, e.decimals)}" step="${e.step}" min="${e.min}" max="${e.max}"
         title="${escAttr(e.id)}"
         data-id="${escAttr(e.id)}">${unitHtml}
       <button class="sl-nudge sl-nudge-inc" type="button" data-dir="1" tabindex="-1" aria-label="Increase ${esc(e.label)} by one step">›</button>
@@ -814,20 +894,20 @@ function _sliderRowHTML(e) {
 // source line, else a stripped fallback.
 function _groupLabel(run, fallback = 'value') {
   const raw = run[0].label || '';
-  if (raw && !/\.[xyzw]$/.test(raw)) return raw;      // explicit or @label / renamed
+  if (raw && !/\.[xyzw]$/.test(raw)) return raw; // explicit or @label / renamed
   const m = /vec[234]\s+([A-Za-z_]\w*)\s*=/.exec(run[0].hint || '');
-  return m ? m[1] : (raw.replace(/\.[xyzw]$/, '') || fallback);
+  return m ? m[1] : raw.replace(/\.[xyzw]$/, '') || fallback;
 }
 
 // ── Colour swatch row HTML (Phase B) ─────────────────────────────────────────
 function _colorRowHTML(unit) {
   const run = unit.entries;
-  const gid = run[0].id;                              // unique element id base
-  const vals = run.map(e => e.value);
+  const gid = run[0].id; // unique element id base
+  const vals = run.map((e) => e.value);
   const scale = detectColorScale(vals);
   const hex = componentsToHex(vals, scale);
   const label = _groupLabel(run, 'color');
-  const compIds = run.map(e => e.id).join(',');
+  const compIds = run.map((e) => e.id).join(',');
   return `
 <div class="sr sr-color" id="sr-${gid}" title="${esc(run[0].hint)}">
   <div class="sr-top">
@@ -842,7 +922,7 @@ function _colorRowHTML(unit) {
 }
 
 // ── Colour picker popover (Phase B) ──────────────────────────────────────────
-let _cpSwatch = null;          // currently-open swatch element
+let _cpSwatch = null; // currently-open swatch element
 
 function closeColorPicker() {
   _cpSwatch = null;
@@ -869,27 +949,33 @@ function randomizeUnpinnedSliders() {
     onValChange(e.id, v);
     n++;
   }
-  toast(n > 0 ? `Randomized ${n} slider${n === 1 ? '' : 's'}` : 'No unpinned sliders to randomize', n > 0 ? 'ok' : 'warn');
+  toast(
+    n > 0 ? `Randomized ${n} slider${n === 1 ? '' : 's'}` : 'No unpinned sliders to randomize',
+    n > 0 ? 'ok' : 'warn'
+  );
 }
 
 // ── Pointer Events — attach to all .sl-field in container ───────────────────
 function _attachSliderEvents(root) {
-  root.querySelectorAll('.sl-field').forEach(field => {
+  root.querySelectorAll('.sl-field').forEach((field) => {
     _initScrubField(field);
   });
-  root.querySelectorAll('.sl-swatch').forEach(sw => {
+  root.querySelectorAll('.sl-swatch').forEach((sw) => {
     if (sw._slBound) return;
     sw._slBound = true;
     sw.addEventListener('click', (e) => {
       e.stopPropagation();
       // Toggle: clicking the open swatch again closes it.
-      if (_cpSwatch === sw) { closeColorPicker(); return; }
+      if (_cpSwatch === sw) {
+        closeColorPicker();
+        return;
+      }
       openColorPicker(sw);
     });
   });
-  root.querySelectorAll('.sl-stepper').forEach(st => _initStepper(st));
-  root.querySelectorAll('.sl-dial').forEach(d => _initDial(d));
-  root.querySelectorAll('.sl-xypad').forEach(p => _initXYPad(p));
+  root.querySelectorAll('.sl-stepper').forEach((st) => _initStepper(st));
+  root.querySelectorAll('.sl-dial').forEach((d) => _initDial(d));
+  root.querySelectorAll('.sl-xypad').forEach((p) => _initXYPad(p));
 }
 
 // ── Keyboard drag reorder ─────────────────────────────────────────────────────
@@ -944,7 +1030,7 @@ function _initStepper(stepper) {
   _bindSvInput(id);
   if (stepper._slBound) return;
   stepper._slBound = true;
-  stepper.querySelectorAll('.step-btn').forEach(btn => {
+  stepper.querySelectorAll('.step-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const e = state.varMap[id];
       if (!e) return;
@@ -957,18 +1043,33 @@ function _initStepper(stepper) {
 // Bind the numeric `.sv` input for a given slider id (shared by track sliders
 // and steppers, which have an input but no track).
 function _bindSvInput(id) {
-  const input = document.getElementById('sv-' + id);
+  const input = document.getElementById(`sv-${  id}`);
   if (!input || input._slBound) return;
   input._slBound = true;
-  input.addEventListener('input', ev => onValChange(id, ev.target.value));
-  input.addEventListener('change', ev => onValChange(id, ev.target.value));
-  input.addEventListener('keydown', ev => {
+  input.addEventListener('input', (ev) => onValChange(id, ev.target.value));
+  input.addEventListener('change', (ev) => onValChange(id, ev.target.value));
+  input.addEventListener('keydown', (ev) => {
     const e = state.varMap[id];
     if (!e) return;
-    if (ev.key === 'Enter') { ev.target.blur(); return; }
-    if (ev.key === 'Escape') { ev.target.value = fmtN(e.value, e.decimals); ev.target.blur(); return; }
-    if (ev.key === 'Home') { ev.preventDefault(); onValChange(id, e.min); return; }
-    if (ev.key === 'End')  { ev.preventDefault(); onValChange(id, e.max); return; }
+    if (ev.key === 'Enter') {
+      ev.target.blur();
+      return;
+    }
+    if (ev.key === 'Escape') {
+      ev.target.value = fmtN(e.value, e.decimals);
+      ev.target.blur();
+      return;
+    }
+    if (ev.key === 'Home') {
+      ev.preventDefault();
+      onValChange(id, e.min);
+      return;
+    }
+    if (ev.key === 'End') {
+      ev.preventDefault();
+      onValChange(id, e.max);
+      return;
+    }
     let delta = 0;
     // Up/Right increase, Down/Left decrease — matches the angle dial's
     // existing ArrowRight/ArrowUp+/ArrowLeft/ArrowDown- convention (§3
@@ -982,20 +1083,24 @@ function _bindSvInput(id) {
     ev.preventDefault();
     onValChange(id, e.value + delta);
   });
-  input.addEventListener('blur', ev => {
+  input.addEventListener('blur', (ev) => {
     const e = state.varMap[id];
     if (!e) return;
     onValChange(id, ev.target.value);
     _flashConfirm(id);
   });
-  input.addEventListener('wheel', ev => {
-    const e = state.varMap[id];
-    if (!e) return;
-    ev.preventDefault();
-    const dir = ev.deltaY < 0 ? 1 : -1;
-    const mult = ev.shiftKey ? 10 : 1;
-    onValChange(id, e.value + dir * e.step * mult);
-  }, { passive: false });
+  input.addEventListener(
+    'wheel',
+    (ev) => {
+      const e = state.varMap[id];
+      if (!e) return;
+      ev.preventDefault();
+      const dir = ev.deltaY < 0 ? 1 : -1;
+      const mult = ev.shiftKey ? 10 : 1;
+      onValChange(id, e.value + dir * e.step * mult);
+    },
+    { passive: false }
+  );
 }
 
 // ── Compositor-style scrub field ──────────────────────────────────────────────
@@ -1012,9 +1117,12 @@ function _initScrubField(field) {
   _bindSvInput(id);
   if (field._slBound) return;
   field._slBound = true;
-  const input = document.getElementById('sv-' + id);
+  const input = document.getElementById(`sv-${  id}`);
 
-  const focusForEdit = () => { input?.focus(); input?.select(); };
+  const focusForEdit = () => {
+    input?.focus();
+    input?.select();
+  };
 
   input?.addEventListener('focus', () => field.classList.add('editing'));
   input?.addEventListener('blur', () => field.classList.remove('editing'));
@@ -1022,9 +1130,9 @@ function _initScrubField(field) {
   // Blender `<`/`>` nudge arrows — revealed on hover at both ends of the
   // field, single-step increment/decrement. Kept out of the scrub/edit path
   // entirely (stopPropagation on pointerdown) so they never start a drag.
-  field.querySelectorAll('.sl-nudge').forEach(btn => {
-    btn.addEventListener('pointerdown', ev => ev.stopPropagation());
-    btn.addEventListener('click', ev => {
+  field.querySelectorAll('.sl-nudge').forEach((btn) => {
+    btn.addEventListener('pointerdown', (ev) => ev.stopPropagation());
+    btn.addEventListener('click', (ev) => {
       ev.stopPropagation();
       const e = state.varMap[id];
       if (!e) return;
@@ -1039,7 +1147,11 @@ function _initScrubField(field) {
     focusForEdit();
   });
 
-  let startX, startVal, multiplier, dragging = false, moved = false;
+  let startX,
+    startVal,
+    multiplier,
+    dragging = false,
+    moved = false;
   const isLog = field.dataset.log === '1';
 
   field.addEventListener('pointerdown', (ev) => {
@@ -1106,7 +1218,11 @@ function _initScrubField(field) {
     if (!dragging) return;
     dragging = false;
     field.classList.remove('active', 'scrubbing', 'clamp-min', 'clamp-max');
-    try { field.releasePointerCapture(ev.pointerId); } catch { /* noop */ }
+    try {
+      field.releasePointerCapture(ev.pointerId);
+    } catch {
+      /* noop */
+    }
     // A press with no meaningful movement is a click: focus the input so the
     // user can type an exact value (this also covers double-click).
     if (!moved) focusForEdit();
@@ -1160,12 +1276,12 @@ function onValChange(id, rawVal) {
   // Auto-extend range if out of bounds
   if (n < e.min) {
     e.min = n - Math.abs(n) * 0.5 - 1;
-    const track = document.getElementById('sl-' + id);
+    const track = document.getElementById(`sl-${  id}`);
     if (track) track.dataset.min = e.min;
   }
   if (n > e.max) {
     e.max = n + Math.abs(n) * 0.5 + 1;
-    const track = document.getElementById('sl-' + id);
+    const track = document.getElementById(`sl-${  id}`);
     if (track) track.dataset.max = e.max;
   }
   _setVal(id, n);
@@ -1173,7 +1289,7 @@ function onValChange(id, rawVal) {
 }
 
 function _flashConfirm(id) {
-  const sv = document.getElementById('sv-' + id);
+  const sv = document.getElementById(`sv-${  id}`);
   if (!sv) return;
   sv.classList.remove('confirmed');
   void sv.offsetWidth;
@@ -1202,7 +1318,7 @@ function syncSlidersFromCode(code) {
     ov.tokenRaw = nv.tokenRaw;
     if (!state.pinnedIds.has(ov.stableKey) && Math.abs(nv.value - ov.value) > 1e-9) {
       ov.value = nv.value;
-      const sv = document.getElementById('sv-' + ov.id);
+      const sv = document.getElementById(`sv-${  ov.id}`);
       if (sv) sv.value = fmtN(ov.value, ov.decimals);
       scheduleFillUpdate(ov.id);
     }
@@ -1212,7 +1328,10 @@ function syncSlidersFromCode(code) {
     state.vars = customized;
     state.varMap = {};
     state.defaultValues = {};
-    customized.forEach(e => { state.varMap[e.id] = e; state.defaultValues[e.id] = e.defaultValue; });
+    customized.forEach((e) => {
+      state.varMap[e.id] = e;
+      state.defaultValues[e.id] = e.defaultValue;
+    });
     buildUI(customized);
   }
   setFromMonaco(false);
@@ -1222,8 +1341,10 @@ function syncSlidersFromCode(code) {
 function toggleGroup(cat, e) {
   if (e?.altKey) {
     // Phase Y — Alt+click: solo-focus this group, collapse all the others.
-    const cats = [...new Set((state.vars || []).map(v => v.category))];
-    cats.forEach(c => { if (c !== cat) collapsedGroups.add(c); });
+    const cats = [...new Set((state.vars || []).map((v) => v.category))];
+    cats.forEach((c) => {
+      if (c !== cat) collapsedGroups.add(c);
+    });
     collapsedGroups.delete(cat);
   } else if (collapsedGroups.has(cat)) {
     collapsedGroups.delete(cat);
@@ -1275,13 +1396,28 @@ function jumpTo(li) {
 }
 
 export {
-  CAT_ORDER, collapsedGroups,
-  buildUI, toggleGroup, togglePin,
-  clampPct, fmtN, esc, escAttr, encArg,
-  jumpTo, onSlide, onValChange, updateFill,
-  _liveDebounce, patchLine, fmtNum,
-  syncSlidersFromCode, isFromSlider,
-  setSliderHooks, initSliderFilter,
+  CAT_ORDER,
+  collapsedGroups,
+  buildUI,
+  toggleGroup,
+  togglePin,
+  clampPct,
+  fmtN,
+  esc,
+  escAttr,
+  encArg,
+  jumpTo,
+  onSlide,
+  onValChange,
+  updateFill,
+  _liveDebounce,
+  patchLine,
+  fmtNum,
+  syncSlidersFromCode,
+  isFromSlider,
+  setSliderHooks,
+  initSliderFilter,
   randomizeUnpinnedSliders,
-  enumSetVal, boolToggle,
+  enumSetVal,
+  boolToggle,
 };

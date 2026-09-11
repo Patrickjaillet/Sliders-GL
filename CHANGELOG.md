@@ -5,6 +5,31 @@ All notable changes to Sliders GL are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] — 2026-09-12
+
+### Added
+
+- The Render sidebar tab now shows read-only GPU/renderer diagnostics
+  (GPU name, WebGL version, max texture size, best compressed texture
+  format), the persisted shader-program cache's entry count with a "Clear
+  program cache" button, and the current adaptive apply-debounce delay for
+  the loaded shader — all previously invisible outside developer console logs.
+- The empty state in the Uniforms panel ("Paste a ShaderToy shader") now
+  has direct "Load Example Shader" and "Browse Shader Library" buttons
+  instead of only accepting a manual paste.
+- The Export sidebar tab now shows the last export format used and lists
+  saved export presets with one-click apply.
+- The Settings sidebar tab now shows a live summary of active preferences
+  (font size, AAA contrast, dyslexia-friendly font, reduced motion, sound
+  feedback) without needing to open the settings sub-panel.
+
+### Fixed
+
+- Fixed insufficient WCAG AA color contrast on the About panel's license
+  and credits text, and on the command palette's empty state — all three
+  used the disabled-control-only contrast token for visible, non-disabled
+  text.
+
 ## [1.3.0] — 2026-09-12
 
 ### Added
@@ -108,6 +133,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   locally — zero network dependency for core functionality.
 - MIT license.
 
+[1.4.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.4.0
 [1.3.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.3.0
 [1.2.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.2.0
 [1.1.1]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.1.1

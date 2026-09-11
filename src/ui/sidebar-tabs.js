@@ -10,11 +10,11 @@
 // correspondant. Il est conservé tel quel pour un éventuel futur onglet.
 
 const TABS = [
-  { id: 'render',   key: '1' },
+  { id: 'render', key: '1' },
   { id: 'uniforms', key: '2' },
-  { id: 'export',   key: '3' },
+  { id: 'export', key: '3' },
   { id: 'settings', key: '4' },
-  { id: 'about',    key: '5' },
+  { id: 'about', key: '5' },
 ];
 
 let _activeTab = 'uniforms';
@@ -39,17 +39,22 @@ async function _dockInto(id) {
 }
 
 export async function switchSidebarTab(id) {
-  if (!TABS.some(t => t.id === id)) return;
+  if (!TABS.some((t) => t.id === id)) return;
   _activeTab = id;
 
-  document.querySelectorAll('.sidebar-tab').forEach(btn => {
+  document.querySelectorAll('.sidebar-tab').forEach((btn) => {
     btn.setAttribute('aria-selected', String(btn.dataset.tab === id));
   });
-  document.querySelectorAll('.sidebar-pane').forEach(pane => {
+  document.querySelectorAll('.sidebar-pane').forEach((pane) => {
     pane.hidden = pane.id !== `sidebar-pane-${id}`;
   });
 
   if (id !== 'uniforms') await _dockInto(id);
+
+  // §5 roadmap — lets pane-specific modules (sidebar-render-diagnostics.js,
+  // settings/export summaries) lazily (re)populate their content only when
+  // their tab actually becomes visible, instead of polling continuously.
+  window.dispatchEvent(new CustomEvent('zgl:sidebar-tab-changed', { detail: { tab: id } }));
 }
 
 export function getActiveSidebarTab() {
@@ -60,13 +65,13 @@ export function initSidebarTabs() {
   const bar = document.querySelector('.sidebar-tabs');
   if (!bar) return;
 
-  bar.querySelectorAll('.sidebar-tab').forEach(btn => {
+  bar.querySelectorAll('.sidebar-tab').forEach((btn) => {
     btn.addEventListener('click', () => switchSidebarTab(btn.dataset.tab));
   });
 
-  document.addEventListener('keydown', e => {
+  document.addEventListener('keydown', (e) => {
     if (!e.altKey || e.ctrlKey || e.metaKey) return;
-    const tab = TABS.find(t => t.key === e.key);
+    const tab = TABS.find((t) => t.key === e.key);
     if (!tab) return;
     e.preventDefault();
     switchSidebarTab(tab.id);

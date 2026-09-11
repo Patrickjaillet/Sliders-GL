@@ -61,7 +61,9 @@
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease);
 }
 
 .pb:hover {
@@ -72,11 +74,11 @@
 
 .pb.warn {
   color: var(--warn);
-  border-color: rgba(255,154,60,0.3);
+  border-color: rgba(255, 154, 60, 0.3);
 }
 
 .pb.warn:hover {
-  background: rgba(255,154,60,0.08);
+  background: rgba(255, 154, 60, 0.08);
   color: var(--warn);
 }
 
@@ -98,7 +100,9 @@
   font: 11px var(--font-ui);
 }
 
-.pb-panels-menu .pb:last-child { border-bottom: none; }
+.pb-panels-menu .pb:last-child {
+  border-bottom: none;
+}
 
 /* ── Filter bar ── */
 
@@ -124,7 +128,9 @@
   min-width: 0;
 }
 
-.sl-filter-input::placeholder { color: var(--text-ghost); }
+.sl-filter-input::placeholder {
+  color: var(--text-ghost);
+}
 
 .sl-filter-mod {
   height: 18px;
@@ -137,7 +143,7 @@
   cursor: pointer;
 }
 
-.sl-filter-mod[aria-pressed="true"] {
+.sl-filter-mod[aria-pressed='true'] {
   color: var(--accent);
   border-color: var(--border-hot);
   background: var(--accent-dim);
@@ -162,14 +168,24 @@
   cursor: pointer;
 }
 
-.sh:first-child { border-top: none; }
+.sh:first-child {
+  border-top: none;
+}
 
 /* Phase Y — reveal animation on group expand (see _flashGroupReveal in slider.js) */
 @keyframes groupReveal {
-  from { opacity: 0; transform: translateY(-3px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.group-reveal { animation: groupReveal 120ms ease-out; }
+.group-reveal {
+  animation: groupReveal 120ms ease-out;
+}
 
 .sh-arrow {
   font-size: 9px;
@@ -177,7 +193,9 @@
   margin-left: auto;
 }
 
-.sh.collapsed .sh-arrow { transform: rotate(-90deg); }
+.sh.collapsed .sh-arrow {
+  transform: rotate(-90deg);
+}
 
 .sh-ico {
   display: inline-block;
@@ -187,10 +205,18 @@
 }
 
 /* Couleurs d'accent par catégorie */
-.sh[data-cat='globals'] { border-left: 2px solid var(--accent); }
-.sh[data-cat='color']   { border-left: 2px solid var(--error); }
-.sh[data-cat='camera']  { border-left: 2px solid var(--buf-a); }
-.sh[data-cat='glow']    { border-left: 2px solid var(--buf-c); }
+.sh[data-cat='globals'] {
+  border-left: 2px solid var(--accent);
+}
+.sh[data-cat='color'] {
+  border-left: 2px solid var(--error);
+}
+.sh[data-cat='camera'] {
+  border-left: 2px solid var(--buf-a);
+}
+.sh[data-cat='glow'] {
+  border-left: 2px solid var(--buf-c);
+}
 
 /* ── Rangée slider (.sr) ── */
 
@@ -217,7 +243,9 @@
   background: var(--bg-raised);
 }
 
-.sr.dragging { cursor: ew-resize; }
+.sr.dragging {
+  cursor: ew-resize;
+}
 
 /* Slider pinné — border-left 2px accent */
 .sr.pinned {
@@ -250,8 +278,12 @@
   transition: opacity var(--dur) var(--ease);
 }
 
-.sr:hover .sr-drag { opacity: 1; }
-.sr-drag:active { cursor: grabbing; }
+.sr:hover .sr-drag {
+  opacity: 1;
+}
+.sr-drag:active {
+  cursor: grabbing;
+}
 
 /* ── sr-top wrapper (legacy support) ── */
 
@@ -341,23 +373,28 @@
   min-width: 0;
   border-radius: var(--radius-sm);
   background:
-    linear-gradient(90deg, var(--accent-dim) var(--fill-pct, 0%), transparent var(--fill-pct, 0%)) no-repeat,
+    linear-gradient(90deg, var(--accent-dim) var(--fill-pct, 0%), transparent var(--fill-pct, 0%))
+      no-repeat,
     var(--bg-raised);
   /* Subtle recessed-track depth (Blender's inset numeric field look) — a
      thin top shadow reads as "cut into" the panel, distinct from the flat
      raised nudge arrows/pin button that sit visually on top of it. */
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.10);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
   cursor: ew-resize;
   user-select: none;
   -webkit-user-drag: none;
   overflow: hidden;
-  transition: outline-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  transition:
+    outline-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
   outline: 1px solid transparent;
   outline-offset: -1px;
 }
 
 .sl-field:hover {
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.10), inset 0 0 0 1px var(--border-mid);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px var(--border-mid);
 }
 
 .sl-field.active,
@@ -372,9 +409,13 @@
   outline-color: var(--border-hot);
 }
 
-.sl-field.editing { cursor: text; }
+.sl-field.editing {
+  cursor: text;
+}
 
-.sv.flash { animation: valueFlash 300ms ease-out; }
+.sv.flash {
+  animation: valueFlash 300ms ease-out;
+}
 
 /* ── Valeur numérique dans le champ scrub (plain slider only) ── */
 
@@ -436,11 +477,20 @@
   opacity: 0;
   pointer-events: none;
   z-index: 2;
-  transition: opacity var(--dur) var(--ease), color var(--dur) var(--ease), background var(--dur) var(--ease);
+  transition:
+    opacity var(--dur) var(--ease),
+    color var(--dur) var(--ease),
+    background var(--dur) var(--ease);
 }
 
-.sl-nudge-dec { left: 0; border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
-.sl-nudge-inc { right: 0; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.sl-nudge-dec {
+  left: 0;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+.sl-nudge-inc {
+  right: 0;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
 
 .sl-field:hover .sl-nudge {
   opacity: 1;
@@ -520,10 +570,14 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity var(--dur) var(--ease), color var(--dur) var(--ease);
+  transition:
+    opacity var(--dur) var(--ease),
+    color var(--dur) var(--ease);
 }
 
-.sr:hover .pin-btn { opacity: 1; }
+.sr:hover .pin-btn {
+  opacity: 1;
+}
 
 .pin-btn.pinned {
   opacity: 1;
@@ -584,3 +638,31 @@
   color: var(--text-dim);
 }
 
+/* §5 roadmap — direct actions from the empty state, rather than a purely
+   passive message. */
+.es-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 200px;
+  margin-top: 6px;
+}
+
+.es-actions .pb {
+  width: 100%;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.es-actions .pb svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}

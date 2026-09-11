@@ -7,19 +7,27 @@
 import { toast } from '../io/actions.js';
 
 const KEY = 'sl_exportPresets';
-const FIELD_SEL = '#exportModal select, #exportModal input[type="checkbox"], #exportModal input[type="number"], #exportModal input[type="text"]';
+const FIELD_SEL =
+  '#exportModal select, #exportModal input[type="checkbox"], #exportModal input[type="number"], #exportModal input[type="text"]';
 
 function _load() {
-  try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }
-  catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem(KEY) || '{}') || {};
+  } catch {
+    return {};
+  }
 }
 function _save(o) {
-  try { localStorage.setItem(KEY, JSON.stringify(o)); } catch { /* noop */ }
+  try {
+    localStorage.setItem(KEY, JSON.stringify(o));
+  } catch {
+    /* noop */
+  }
 }
 
 function _captureFields() {
   const out = {};
-  document.querySelectorAll(FIELD_SEL).forEach(el => {
+  document.querySelectorAll(FIELD_SEL).forEach((el) => {
     if (!(el instanceof HTMLElement) || !el.id) return;
     const inp = /** @type {HTMLInputElement} */ (el);
     out[el.id] = inp.type === 'checkbox' ? inp.checked : inp.value;
@@ -42,8 +50,9 @@ function _renderSelect() {
   if (!(sel instanceof HTMLSelectElement)) return;
   const presets = _load();
   const names = Object.keys(presets).sort();
-  sel.innerHTML = '<option value="">— Presets —</option>'
-    + names.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('');
+  sel.innerHTML =
+    `<option value="">— Presets —</option>${ 
+    names.map((n) => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('')}`;
 }
 
 export function initExportPresets() {
@@ -69,12 +78,18 @@ export function initExportPresets() {
     const name = selEl.value;
     if (!name) return;
     const presets = _load();
-    if (presets[name]) { _applyFields(presets[name]); toast(`Loaded export preset "${name}"`, 'ok'); }
+    if (presets[name]) {
+      _applyFields(presets[name]);
+      toast(`Loaded export preset "${name}"`, 'ok');
+    }
   });
 
   document.getElementById('exp-preset-save')?.addEventListener('click', () => {
     const name = (nameEl.value || selEl.value || '').trim();
-    if (!name) { toast('Enter a preset name first', 'warn'); return; }
+    if (!name) {
+      toast('Enter a preset name first', 'warn');
+      return;
+    }
     const presets = _load();
     presets[name] = _captureFields();
     _save(presets);
@@ -93,4 +108,35 @@ export function initExportPresets() {
     _renderSelect();
     toast(`Deleted export preset "${name}"`, 'warn');
   });
+}
+
+// §5 roadmap — Export sidebar pane: list saved presets with one-click apply
+// (opens the export modal and pre-fills it), instead of requiring the user
+// to already have the modal open to reach the preset dropdown above.
+
+/** @returns {string[]} Saved export preset names, sorted. */
+export function listExportPresetNames() {
+  return Object.keys(_load()).sort();
+}
+
+/**
+ * Open the export modal and apply the named preset's saved field values.
+ * No-op (with a toast) if the preset no longer exists.
+ * @param {string} name
+ */
+export function applyExportPresetByName(name) {
+  const presets = _load();
+  if (!presets[name]) {
+    toast(`Export preset "${name}" no longer exists`, 'warn');
+    return;
+  }
+  // initExportPresets() must have already run (app/init.js) for the modal's
+  // own preset bar/fields to exist — applied here regardless of whether the
+  // modal is currently open, same as the modal's own <select> handler.
+  _applyFields(presets[name]);
+  const selEl = /** @type {HTMLSelectElement|null} */ (
+    document.getElementById('exp-preset-select')
+  );
+  if (selEl) selEl.value = name;
+  toast(`Loaded export preset "${name}"`, 'ok');
 }

@@ -535,7 +535,10 @@
 
 .zcp-empty {
   padding: 24px 20px;
-  color: var(--text-ghost);
+  /* §5 roadmap a11y check — --text-ghost is reserved for disabled controls
+     (WCAG-exempt); this is visible empty-state text, same bug already fixed
+     on .insp-empty (layout.css) and onboarding.js — see docs/design-system.md. */
+  color: var(--text-dim);
   font: 12px var(--font-ui);
   text-align: center;
 }

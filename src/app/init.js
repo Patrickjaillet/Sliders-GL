@@ -25,6 +25,10 @@ import { initDock } from '../ui/dock.js';
 import { initKeyboardNav } from '../ui/keyboard-nav.js';
 import { initPanelDock } from '../ui/panel-dock.js';
 import { initSidebarTabs } from '../ui/sidebar-tabs.js';
+import { initSidebarRenderDiagnostics } from '../ui/sidebar-render-diagnostics.js';
+import { initExportLastUsedTracker } from '../ui/export-last-used.js';
+import { initSidebarExportSummary } from '../ui/sidebar-export-summary.js';
+import { initSidebarSettingsSummary } from '../ui/sidebar-settings-summary.js';
 import { initInspectorContext } from '../ui/inspector-context.js';
 import { initSliderGutterDots } from '../ui/slider-gutter.js';
 import { initCanvasTools } from '../ui/canvas-tools.js';
@@ -81,6 +85,13 @@ window.addEventListener('load', async () => {
   initDock();
   // Phase O — onglets de sidebar (Uniforms/Style/History)
   initSidebarTabs();
+  // §5 roadmap — Render pane: GPU/cache/debounce diagnostics
+  initSidebarRenderDiagnostics();
+  // §5 roadmap — Export pane: last-used format + saved presets summary
+  initExportLastUsedTracker();
+  initSidebarExportSummary();
+  // §5 roadmap — Settings pane: active preferences summary
+  initSidebarSettingsSummary();
   // Phase Q — inspector contextuel (perf/pass/slider/uniform)
   initInspectorContext();
   // Phase R — scrubber temporel + overlays viewport
@@ -116,7 +127,7 @@ window.addEventListener('load', async () => {
     const syncVV = () => {
       const full = window.innerHeight;
       if (vv.height < full - 80) {
-        document.documentElement.style.height = `${vv.height  }px`;
+        document.documentElement.style.height = `${vv.height}px`;
       } else {
         document.documentElement.style.height = '';
       }
@@ -245,7 +256,7 @@ window.addEventListener('load', async () => {
         const sw = document.getElementById('sw');
         if (sw) {
           // Forcer un reflow synchrone.
-           
+
           void sw.offsetHeight;
           // Double rAF : garantit un repaint sur le frame suivant même si le
           // premier reflow n'a pas suffi dans certaines versions de WebView2.
