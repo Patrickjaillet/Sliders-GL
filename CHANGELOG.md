@@ -5,6 +5,20 @@ All notable changes to Sliders GL are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.2] — 2026-09-12
+
+### Fixed
+
+- Restoring a saved UI zoom level on startup no longer shows the "zoom
+  changed" toast or triggers a screen-reader announcement — those are now
+  reserved for an actual Ctrl+=/-/0 keypress, matching what a real user
+  action should trigger.
+- Removed a redundant, partially broken second "Skip to editor" link that
+  was being injected right after the real one, pointing at page anchors
+  that no longer exist.
+- Reduced an intermittent accessibility-test false positive around the
+  first-launch welcome dialog's fade-in animation.
+
 ## [1.9.1] — 2026-09-12
 
 ### Fixed
@@ -252,6 +266,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   locally — zero network dependency for core functionality.
 - MIT license.
 
+[1.9.2]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.2
 [1.9.1]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.1
 [1.9.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.0
 [1.8.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.8.0

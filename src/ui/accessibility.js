@@ -8,32 +8,16 @@
  */
 
 // ═════════════════════════════════════════════════════════════════════════════
-// §A  SKIP LINK (injected programmatically for SPA)
-// ═════════════════════════════════════════════════════════════════════════════
-
-function injectSkipLink() {
-  if (document.getElementById('skip-to-editor')) return;
-
-  const link = document.createElement('a');
-  link.id = 'skip-to-editor';
-  link.href = '#editor-container';
-  link.className = 'skip-link';
-  link.textContent = 'Skip to editor';
-  link.addEventListener('click', (e) => {
-    e.preventDefault();
-    const target =
-      document.getElementById('editor-container') ||
-      document.querySelector('.monaco-editor') ||
-      document.getElementById('editorPane');
-    if (target) {
-      target.setAttribute('tabindex', '-1');
-      /** @type {HTMLElement} */ (target).focus();
-    }
-  });
-
-  document.body.insertBefore(link, document.body.firstChild);
-}
-
+// §A  SKIP LINK
+//
+// §12 roadmap audit: this used to also inject a second "Skip to editor" link
+// via JS (`#skip-to-editor`, targeting `#editor-container`/`#editorPane` —
+// neither id exists anywhere in ui.html anymore), landing right after the
+// real static skip link in `ui.html` (`<a class="skip-link" href="#mc">`,
+// #mc being the actual Monaco mount point) in tab order. Two consecutive
+// "Skip to editor" links is confusing for keyboard/screen-reader users and
+// not standard practice — removed the dead duplicate; the static one alone
+// already works via native anchor-jump behavior.
 // ═════════════════════════════════════════════════════════════════════════════
 // §B  SCREEN READER — Slider aria-valuenow + live region for status
 // ═════════════════════════════════════════════════════════════════════════════
@@ -147,7 +131,17 @@ function _nearestZoomStep(z) {
   return ZOOM_STEPS.reduce((prev, curr) => (Math.abs(curr - z) < Math.abs(prev - z) ? curr : prev));
 }
 
-function _applyZoom(zoom) {
+// §12 roadmap a11y audit: `_restoreZoom()` (page load) used to call
+// `_applyZoom()` the same way a real Ctrl+=/-/0 keypress does, which always
+// shows the transient "N%" toast and fires a screen-reader announcement —
+// appropriate for a user action, not for silently restoring a saved
+// preference on load. That toast's fade-in was also the actual root cause
+// of an intermittent axe-core color-contrast flake (verified over a 20-run
+// stress test): sampled mid-transition, its blended color could read as a
+// contrast violation for one frame. `silent` skips both side effects for
+// the load-time restore path while leaving real user-triggered zoom (which
+// SHOULD show the toast) unchanged.
+function _applyZoom(zoom, silent = false) {
   _currentZoom = _clampZoom(zoom);
 
   // Apply via CSS custom property on :root + transform on the app wrapper
@@ -166,6 +160,8 @@ function _applyZoom(zoom) {
   try {
     localStorage.setItem(ZOOM_STORAGE_KEY, String(_currentZoom));
   } catch (_) {}
+
+  if (silent) return;
 
   // Show indicator
   _showZoomIndicator(_currentZoom);
@@ -253,12 +249,12 @@ function _restoreZoom() {
     if (saved) {
       const z = parseFloat(saved);
       if (z >= 0.7 && z <= 1.5) {
-        _applyZoom(z);
+        _applyZoom(z, /* silent */ true);
         return;
       }
     }
   } catch (_) {}
-  _applyZoom(ZOOM_DEFAULT);
+  _applyZoom(ZOOM_DEFAULT, /* silent */ true);
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -270,7 +266,6 @@ function _restoreZoom() {
  * Call once on DOMContentLoaded.
  */
 export function initAccessibility() {
-  injectSkipLink();
   _initZoomKeyboard();
   _restoreZoom();
 
