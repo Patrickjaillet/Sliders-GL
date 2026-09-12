@@ -360,6 +360,161 @@
   font-size: 9px;
 }
 
+/* §8 roadmap audit — Angle dial (rotation sliders, .sl-dial in slider.js)
+   had no CSS anywhere: it rendered with bare SVG defaults (black ring/
+   needle/handle, no hover or active-drag feedback). Styled to match the
+   app's tokens the same way .sl-field does. */
+.st-dial {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.sl-dial {
+  flex-shrink: 0;
+  cursor: grab;
+  border-radius: 50%;
+  outline: 1px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color var(--dur) var(--ease);
+}
+
+.sl-dial:hover {
+  outline-color: var(--border-mid);
+}
+
+.sl-dial:focus-visible {
+  outline: 2px solid var(--border-hot);
+}
+
+.sl-dial.active {
+  cursor: grabbing;
+  outline-color: var(--accent);
+}
+
+.dial-ring {
+  fill: var(--bg-raised);
+  stroke: var(--border-mid);
+  stroke-width: 1.5;
+  transition: stroke var(--dur) var(--ease);
+}
+
+.sl-dial:hover .dial-ring,
+.sl-dial.active .dial-ring {
+  stroke: var(--accent);
+}
+
+.dial-needle {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.dial-handle {
+  fill: var(--accent);
+  stroke: var(--bg-raised);
+  stroke-width: 1.5;
+}
+
+.dial-deg {
+  font: 12px var(--font-mono);
+  color: var(--text-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* §8 roadmap audit — XY-pad (.sl-xypad in slider.js) had the same problem:
+   no CSS, so the pad/axes/point indicator were entirely invisible (no
+   background, no border, no visible point) despite the drag logic being
+   fully implemented in JS. */
+.st-xy {
+  /* .sr-xy (the flex row above) gives this wrapper no explicit basis, so
+     without a concrete width here .sl-xypad's own width:100% has nothing
+     to resolve against and both collapse to 0 — flex-basis:100% makes
+     this wrapper claim the row's full width like .st-dial's row does. */
+  flex-basis: 100%;
+  padding: 4px 0;
+}
+
+.sl-xypad {
+  position: relative;
+  width: 100%;
+  max-width: 140px;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  outline: 1px solid var(--border-mid);
+  outline-offset: -1px;
+  cursor: crosshair;
+  transition: outline-color var(--dur) var(--ease);
+}
+
+.sl-xypad:hover {
+  outline-color: var(--border-strong);
+}
+
+.sl-xypad:focus-visible {
+  outline: 2px solid var(--border-hot);
+}
+
+.sl-xypad.active {
+  outline-color: var(--accent);
+}
+
+.xy-axis {
+  position: absolute;
+  background: var(--border-sub);
+  pointer-events: none;
+}
+
+.xy-axis-h {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+}
+
+.xy-axis-v {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+}
+
+.xy-point {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 1.5px solid var(--bg-raised);
+  pointer-events: none;
+  transition: background var(--dur) var(--ease);
+}
+
+.sl-xypad.active .xy-point {
+  background: var(--accent-hover);
+}
+
+.xy-readout {
+  margin-left: auto;
+  font: 11px var(--font-mono);
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.sn-tag {
+  margin-left: 4px;
+  padding: 0 4px;
+  font: 700 9px var(--font-mono);
+  color: var(--text-dim);
+  background: var(--bg-void);
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.03em;
+}
+
 /* ── Zone slider : scrubbable compositor-style value field ──
    No separate track/handle — the field itself is the drag target. A thin
    accent fill (--fill-pct, set from slider.js) shows the value's position

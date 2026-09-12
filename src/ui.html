@@ -1660,10 +1660,18 @@
                 ⌨ palette
               </button>
               <!-- §7.3: shader complexity score badge -->
+              <!-- §8 roadmap — the native `hidden` attribute forces
+                   display:none, which permanently overrides the
+                   .cx-hidden/.cx-low/.cx-mid/.cx-high classes that
+                   complexity-badge.js actually toggles (opacity/max-width
+                   transition, never display) — the badge could never
+                   become visible no matter what the JS did. Starts with
+                   .cx-hidden instead so it's invisible until the first
+                   score arrives, but the CSS transition (and the JS) are
+                   now the only thing controlling visibility. -->
               <span
-                class="ebn cx-badge"
+                class="ebn cx-badge cx-hidden"
                 id="complexityBadge"
-                hidden
                 role="status"
                 aria-label="Shader complexity score"
                 >⚙ 0</span

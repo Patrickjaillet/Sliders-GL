@@ -25,7 +25,7 @@ let _picker = null;
 let _activeSwatch = null;
 let _compIds = [];
 let _scale = 1;
-let _history = [];  // max 8 hex strings
+let _history = []; // max 8 hex strings
 const MAX_HISTORY = 8;
 
 // ── API publique ──────────────────────────────────────────────────────────────
@@ -34,7 +34,7 @@ export function openHSLPicker(swatch, compIds, opts = {}) {
   _compIds = compIds;
   _activeSwatch = swatch;
 
-  const vals = compIds.map(id => state.varMap[id]?.value ?? 0);
+  const vals = compIds.map((id) => state.varMap[id]?.value ?? 0);
   _scale = detectColorScale(vals);
 
   if (!_picker) _buildPicker();
@@ -112,13 +112,15 @@ function _buildPicker() {
   _drawHueWheel();
   _bindEvents();
 
-  document.addEventListener('click', e => {
+  document.addEventListener('click', (e) => {
     if (_picker.hidden) return;
     if (_picker.contains(e.target)) return;
     if (_activeSwatch && _activeSwatch.contains(e.target)) return;
     closeHSLPicker();
   });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeHSLPicker(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeHSLPicker();
+  });
 }
 
 // ── Roue de teinte ────────────────────────────────────────────────────────────
@@ -126,14 +128,19 @@ function _buildPicker() {
 function _drawHueWheel() {
   const canvas = _picker.querySelector('#hslWheelCanvas');
   const ctx = canvas.getContext('2d');
-  const cx = 90, cy = 90, R = 84, r = 56;
+  const cx = 90,
+    cy = 90,
+    R = 84,
+    r = 56;
 
   for (let deg = 0; deg < 360; deg++) {
-    const a0 = (deg - 0.5) * Math.PI / 180;
-    const a1 = (deg + 0.5) * Math.PI / 180;
+    const a0 = ((deg - 0.5) * Math.PI) / 180;
+    const a1 = ((deg + 0.5) * Math.PI) / 180;
     const grad = ctx.createLinearGradient(
-      cx + R * Math.cos(a0), cy + R * Math.sin(a0),
-      cx + R * Math.cos(a1), cy + R * Math.sin(a1)
+      cx + R * Math.cos(a0),
+      cy + R * Math.sin(a0),
+      cx + R * Math.cos(a1),
+      cy + R * Math.sin(a1)
     );
     grad.addColorStop(0, `hsl(${deg}, 100%, 50%)`);
     grad.addColorStop(1, `hsl(${deg + 1}, 100%, 50%)`);
@@ -146,7 +153,9 @@ function _drawHueWheel() {
   }
   // Punch hole
   ctx.globalCompositeOperation = 'destination-out';
-  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fill();
   ctx.globalCompositeOperation = 'source-over';
 }
 
@@ -155,98 +164,149 @@ function _drawTriangle(h) {
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, 180, 180);
 
-  const cx = 90, cy = 90, R = 52;
+  const cx = 90,
+    cy = 90,
+    R = 52;
   // Equilateral triangle rotated by h (degrees)
-  const rad = h * Math.PI / 180;
-  const pts = [0, 1, 2].map(i => {
-    const a = rad + (i * 2 * Math.PI / 3);
+  const rad = (h * Math.PI) / 180;
+  const pts = [0, 1, 2].map((i) => {
+    const a = rad + (i * 2 * Math.PI) / 3;
     return [cx + R * Math.cos(a), cy + R * Math.sin(a)];
   });
 
   // White corner, black corner, hue corner
   const [pHue, pWhite, pBlack] = pts;
 
-  const grad1 = ctx.createLinearGradient(pHue[0], pHue[1], (pWhite[0] + pBlack[0]) / 2, (pWhite[1] + pBlack[1]) / 2);
+  const grad1 = ctx.createLinearGradient(
+    pHue[0],
+    pHue[1],
+    (pWhite[0] + pBlack[0]) / 2,
+    (pWhite[1] + pBlack[1]) / 2
+  );
   grad1.addColorStop(0, `hsl(${h}, 100%, 50%)`);
   grad1.addColorStop(1, 'white');
   ctx.beginPath();
-  ctx.moveTo(...pHue); ctx.lineTo(...pWhite); ctx.lineTo(...pBlack); ctx.closePath();
-  ctx.fillStyle = grad1; ctx.fill();
+  ctx.moveTo(...pHue);
+  ctx.lineTo(...pWhite);
+  ctx.lineTo(...pBlack);
+  ctx.closePath();
+  ctx.fillStyle = grad1;
+  ctx.fill();
 
-  const grad2 = ctx.createLinearGradient(pHue[0], pHue[1], (pWhite[0] + pBlack[0]) / 2, (pWhite[1] + pBlack[1]) / 2);
+  const grad2 = ctx.createLinearGradient(
+    pHue[0],
+    pHue[1],
+    (pWhite[0] + pBlack[0]) / 2,
+    (pWhite[1] + pBlack[1]) / 2
+  );
   grad2.addColorStop(0, 'transparent');
   grad2.addColorStop(1, 'black');
   ctx.beginPath();
-  ctx.moveTo(...pHue); ctx.lineTo(...pWhite); ctx.lineTo(...pBlack); ctx.closePath();
-  ctx.globalAlpha = 0.9; ctx.fillStyle = grad2; ctx.fill(); ctx.globalAlpha = 1;
+  ctx.moveTo(...pHue);
+  ctx.lineTo(...pWhite);
+  ctx.lineTo(...pBlack);
+  ctx.closePath();
+  ctx.globalAlpha = 0.9;
+  ctx.fillStyle = grad2;
+  ctx.fill();
+  ctx.globalAlpha = 1;
 }
 
 // ── Conversions couleur ────────────────────────────────────────────────────────
 
 function _rgb01ToHsl(r, g, b) {
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h = 0, s = 0;
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b);
+  let h = 0,
+    s = 0;
   const l = (max + min) / 2;
   if (max !== min) {
     const d = max - min;
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
     switch (max) {
-      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-      case g: h = ((b - r) / d + 2) / 6; break;
-      case b: h = ((r - g) / d + 4) / 6; break;
+      case r:
+        h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+        break;
+      case g:
+        h = ((b - r) / d + 2) / 6;
+        break;
+      case b:
+        h = ((r - g) / d + 4) / 6;
+        break;
     }
   }
   return [h * 360, s * 100, l * 100];
 }
 
 function _hslToRgb01(h, s, l) {
-  h /= 360; s /= 100; l /= 100;
+  h /= 360;
+  s /= 100;
+  l /= 100;
   const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
   const p = 2 * l - q;
   const hue2rgb = (t) => {
-    if (t < 0) t += 1; if (t > 1) t -= 1;
-    if (t < 1/6) return p + (q - p) * 6 * t;
-    if (t < 1/2) return q;
-    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
     return p;
   };
-  return [hue2rgb(h + 1/3), hue2rgb(h), hue2rgb(h - 1/3)];
+  return [hue2rgb(h + 1 / 3), hue2rgb(h), hue2rgb(h - 1 / 3)];
 }
 
 function _rgb01ToHsv(r, g, b) {
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  const v = max, d = max - min;
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b);
+  const v = max,
+    d = max - min;
   const s = max === 0 ? 0 : d / max;
   let h = 0;
   if (max !== min) {
     switch (max) {
-      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-      case g: h = ((b - r) / d + 2) / 6; break;
-      case b: h = ((r - g) / d + 4) / 6; break;
+      case r:
+        h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+        break;
+      case g:
+        h = ((b - r) / d + 2) / 6;
+        break;
+      case b:
+        h = ((r - g) / d + 4) / 6;
+        break;
     }
   }
   return [h * 360, s * 100, v * 100];
 }
 
 function _hsvToRgb01(h, s, v) {
-  h /= 360; s /= 100; v /= 100;
+  h /= 360;
+  s /= 100;
+  v /= 100;
   const i = Math.floor(h * 6);
   const f = h * 6 - i;
-  const p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s);
+  const p = v * (1 - s),
+    q = v * (1 - f * s),
+    t = v * (1 - (1 - f) * s);
   switch (i % 6) {
-    case 0: return [v, t, p];
-    case 1: return [q, v, p];
-    case 2: return [p, v, t];
-    case 3: return [p, q, v];
-    case 4: return [t, p, v];
-    default: return [v, p, q];
+    case 0:
+      return [v, t, p];
+    case 1:
+      return [q, v, p];
+    case 2:
+      return [p, v, t];
+    case 3:
+      return [p, q, v];
+    case 4:
+      return [t, p, v];
+    default:
+      return [v, p, q];
   }
 }
 
 function _getRgb01() {
   if (!_compIds.length) return [0, 0, 0];
-  const vals = _compIds.map(id => state.varMap[id]?.value ?? 0);
-  const to01 = v => _scale === 1 ? v : v / 255;
+  const vals = _compIds.map((id) => state.varMap[id]?.value ?? 0);
+  const to01 = (v) => (_scale === 1 ? v : v / 255);
   return vals.slice(0, 3).map(to01);
 }
 
@@ -257,7 +317,7 @@ function _getAlpha01() {
 }
 
 function _applyRgb01(r, g, b) {
-  const fromUI = v => _scale === 1 ? v : v * 255;
+  const fromUI = (v) => (_scale === 1 ? v : v * 255);
   onValChange(_compIds[0], fromUI(r));
   onValChange(_compIds[1], fromUI(g));
   onValChange(_compIds[2], fromUI(b));
@@ -280,37 +340,43 @@ function _refreshFromState() {
 
 function _updateWheelThumb(h) {
   const thumb = _picker.querySelector('#hslWheelThumb');
-  const cx = 90, cy = 90, rad = 70;
-  const a = (h - 90) * Math.PI / 180;
+  const cx = 90,
+    cy = 90,
+    rad = 70;
+  const a = ((h - 90) * Math.PI) / 180;
   const x = cx + rad * Math.cos(a);
   const y = cy + rad * Math.sin(a);
-  thumb.style.left = x + 'px';
-  thumb.style.top = y + 'px';
+  thumb.style.left = `${x  }px`;
+  thumb.style.top = `${y  }px`;
 }
 
 function _updateTriThumb(h, s, l) {
   const thumb = _picker.querySelector('#hslTriThumb');
-  const cx = 90, cy = 90, R = 52;
-  const rad = (h - 90) * Math.PI / 180;
-  const [pHue, pWhite, pBlack] = [0, 1, 2].map(i => {
-    const a = rad + (i * 2 * Math.PI / 3) + Math.PI / 2 * 0;
+  const cx = 90,
+    cy = 90,
+    R = 52;
+  const rad = ((h - 90) * Math.PI) / 180;
+  const [pHue, pWhite, pBlack] = [0, 1, 2].map((i) => {
+    const a = rad + (i * 2 * Math.PI) / 3 + (Math.PI / 2) * 0;
     // Use h angle from _drawTriangle
-    const ang = (h * Math.PI / 180) + (i * 2 * Math.PI / 3);
+    const ang = (h * Math.PI) / 180 + (i * 2 * Math.PI) / 3;
     return [cx + R * Math.cos(ang), cy + R * Math.sin(ang)];
   });
   // Barycentric from HSL: s=saturation, l=lightness
-  const sv = s / 100, lv = l / 100;
+  const sv = s / 100,
+    lv = l / 100;
   // Approximate: hue corner weight, white corner weight, black corner weight
-  const wHue = sv * (2 * lv - lv * lv < 1e-9 ? 0 : Math.min(1, (1 - lv) / (lv < 0.5 ? lv : 1 - lv)));
-  const wW = (1 - sv);
-  const wB = sv * (1 - 2 * lv < 0 ? 0 : (1 - 2 * lv));
+  const wHue =
+    sv * (2 * lv - lv * lv < 1e-9 ? 0 : Math.min(1, (1 - lv) / (lv < 0.5 ? lv : 1 - lv)));
+  const wW = 1 - sv;
+  const wB = sv * (1 - 2 * lv < 0 ? 0 : 1 - 2 * lv);
   const wSum = wHue + wW + wB || 1;
   const wx = (pHue[0] * wHue + pWhite[0] * wW + pBlack[0] * wB) / wSum;
   const wy = (pHue[1] * wHue + pWhite[1] * wW + pBlack[1] * wB) / wSum;
-  thumb.style.left = wx + 'px';
-  thumb.style.top = wy + 'px';
+  thumb.style.left = `${wx  }px`;
+  thumb.style.top = `${wy  }px`;
   const [r, g, b] = _hslToRgb01(h, s, l);
-  thumb.style.background = `rgb(${Math.round(r*255)},${Math.round(g*255)},${Math.round(b*255)})`;
+  thumb.style.background = `rgb(${Math.round(r * 255)},${Math.round(g * 255)},${Math.round(b * 255)})`;
 }
 
 function _updateAlphaBar(r, g, b, a) {
@@ -318,24 +384,35 @@ function _updateAlphaBar(r, g, b, a) {
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, 160, 14);
   const chk = ctx.createPattern(_checkerboard(4), 'repeat');
-  ctx.fillStyle = chk; ctx.fillRect(0, 0, 160, 14);
+  ctx.fillStyle = chk;
+  ctx.fillRect(0, 0, 160, 14);
   const grad = ctx.createLinearGradient(0, 0, 160, 0);
-  grad.addColorStop(0, `rgba(${Math.round(r*255)},${Math.round(g*255)},${Math.round(b*255)},0)`);
-  grad.addColorStop(1, `rgba(${Math.round(r*255)},${Math.round(g*255)},${Math.round(b*255)},1)`);
-  ctx.fillStyle = grad; ctx.fillRect(0, 0, 160, 14);
+  grad.addColorStop(
+    0,
+    `rgba(${Math.round(r * 255)},${Math.round(g * 255)},${Math.round(b * 255)},0)`
+  );
+  grad.addColorStop(
+    1,
+    `rgba(${Math.round(r * 255)},${Math.round(g * 255)},${Math.round(b * 255)},1)`
+  );
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 160, 14);
 
   const thumb = _picker.querySelector('#hslAlphaThumb');
-  thumb.style.left = (a * 160) + 'px';
+  thumb.style.left = `${a * 160  }px`;
   const val = _picker.querySelector('#hslAlphaVal');
-  if (val) val.textContent = Math.round(a * 100) + '%';
+  if (val) val.textContent = `${Math.round(a * 100)  }%`;
 }
 
 function _checkerboard(sz) {
   const c = document.createElement('canvas');
   c.width = c.height = sz * 2;
   const ctx = c.getContext('2d');
-  ctx.fillStyle = '#ccc'; ctx.fillRect(0, 0, sz*2, sz*2);
-  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, sz, sz); ctx.fillRect(sz, sz, sz, sz);
+  ctx.fillStyle = '#ccc';
+  ctx.fillRect(0, 0, sz * 2, sz * 2);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, sz, sz);
+  ctx.fillRect(sz, sz, sz, sz);
   return c;
 }
 
@@ -368,9 +445,12 @@ function _setInp(sel, val) {
 }
 
 function _toHex(r, g, b, a) {
-  const h = v => Math.max(0, Math.min(255, Math.round(v * 255))).toString(16).padStart(2, '0');
-  const hex = '#' + h(r) + h(g) + h(b);
-  return (_compIds.length >= 4 && a < 1 - 1e-4) ? hex + h(a) : hex;
+  const h = (v) =>
+    Math.max(0, Math.min(255, Math.round(v * 255)))
+      .toString(16)
+      .padStart(2, '0');
+  const hex = `#${  h(r)  }${h(g)  }${h(b)}`;
+  return _compIds.length >= 4 && a < 1 - 1e-4 ? hex + h(a) : hex;
 }
 
 function _updateHarmonies(h, s, l) {
@@ -386,16 +466,19 @@ function _updateHarmonies(h, s, l) {
 
 function _pushHistory(hex) {
   if (_history[0] === hex) return;
-  _history = [hex, ..._history.filter(h => h !== hex)].slice(0, MAX_HISTORY);
+  _history = [hex, ..._history.filter((h) => h !== hex)].slice(0, MAX_HISTORY);
   _renderHistory();
 }
 
 function _renderHistory() {
   const el = _picker.querySelector('#hslHistory');
-  el.innerHTML = _history.map(hex =>
-    `<div class="hsl-hist-swatch" style="background:${hex}" data-hex="${hex}" title="${hex}"></div>`
-  ).join('');
-  el.querySelectorAll('.hsl-hist-swatch').forEach(sw => {
+  el.innerHTML = _history
+    .map(
+      (hex) =>
+        `<div class="hsl-hist-swatch" style="background:${hex}" data-hex="${hex}" title="${hex}"></div>`
+    )
+    .join('');
+  el.querySelectorAll('.hsl-hist-swatch').forEach((sw) => {
     sw.addEventListener('click', () => {
       const comps = hexToComponents(sw.dataset.hex.slice(1), _scale);
       if (!comps) return;
@@ -409,12 +492,12 @@ function _renderHistory() {
 
 function _bindEvents() {
   // Mode tabs
-  _picker.querySelectorAll('.hsl-mode-btn').forEach(btn => {
+  _picker.querySelectorAll('.hsl-mode-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      _picker.querySelectorAll('.hsl-mode-btn').forEach(b => b.classList.remove('active'));
+      _picker.querySelectorAll('.hsl-mode-btn').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       const mode = btn.dataset.mode;
-      _picker.querySelectorAll('.hsl-inp-row').forEach(row => {
+      _picker.querySelectorAll('.hsl-inp-row').forEach((row) => {
         row.hidden = row.dataset.mode !== mode;
       });
       _refreshFromState();
@@ -431,7 +514,7 @@ function _bindEvents() {
   _bindAlphaDrag();
 
   // Inputs
-  _picker.querySelector('#hslHexInp').addEventListener('input', e => {
+  _picker.querySelector('#hslHexInp').addEventListener('input', (e) => {
     const comps = hexToComponents(e.target.value, _scale);
     if (!comps) return;
     _compIds.slice(0, comps.length).forEach((id, i) => onValChange(id, comps[i]));
@@ -439,7 +522,7 @@ function _bindEvents() {
   });
 
   ['hslR', 'hslG', 'hslB'].forEach((id, ch) => {
-    _picker.querySelector('#' + id)?.addEventListener('input', e => {
+    _picker.querySelector(`#${  id}`)?.addEventListener('input', (e) => {
       const v = _scale === 1 ? Number(e.target.value) / 255 : Number(e.target.value);
       onValChange(_compIds[ch], v);
       setTimeout(_refreshFromState, 16);
@@ -447,7 +530,7 @@ function _bindEvents() {
   });
 
   ['hslH', 'hslS', 'hslL'].forEach((id) => {
-    _picker.querySelector('#' + id)?.addEventListener('input', () => {
+    _picker.querySelector(`#${  id}`)?.addEventListener('input', () => {
       const h = Number(_picker.querySelector('#hslH').value);
       const s = Number(_picker.querySelector('#hslS').value);
       const l = Number(_picker.querySelector('#hslL').value);
@@ -458,8 +541,8 @@ function _bindEvents() {
   });
 
   ['hslHv', 'hslSv', 'hslV'].forEach(() => {
-    ['hslHv', 'hslSv', 'hslV'].forEach(id => {
-      _picker.querySelector('#' + id)?.addEventListener('input', () => {
+    ['hslHv', 'hslSv', 'hslV'].forEach((id) => {
+      _picker.querySelector(`#${  id}`)?.addEventListener('input', () => {
         const h = Number(_picker.querySelector('#hslHv').value);
         const s = Number(_picker.querySelector('#hslSv').value);
         const v = Number(_picker.querySelector('#hslV').value);
@@ -471,7 +554,7 @@ function _bindEvents() {
   });
 
   // Harmonies click
-  _picker.querySelectorAll('.hsl-harm-swatch').forEach(sw => {
+  _picker.querySelectorAll('.hsl-harm-swatch').forEach((sw) => {
     sw.addEventListener('click', () => {
       const bg = sw.style.background;
       // Extract hsl values and apply
@@ -494,7 +577,9 @@ function _bindEvents() {
       _compIds.slice(0, comps.length).forEach((id, i) => onValChange(id, comps[i]));
       _pushHistory(result.sRGBHex);
       setTimeout(_refreshFromState, 16);
-    } catch (_) { /* user cancelled */ }
+    } catch (_) {
+      /* user cancelled */
+    }
   });
 }
 
@@ -502,18 +587,25 @@ function _bindWheelDrag(canvas) {
   let dragging = false;
   const pick = (ev) => {
     const r = canvas.getBoundingClientRect();
-    const x = ev.clientX - r.left - 90, y = ev.clientY - r.top - 90;
+    const x = ev.clientX - r.left - 90,
+      y = ev.clientY - r.top - 90;
     const dist = Math.sqrt(x * x + y * y);
     if (dist < 50 || dist > 88) return; // outside ring
-    let h = Math.atan2(y, x) * 180 / Math.PI + 90;
+    let h = (Math.atan2(y, x) * 180) / Math.PI + 90;
     if (h < 0) h += 360;
     const [, s, l] = _rgb01ToHsl(..._getRgb01());
     const [nr, ng, nb] = _hslToRgb01(h, s, l);
     _applyRgb01(nr, ng, nb);
     setTimeout(_refreshFromState, 16);
   };
-  canvas.addEventListener('pointerdown', e => { dragging = true; canvas.setPointerCapture(e.pointerId); pick(e); });
-  canvas.addEventListener('pointermove', e => { if (dragging) pick(e); });
+  canvas.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    canvas.setPointerCapture(e.pointerId);
+    pick(e);
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (dragging) pick(e);
+  });
   canvas.addEventListener('pointerup', () => {
     dragging = false;
     const [r, g, b] = _getRgb01();
@@ -526,33 +618,59 @@ function _bindTriDrag(canvas) {
   let dragging = false;
   const pick = (ev) => {
     const rect = canvas.getBoundingClientRect();
-    const x = ev.clientX - rect.left, y = ev.clientY - rect.top;
+    const x = ev.clientX - rect.left,
+      y = ev.clientY - rect.top;
     const [h] = _rgb01ToHsl(..._getRgb01());
-    const cx = 90, cy = 90, R = 52;
-    const ang = h * Math.PI / 180;
-    const pts = [0, 1, 2].map(i => {
-      const a = ang + (i * 2 * Math.PI / 3);
+    const cx = 90,
+      cy = 90,
+      R = 52;
+    const ang = (h * Math.PI) / 180;
+    const pts = [0, 1, 2].map((i) => {
+      const a = ang + (i * 2 * Math.PI) / 3;
       return [cx + R * Math.cos(a), cy + R * Math.sin(a)];
     });
     const [pHue, pWhite, pBlack] = pts;
     // Barycentric coordinates of click
-    const denom = (pWhite[1] - pBlack[1]) * (pHue[0] - pBlack[0]) + (pBlack[0] - pWhite[0]) * (pHue[1] - pBlack[1]);
+    const denom =
+      (pWhite[1] - pBlack[1]) * (pHue[0] - pBlack[0]) +
+      (pBlack[0] - pWhite[0]) * (pHue[1] - pBlack[1]);
     if (Math.abs(denom) < 1e-6) return;
-    let wH = ((pWhite[1] - pBlack[1]) * (x - pBlack[0]) + (pBlack[0] - pWhite[0]) * (y - pBlack[1])) / denom;
-    let wW = ((pBlack[1] - pHue[1]) * (x - pBlack[0]) + (pHue[0] - pBlack[0]) * (y - pBlack[1])) / denom;
+    let wH =
+      ((pWhite[1] - pBlack[1]) * (x - pBlack[0]) + (pBlack[0] - pWhite[0]) * (y - pBlack[1])) /
+      denom;
+    let wW =
+      ((pBlack[1] - pHue[1]) * (x - pBlack[0]) + (pHue[0] - pBlack[0]) * (y - pBlack[1])) / denom;
     let wB = 1 - wH - wW;
-    wH = Math.max(0, wH); wW = Math.max(0, wW); wB = Math.max(0, wB);
+    wH = Math.max(0, wH);
+    wW = Math.max(0, wW);
+    wB = Math.max(0, wB);
     const sum = wH + wW + wB || 1;
-    wH /= sum; wW /= sum; wB /= sum;
+    wH /= sum;
+    wW /= sum;
+    wB /= sum;
     // White and black corners fix s and l
-    const s = wH * 100 / (wH + wW < 1e-9 ? 1e-9 : wH + wW) * (1 - wB);
+    const s = ((wH * 100) / (wH + wW < 1e-9 ? 1e-9 : wH + wW)) * (1 - wB);
     const l = (1 - wB) * 50 + wB * 0;
-    const [r, g, b] = _hslToRgb01(h, s * (1 - wB / (1 - wH || 1e-9)), Math.max(0, Math.min(100, (wW + wH * 0.5) * 100)));
-    _applyRgb01(Math.max(0, Math.min(1, r)), Math.max(0, Math.min(1, g)), Math.max(0, Math.min(1, b)));
+    const [r, g, b] = _hslToRgb01(
+      h,
+      s * (1 - wB / (1 - wH || 1e-9)),
+      Math.max(0, Math.min(100, (wW + wH * 0.5) * 100))
+    );
+    _applyRgb01(
+      Math.max(0, Math.min(1, r)),
+      Math.max(0, Math.min(1, g)),
+      Math.max(0, Math.min(1, b))
+    );
     setTimeout(_refreshFromState, 16);
   };
-  canvas.addEventListener('pointerdown', e => { dragging = true; canvas.setPointerCapture(e.pointerId); pick(e); });
-  canvas.addEventListener('pointermove', e => { if (dragging) pick(e); });
+  canvas.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    canvas.setPointerCapture(e.pointerId);
+    pick(e);
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (dragging) pick(e);
+  });
   canvas.addEventListener('pointerup', () => {
     dragging = false;
     const [r, g, b] = _getRgb01();
@@ -571,9 +689,17 @@ function _bindAlphaDrag() {
     onValChange(_compIds[3], _scale === 1 ? alpha : alpha * 255);
     setTimeout(_refreshFromState, 16);
   };
-  canvas.addEventListener('pointerdown', e => { dragging = true; canvas.setPointerCapture(e.pointerId); pick(e); });
-  canvas.addEventListener('pointermove', e => { if (dragging) pick(e); });
-  canvas.addEventListener('pointerup', () => { dragging = false; });
+  canvas.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    canvas.setPointerCapture(e.pointerId);
+    pick(e);
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (dragging) pick(e);
+  });
+  canvas.addEventListener('pointerup', () => {
+    dragging = false;
+  });
 }
 
 // ── Positionnement ────────────────────────────────────────────────────────────
@@ -586,8 +712,8 @@ function _positionPicker(swatch) {
   left = Math.max(8, left);
   let top = rect.bottom + 6;
   if (top + ph > window.innerHeight - 8) top = Math.max(8, rect.top - ph - 6);
-  _picker.style.left = left + 'px';
-  _picker.style.top = top + 'px';
+  _picker.style.left = `${left  }px`;
+  _picker.style.top = `${top  }px`;
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
@@ -604,7 +730,10 @@ function _injectStyles() {
       border-radius: var(--radius-md);
       width: 210px;
       padding: 8px;
-      box-shadow: 0 12px 40px rgba(0,0,0,.6);
+      /* §8 roadmap audit — floating popup panel; use the same elevation
+         token as every other popup/dropdown (--shadow-popup ==
+         --elevation-3 in tokens.css) instead of a one-off shadow. */
+      box-shadow: var(--shadow-popup, 0 8px 24px rgba(0,0,0,.28));
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
       color: var(--prose, #242424);

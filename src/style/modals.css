@@ -236,7 +236,10 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--border-mid);
   background: var(--bg-overlay);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  /* §8 roadmap audit — was a hardcoded one-off shadow; every other popup/
+     dropdown in the app (file menu, tb-menu, panel-dock menu, etc.) already
+     uses --shadow-popup (aliased to --elevation-3 in tokens.css). */
+  box-shadow: var(--shadow-popup);
   pointer-events: none;
   visibility: hidden;
   opacity: 0;

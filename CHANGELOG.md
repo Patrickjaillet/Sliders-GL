@@ -5,6 +5,25 @@ All notable changes to Sliders GL are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] — 2026-09-12
+
+### Added
+
+- Angle dial sliders (rotation) and XY-pad sliders (grouped vec2 values)
+  now have complete visual styling — they previously rendered with bare
+  browser/SVG defaults (a plain black circle, no background, no hover or
+  active-drag feedback) despite their drag interaction being fully
+  functional.
+
+### Fixed
+
+- The shader complexity badge could never actually become visible: a
+  native `hidden` HTML attribute was permanently overriding the CSS
+  classes the badge's own code toggles to show it.
+- The slider and slider-group context menus, and the color picker popups,
+  now use the same shadow depth as every other popup in the app instead
+  of one-off shadow values.
+
 ## [1.6.0] — 2026-09-12
 
 ### Added
@@ -177,6 +196,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   locally — zero network dependency for core functionality.
 - MIT license.
 
+[1.7.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.7.0
 [1.6.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.6.0
 [1.5.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.5.0
 [1.4.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.4.0
