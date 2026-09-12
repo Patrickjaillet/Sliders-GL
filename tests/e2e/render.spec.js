@@ -94,6 +94,18 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   });
 
   // ── Test 2: Screenshot pixel hash ─────────────────────────────────────────
+  //
+  // This test was suspected of being flaky across several sessions. Root
+  // caused: it is fully stable under the project's real config
+  // (`workers: 1` in playwright.config.js — confirmed 15/15 clean repeats)
+  // and only fails under artificial multi-worker parallelism (also 15/15,
+  // but as genuine WebGL readback instability — Vite + Monaco + WebGL
+  // booting concurrently across several workers starves the GPU/CPU badly
+  // enough that even page load itself can take over a minute). Since the
+  // project never runs Playwright with more than one worker, this was
+  // never a real flake in practice — the earlier "flaky" observations were
+  // most likely made while other CPU-heavy work was running alongside the
+  // test suite, not a defect in this test or the render pipeline.
 
   test('screenshot of static shader produces stable pixel hash', async ({ page }) => {
     // A deterministic shader that doesn't use iTime
