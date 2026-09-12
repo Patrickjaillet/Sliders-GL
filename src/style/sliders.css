@@ -519,7 +519,13 @@
    No separate track/handle — the field itself is the drag target. A thin
    accent fill (--fill-pct, set from slider.js) shows the value's position
    in [min,max]; the numeric input sits on top, right-aligned, and only
-   becomes interactive/caret-visible once focused (see .editing below). */
+   becomes interactive/caret-visible once focused (see .editing below).
+
+   The fill's color comes from --fill-color, which defaults to the old
+   flat --accent-dim but is overridden per category below
+   (.sl-field[data-cat="…"]) so each uniform group (rotation, color,
+   fractal, …) reads as a distinct color at a glance, matching the
+   category glyphs already used in the Outliner/group headers. */
 
 .sl-field {
   flex: 1;
@@ -527,8 +533,9 @@
   height: 20px;
   min-width: 0;
   border-radius: var(--radius-sm);
+  --fill-color: var(--accent-dim);
   background:
-    linear-gradient(90deg, var(--accent-dim) var(--fill-pct, 0%), transparent var(--fill-pct, 0%))
+    linear-gradient(90deg, var(--fill-color) var(--fill-pct, 0%), transparent var(--fill-pct, 0%))
       no-repeat,
     var(--bg-raised);
   /* Subtle recessed-track depth (Blender's inset numeric field look) — a
@@ -550,6 +557,43 @@
   box-shadow:
     inset 0 1px 2px rgba(0, 0, 0, 0.1),
     inset 0 0 0 1px var(--border-mid);
+}
+
+/* Per-category fill colors — see the --fill-color comment above. Alpha
+   kept low (20%) so the fill reads as a colored tint rather than a solid
+   bar, consistent with the original --accent-dim's own subtlety; each
+   color already carries enough saturation at this alpha to be
+   distinguishable against --bg-raised without needing a higher opacity.
+   Written as plain rgba() (matching --accent-dim's own pattern above)
+   rather than color-mix() for broad WebView2/Chromium compatibility —
+   this is the app's first color swatch to vary by category, so no
+   runtime feature-detection exists to fall back on if unsupported. */
+.sl-field[data-cat='globals'] {
+  --fill-color: rgba(107, 107, 107, 0.2);
+}
+.sl-field[data-cat='iterations'] {
+  --fill-color: rgba(184, 89, 15, 0.2);
+}
+.sl-field[data-cat='rotation'] {
+  --fill-color: rgba(14, 124, 156, 0.2);
+}
+.sl-field[data-cat='camera'] {
+  --fill-color: rgba(109, 79, 196, 0.2);
+}
+.sl-field[data-cat='fractal'] {
+  --fill-color: rgba(176, 48, 143, 0.2);
+}
+.sl-field[data-cat='glow'] {
+  --fill-color: rgba(201, 151, 26, 0.2);
+}
+.sl-field[data-cat='color'] {
+  --fill-color: rgba(31, 157, 90, 0.2);
+}
+.sl-field[data-cat='vectors'] {
+  --fill-color: rgba(47, 111, 214, 0.2);
+}
+.sl-field[data-cat='misc'] {
+  --fill-color: rgba(122, 122, 122, 0.2);
 }
 
 .sl-field.active,

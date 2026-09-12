@@ -120,6 +120,27 @@
   --accent-b: 80;
 
   /* ============================================================
+     SLIDER CATEGORY COLORS — one hue per uniform group (rotation,
+     color, fractal, etc.), used only for the slider fill bar
+     (.sl-field[data-cat]) so groups are distinguishable at a glance
+     without reading labels. Chosen at consistent ~55-65% lightness so
+     each reads clearly against --bg-raised (#d6d6d6) without any one
+     hue feeling louder than the rest; kept out of the --accent family
+     since --accent stays reserved for selection/active-state UI chrome,
+     not per-category decoration (see docs/design-system.md).
+     ============================================================ */
+
+  --cat-globals: #6b6b6b;
+  --cat-iterations: #b8590f;
+  --cat-rotation: #0e7c9c;
+  --cat-camera: #6d4fc4;
+  --cat-fractal: #b0308f;
+  --cat-glow: #c9971a;
+  --cat-color: #1f9d5a;
+  --cat-vectors: #2f6fd6;
+  --cat-misc: #7a7a7a;
+
+  /* ============================================================
      FUNCTIONAL STATES — darkened for AA text contrast on light-gray
      ============================================================ */
 

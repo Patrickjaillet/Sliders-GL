@@ -593,6 +593,7 @@ function _channelSlidersHTML(entries, labels) {
       <span class="sl-chan-label" aria-hidden="true">${labels[i] || ''}</span>
       <div class="sl-field sl-field-mini" id="sl-${e.id}"
         data-id="${escAttr(e.id)}"
+        data-cat="${escAttr(e.category || 'misc')}"
         data-min="${e.min}" data-max="${e.max}" data-step="${e.step}" data-decimals="${e.decimals}"${e.isLog ? ' data-log="1"' : ''}
         data-soft-min="${softMin}" data-soft-max="${softMax}"
         style="--fill-pct:${pct}%"
@@ -874,6 +875,7 @@ function _sliderRowHTML(e) {
     <span class="sn" id="sn-${e.id}" ondblclick="startRename(decodeURIComponent('${idArg}'))" title="Double-click to rename">${esc(e.label)}</span>
     <div class="sl-field" id="sl-${e.id}"
       data-id="${escAttr(e.id)}"
+      data-cat="${escAttr(e.category || 'misc')}"
       data-min="${e.min}" data-max="${e.max}" data-step="${e.step}" data-decimals="${e.decimals}"${e.isLog ? ' data-log="1"' : ''}
       data-soft-min="${softMin}" data-soft-max="${softMax}"
       style="--fill-pct:${pct}%">

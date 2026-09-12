@@ -18,6 +18,20 @@ dark `z-gl-dark` theme (`--bg-editor`) regardless of the app's light-gray
 surfaces, because the editor's syntax-highlight palette is tuned for a dark
 background.
 
+### Category colors
+
+A second, narrowly-scoped exception to the single-accent rule: the
+`--cat-*` tokens (`--cat-globals`, `--cat-rotation`, `--cat-color`, etc.,
+one per uniform group in `slider.js`'s `CAT_ORDER`) give each slider panel
+group its own hue, applied only to the slider fill bar
+(`.sl-field[data-cat="…"]` in `sliders.css`) at a low, consistent 20%
+alpha — a scanning aid for panels with many groups, not a second brand
+accent. Don't use `--cat-*` for buttons, borders, or any other UI chrome;
+that stays `--accent`. When adding a new category to `CAT_ORDER`, add a
+matching `--cat-*` token and `.sl-field[data-cat]` rule together, picking a
+hue distinct from its neighbors at the same ~55-65% lightness the existing
+set uses.
+
 ## Surfaces
 
 Four flat surface levels, each one step lighter than the last:

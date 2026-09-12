@@ -5,6 +5,15 @@ All notable changes to Sliders GL are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] — 2026-09-12
+
+### Added
+
+- Slider fill bars are now tinted by uniform category (Rotation, Color,
+  Fractal, Glow, Vectors, etc.), each with its own subtle color, instead of
+  a single flat teal tint for every slider — makes it faster to visually
+  scan a large panel and spot which group a slider belongs to.
+
 ## [1.9.4] — 2026-09-12
 
 ### Added
@@ -297,6 +306,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   locally — zero network dependency for core functionality.
 - MIT license.
 
+[1.10.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.10.0
 [1.9.4]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.4
 [1.9.3]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.3
 [1.9.2]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.2
