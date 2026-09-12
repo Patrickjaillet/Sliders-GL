@@ -23,6 +23,26 @@ npm run tauri:dev
 - Run linting: `npm run lint`
 - Run the offline-dependency check: `npm run check:offline`
 
+## Design system
+
+Sliders GL follows a single light/medium-gray "workbench" theme with one
+teal accent (`--accent`) — see
+[`docs/design-system.md`](docs/design-system.md) for the full nomenclature
+(surfaces, elevation, spacing, typography, geometry tokens) before touching
+CSS. In short:
+
+- All new colors, spacing, and radii should reference the tokens in
+  `src/style/tokens.css` (`--bg-surface`, `--space-*`, `--radius-*`, etc.),
+  not new hardcoded values or the legacy short aliases (`--bg2`, `--t1`,
+  and similar).
+- Don't introduce a second accent color or a dark theme for the app shell.
+  The Monaco editor's own dark theme is the one deliberate exception.
+- `--text-ghost` is reserved for disabled controls only — using it for any
+  visible, enabled text is a recurring contrast bug this project has fixed
+  multiple times; use `--text-dim` instead for dim-but-readable text.
+- When adding a new color token, compute and comment its WCAG contrast
+  ratio against the surface(s) it sits on, matching the existing tokens.
+
 ## Pull requests
 
 - Keep changes focused and scoped to a single concern.

@@ -5,6 +5,20 @@ All notable changes to Sliders GL are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.4] — 2026-09-12
+
+### Added
+
+- A GitHub Pages presentation site (`docs/index.html`) with real
+  screenshots, a feature overview, and a download link.
+- `CONTRIBUTING.md` now points contributors to the design system
+  conventions before they touch any CSS.
+
+### Changed
+
+- Regenerated the README screenshot from the actual desktop app (not a
+  browser tab) to reflect the current, dead-space-free layout.
+
 ## [1.9.3] — 2026-09-12
 
 ### Added
@@ -283,6 +297,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   locally — zero network dependency for core functionality.
 - MIT license.
 
+[1.9.4]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.4
 [1.9.3]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.3
 [1.9.2]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.2
 [1.9.1]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.1

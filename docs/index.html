@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sliders GL — Shadertoy-compatible GLSL editor for Windows</title>
+    <meta
+      name="description"
+      content="Sliders GL is a Shadertoy-compatible GLSL shader editor with a Blender-style desktop UI for Windows 10/11. Offline-first, ultra-precise sliders, live preview."
+    />
+    <link rel="icon" href="screenshot.png" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-void: #c4c4c4;
+        --bg-surface: #cdcdcd;
+        --bg-raised: #d6d6d6;
+        --bg-panel: #d1d1d1;
+        --border-mid: #a8a8a8;
+        --text-primary: #242424;
+        --text-dim: #4a4a4a;
+        --accent: #0b5650;
+        --accent-hover: #14847a;
+        --font-ui: 'Inter', system-ui, sans-serif;
+        --font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          --bg-void: #1c1e1e;
+          --bg-surface: #242727;
+          --bg-raised: #2c3030;
+          --bg-panel: #26292a;
+          --border-mid: #3a3e3e;
+          --text-primary: #ececec;
+          --text-dim: #a8adad;
+          --accent: #17b3a6;
+          --accent-hover: #21d4c4;
+        }
+      }
+      :root[data-theme='dark'] {
+        --bg-void: #1c1e1e;
+        --bg-surface: #242727;
+        --bg-raised: #2c3030;
+        --bg-panel: #26292a;
+        --border-mid: #3a3e3e;
+        --text-primary: #ececec;
+        --text-dim: #a8adad;
+        --accent: #17b3a6;
+        --accent-hover: #21d4c4;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--bg-void);
+        color: var(--text-primary);
+        font-family: var(--font-ui);
+        line-height: 1.5;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      /* ── Hero with Three.js canvas ─────────────────────────── */
+      .hero {
+        position: relative;
+        min-height: 92vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        overflow: hidden;
+        border-bottom: 1px solid var(--border-mid);
+      }
+      #hero-canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        display: block;
+      }
+      .hero-content {
+        position: relative;
+        z-index: 1;
+        padding: 24px;
+        max-width: 720px;
+      }
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--accent);
+        background: rgba(11, 86, 80, 0.12);
+        border: 1px solid var(--accent);
+        border-radius: 999px;
+        padding: 4px 12px;
+        margin-bottom: 20px;
+      }
+      .hero h1 {
+        font-size: clamp(32px, 6vw, 56px);
+        font-weight: 700;
+        margin: 0 0 14px;
+        letter-spacing: -0.02em;
+      }
+      .hero p.tagline {
+        font-size: clamp(15px, 2.2vw, 19px);
+        color: var(--text-dim);
+        margin: 0 0 32px;
+      }
+      .hero-ctas {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--font-ui);
+        font-weight: 600;
+        font-size: 14px;
+        padding: 12px 22px;
+        border-radius: 8px;
+        text-decoration: none;
+        border: 1px solid transparent;
+        transition:
+          transform 0.15s ease,
+          background 0.15s ease,
+          border-color 0.15s ease;
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: var(--accent-hover);
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--text-primary);
+        border-color: var(--border-mid);
+      }
+      .btn-ghost:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .scroll-cue {
+        position: absolute;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 11px;
+        font-family: var(--font-mono);
+        color: var(--text-dim);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        z-index: 1;
+        opacity: 0.7;
+      }
+
+      /* ── Sections ───────────────────────────────────────────── */
+      section {
+        padding: 88px 0;
+      }
+      h2 {
+        font-size: clamp(24px, 3.4vw, 32px);
+        font-weight: 700;
+        text-align: center;
+        margin: 0 0 12px;
+        letter-spacing: -0.01em;
+      }
+      .section-sub {
+        text-align: center;
+        color: var(--text-dim);
+        max-width: 560px;
+        margin: 0 auto 56px;
+        font-size: 15px;
+      }
+
+      /* ── Feature grid ───────────────────────────────────────── */
+      .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+      }
+      .feature {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-mid);
+        border-radius: 10px;
+        padding: 24px;
+      }
+      .feature-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: rgba(11, 86, 80, 0.12);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        margin-bottom: 14px;
+      }
+      .feature h3 {
+        font-size: 16px;
+        margin: 0 0 8px;
+      }
+      .feature p {
+        font-size: 13.5px;
+        color: var(--text-dim);
+        margin: 0;
+      }
+
+      /* ── Screenshot gallery ─────────────────────────────────── */
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+      .gallery figure {
+        margin: 0;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-mid);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .gallery img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-bottom: 1px solid var(--border-mid);
+      }
+      .gallery figcaption {
+        padding: 12px 16px;
+        font-size: 13px;
+        color: var(--text-dim);
+      }
+      @media (max-width: 720px) {
+        .gallery {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ── Download ───────────────────────────────────────────── */
+      .download-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-mid);
+        border-radius: 14px;
+        padding: 48px 32px;
+        text-align: center;
+      }
+      .download-card h2 {
+        margin-bottom: 8px;
+      }
+      .download-card .section-sub {
+        margin-bottom: 28px;
+      }
+      .req-note {
+        margin-top: 20px;
+        font-size: 12.5px;
+        color: var(--text-dim);
+        font-family: var(--font-mono);
+      }
+
+      footer {
+        border-top: 1px solid var(--border-mid);
+        padding: 32px 0;
+        text-align: center;
+        font-size: 12.5px;
+        color: var(--text-dim);
+      }
+      footer a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      footer a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="hero">
+      <canvas id="hero-canvas"></canvas>
+      <div class="hero-content">
+        <span class="hero-badge">● Windows 10/11 · fully offline</span>
+        <h1>Sliders GL</h1>
+        <p class="tagline">
+          A Shadertoy-compatible GLSL shader editor with a Blender-style desktop UI. Ultra-precise
+          sliders for every uniform, a Monaco-powered editor, and instant live preview — built for
+          Windows, built to work offline.
+        </p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="https://github.com/Patrickjaillet/Sliders-GL/releases"
+            >Download for Windows</a
+          >
+          <a class="btn btn-ghost" href="https://github.com/Patrickjaillet/Sliders-GL"
+            >View on GitHub</a
+          >
+        </div>
+      </div>
+      <div class="scroll-cue">scroll ↓</div>
+    </section>
+
+    <div class="wrap">
+      <section id="features">
+        <h2>Everything a shader needs, exposed as a control</h2>
+        <p class="section-sub">
+          Sliders GL turns every uniform in a GLSL shader into a precise, keyboard-accessible
+          control — no more editing numbers by hand and re-compiling to see the result.
+        </p>
+        <div class="features">
+          <div class="feature">
+            <div class="feature-icon">◈</div>
+            <h3>Ultra-precise sliders</h3>
+            <p>
+              Click-drag scrubbing, fine/coarse step modifiers, per-channel vector and color
+              controls, full keyboard access.
+            </p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">✎</div>
+            <h3>Monaco-based editor</h3>
+            <p>
+              Syntax highlighting, inline diagnostics, autocomplete, and code formatting for GLSL,
+              right inside the app.
+            </p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">⇄</div>
+            <h3>ShaderToy-compatible</h3>
+            <p>
+              <code>mainImage</code>, <code>iResolution</code>, <code>iTime</code>,
+              <code>iMouse</code>, channel uniforms — with direct import by ID or URL.
+            </p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">⇩</div>
+            <h3>Full export pipeline</h3>
+            <p>
+              Frame and screenshot export, video recording, standalone HTML, and full project ZIP
+              export.
+            </p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">▥</div>
+            <h3>Blender-style workspace</h3>
+            <p>
+              Topbar, tool shelf, tabbed Properties, Outliner, draggable/ collapsible areas — a real
+              desktop editor, not a wrapped webpage.
+            </p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">⛨</div>
+            <h3>Fully offline</h3>
+            <p>
+              All runtimes, fonts, and tooling are bundled locally. Zero network dependency for core
+              functionality.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="screenshots">
+        <h2>See it in action</h2>
+        <p class="section-sub">
+          A light, medium-gray workbench theme with a single teal accent — built to stay out of the
+          way of the shader you're working on.
+        </p>
+        <div class="gallery">
+          <figure>
+            <img
+              src="screenshot.png"
+              alt="Sliders GL rendering a procedural tunnel shader, full viewport"
+              loading="lazy"
+            />
+            <figcaption>
+              Live GLSL preview — the viewport fills the available space, no dead space around the
+              render.
+            </figcaption>
+          </figure>
+          <figure>
+            <img
+              src="shot-editor.png"
+              alt="Sliders GL Monaco code editor with slider panel"
+              loading="lazy"
+            />
+            <figcaption>
+              Monaco-powered GLSL editor alongside the auto-generated uniform sliders.
+            </figcaption>
+          </figure>
+          <figure>
+            <img
+              src="shot-compare.png"
+              alt="Sliders GL before/after compare view with blend slider"
+              loading="lazy"
+            />
+            <figcaption>
+              Before/after compare mode with a live blend slider for A/B-ing changes.
+            </figcaption>
+          </figure>
+          <figure>
+            <img
+              src="shot-diagnostics.png"
+              alt="Sliders GL render settings and GPU diagnostics panel"
+              loading="lazy"
+            />
+            <figcaption>
+              Render settings and read-only GPU diagnostics, right in the sidebar.
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="download">
+        <div class="download-card">
+          <h2>Get Sliders GL</h2>
+          <p class="section-sub">
+            Free, native Windows desktop app. No installation of a runtime or browser required.
+          </p>
+          <div class="hero-ctas">
+            <a class="btn btn-primary" href="https://github.com/Patrickjaillet/Sliders-GL/releases"
+              >Download the latest release</a
+            >
+            <a class="btn btn-ghost" href="https://github.com/Patrickjaillet/Sliders-GL#readme"
+              >Read the docs</a
+            >
+          </div>
+          <p class="req-note">Windows 10 / Windows 11 · MIT licensed</p>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <div class="wrap">
+        Sliders GL — © 2026 Patrick JAILLET · MIT License ·
+        <a href="https://github.com/Patrickjaillet/Sliders-GL">GitHub</a>
+      </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+      (function () {
+        var canvas = document.getElementById('hero-canvas');
+        if (!window.THREE || !canvas) return;
+
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(
+          60,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          100
+        );
+        camera.position.z = 6;
+
+        var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+        function resize() {
+          var w = canvas.parentElement.clientWidth;
+          var h = canvas.parentElement.clientHeight;
+          renderer.setSize(w, h, false);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+        }
+
+        // A shader-like plane driven by a fragment shader, echoing the app's own
+        // GLSL-editing identity rather than a generic particle field.
+        var geo = new THREE.PlaneGeometry(20, 20, 1, 1);
+        var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var accentColor = isDark
+          ? new THREE.Vector3(0.09, 0.7, 0.65)
+          : new THREE.Vector3(0.04, 0.34, 0.31);
+        var bgColor = isDark
+          ? new THREE.Vector3(0.11, 0.12, 0.12)
+          : new THREE.Vector3(0.77, 0.77, 0.77);
+
+        var mat = new THREE.ShaderMaterial({
+          uniforms: {
+            uTime: { value: 0 },
+            uAccent: { value: accentColor },
+            uBg: { value: bgColor },
+          },
+          vertexShader: [
+            'varying vec2 vUv;',
+            'void main() {',
+            '  vUv = uv;',
+            '  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
+            '}',
+          ].join('\n'),
+          fragmentShader: [
+            'precision highp float;',
+            'varying vec2 vUv;',
+            'uniform float uTime;',
+            'uniform vec3 uAccent;',
+            'uniform vec3 uBg;',
+            'void main() {',
+            '  vec2 uv = vUv * 2.0 - 1.0;',
+            '  float t = uTime * 0.15;',
+            '  float d = length(uv);',
+            '  float rings = sin(d * 10.0 - t * 4.0);',
+            '  float wave = sin(uv.x * 4.0 + t * 2.0) * sin(uv.y * 4.0 - t * 1.6);',
+            '  float mixv = smoothstep(-0.2, 0.9, rings * 0.5 + wave * 0.5);',
+            '  vec3 col = mix(uBg, uAccent, mixv * (1.0 - d * 0.5));',
+            '  float fade = smoothstep(1.4, 0.2, d);',
+            '  gl_FragColor = vec4(col, fade * 0.9);',
+            '}',
+          ].join('\n'),
+          transparent: true,
+        });
+
+        var mesh = new THREE.Mesh(geo, mat);
+        scene.add(mesh);
+
+        resize();
+        window.addEventListener('resize', resize);
+
+        var clock = new THREE.Clock();
+        var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function animate() {
+          if (!reduceMotion) {
+            mat.uniforms.uTime.value = clock.getElapsedTime();
+          }
+          renderer.render(scene, camera);
+          requestAnimationFrame(animate);
+        }
+        animate();
+      })();
+    </script>
+  </body>
+</html>
