@@ -5,6 +5,23 @@ All notable changes to Sliders GL are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.3] — 2026-09-12
+
+### Added
+
+- New end-to-end test coverage: the sound toggle, Help menu additions,
+  Shader Library/Includes Manager buttons, and canvas gizmos/compare-view
+  toggles are now covered by automated regression tests, as is the viewport
+  resize pipeline (confirming the canvas actually changes GL resolution,
+  not just its CSS size, on a window resize) and overall layout coverage
+  at four common desktop resolutions.
+
+### Removed
+
+- Removed `scripts/benchmark.js` and the `npm run benchmark` command: it
+  measured the throughput of a GLSL→WGSL transpiler that no longer exists
+  in this codebase, and had been silently broken for a while.
+
 ## [1.9.2] — 2026-09-12
 
 ### Fixed
@@ -266,6 +283,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   locally — zero network dependency for core functionality.
 - MIT license.
 
+[1.9.3]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.3
 [1.9.2]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.2
 [1.9.1]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.1
 [1.9.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.0

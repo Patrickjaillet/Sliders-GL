@@ -112,11 +112,13 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     await page.waitForTimeout(500);
 
     // Read the actual WebGL framebuffer rather than an element .screenshot():
-    // #glc is displayed through a CSS transform: scale(var(--cw-scale)) wrapper
-    // (see .cw.scale-fit in layout.css), and rasterizing a fractionally-scaled
-    // element into a PNG twice in a row is not guaranteed pixel-stable (browser
-    // compositing/anti-aliasing jitter) even though the GL content underneath
-    // is byte-identical — confirmed by comparing raw readPixels() output above.
+    // #glc is letterboxed to fill its column (`max-width/max-height: 100%` on
+    // .cw, see layout.css — the old `.cw.scale-fit`/CSS `transform:
+    // scale(var(--cw-scale))` approach was replaced by a real GL-level
+    // resize, §2 roadmap), and rasterizing an element into a PNG twice in a
+    // row is not guaranteed pixel-stable (browser compositing/anti-aliasing
+    // jitter) even though the GL content underneath is byte-identical —
+    // confirmed by comparing raw readPixels() output above.
     const readGlPixels = () =>
       page.evaluate(() => {
         const canvas = document.getElementById('glc');
@@ -180,5 +182,62 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // Image tab should be visible
     const imageTab = page.locator('.export-tab').first();
     await expect(imageTab).toBeVisible();
+  });
+
+  // ── Test 5: Viewport resize triggers a real GL-level resize ────────────────
+  // §13 roadmap: the §2 rework replaced `.cw.scale-fit` (a CSS-only
+  // transform:scale(), same fixed-resolution canvas underneath) with a real
+  // `renderer.setSize()` resize measured off #viewportCol (gl/renderer.js).
+  // That fix's whole point was that #glc.width/#glc.height actually change
+  // with the window instead of always reporting a stale fixed size — this
+  // regression-tests exactly that property, which no existing test covered.
+
+  test('window resize changes the canvas GL resolution and rendering continues', async ({
+    page,
+  }) => {
+    const shader = `
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+  vec2 uv = fragCoord / iResolution.xy;
+  fragColor = vec4(uv, 0.5 + 0.5 * sin(iTime), 1.0);
+}`;
+    await applyShader(page, shader);
+    await waitForRender(page);
+
+    const sizeBefore = await page.evaluate(() => {
+      const c = document.getElementById('glc');
+      return { width: c.width, height: c.height };
+    });
+    expect(sizeBefore.width).toBeGreaterThan(0);
+    expect(sizeBefore.height).toBeGreaterThan(0);
+
+    // Shrink the window enough that the viewport column must actually shrink
+    // (not just letterbox within the same box).
+    const original = page.viewportSize();
+    await page.setViewportSize({
+      width: Math.max(640, (original?.width ?? 1280) - 400),
+      height: Math.max(480, (original?.height ?? 720) - 300),
+    });
+
+    // doResize() is ResizeObserver-driven (viewport.js), not synchronous —
+    // give it a moment, then confirm the GL canvas actually changed size.
+    await page.waitForTimeout(400);
+    const sizeAfter = await page.evaluate(() => {
+      const c = document.getElementById('glc');
+      return { width: c.width, height: c.height };
+    });
+    expect(sizeAfter.width !== sizeBefore.width || sizeAfter.height !== sizeBefore.height).toBe(
+      true
+    );
+
+    // And rendering must still be live at the new resolution — not stuck
+    // showing a stale frame from before the resize.
+    const stillRendering = await page.evaluate(() => {
+      const canvas = document.getElementById('glc');
+      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+      const pixels = new Uint8Array(4);
+      gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+      return pixels.some((v) => v !== 0);
+    });
+    expect(stillRendering).toBe(true);
   });
 });

@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
-import { resolve }      from 'path'
+import { defineConfig } from 'vite';
+import { resolve } from 'path';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { resolve as resolvePath, dirname } from 'path';
@@ -36,35 +36,38 @@ const _require = createRequire(import.meta.url);
 
 const MONACO_WORKERS = [
   { label: 'editorWorkerService', entry: 'monaco-editor/esm/vs/editor/editor.worker' },
-  { label: 'css',        entry: 'monaco-editor/esm/vs/language/css/css.worker' },
-  { label: 'html',       entry: 'monaco-editor/esm/vs/language/html/html.worker' },
-  { label: 'json',       entry: 'monaco-editor/esm/vs/language/json/json.worker' },
+  { label: 'css', entry: 'monaco-editor/esm/vs/language/css/css.worker' },
+  { label: 'html', entry: 'monaco-editor/esm/vs/language/html/html.worker' },
+  { label: 'json', entry: 'monaco-editor/esm/vs/language/json/json.worker' },
   { label: 'typescript', entry: 'monaco-editor/esm/vs/language/typescript/ts.worker' },
 ];
 
 // Extra label aliases (same worker file)
 const WORKER_ALIASES = {
   javascript: 'typescript',
-  less:       'css',
-  scss:       'css',
+  less: 'css',
+  scss: 'css',
   handlebars: 'html',
-  razor:      'html',
+  razor: 'html',
 };
 
-const PUBLIC_PATH  = 'monacoeditorwork';
-const CACHE_DIR    = 'node_modules/.monaco-cache/';
+const PUBLIC_PATH = 'monacoeditorwork';
+const CACHE_DIR = 'node_modules/.monaco-cache/';
 
 function workerBundleName(entry) {
   // entry: 'monaco-editor/esm/vs/editor/editor.worker'
   // → 'editor.bundle.js' (not 'editor.worker.bundle.js' to avoid double .worker)
-  const base = basename(entry);            // 'editor.worker'
+  const base = basename(entry); // 'editor.worker'
   const stem = base.replace(/\.worker$/, ''); // 'editor'
   return stem + '.bundle.js';
 }
 
 function resolveWorkerEntry(entry) {
-  try { return _require.resolve(join(process.cwd(), 'node_modules', entry)); }
-  catch { return _require.resolve(entry); }
+  try {
+    return _require.resolve(join(process.cwd(), 'node_modules', entry));
+  } catch {
+    return _require.resolve(entry);
+  }
 }
 
 async function buildWorker(entry) {
@@ -73,9 +76,9 @@ async function buildWorker(entry) {
     mkdirSync(CACHE_DIR, { recursive: true });
     await esbuildBuild({
       entryPoints: [resolveWorkerEntry(entry)],
-      bundle:      true,
+      bundle: true,
       outfile,
-      format:      'iife',
+      format: 'iife',
     });
   }
   return outfile;
@@ -87,7 +90,7 @@ function buildWorkerPaths(base = '/') {
     paths[w.label] = `${base}${PUBLIC_PATH}/${workerBundleName(w.entry)}`;
   }
   for (const [alias, target] of Object.entries(WORKER_ALIASES)) {
-    const src = MONACO_WORKERS.find(w => w.label === target);
+    const src = MONACO_WORKERS.find((w) => w.label === target);
     if (src) paths[alias] = `${base}${PUBLIC_PATH}/${workerBundleName(src.entry)}`;
   }
   return paths;
@@ -98,7 +101,9 @@ function monacoWorkerPlugin() {
   return {
     name: 'zgl-monaco-workers',
 
-    configResolved(cfg) { resolvedConfig = cfg; },
+    configResolved(cfg) {
+      resolvedConfig = cfg;
+    },
 
     // DEV: serve bundled workers via middleware
     configureServer(server) {
@@ -129,7 +134,7 @@ function monacoWorkerPlugin() {
     // Monaco appelle new Worker(url) classique, pas de module worker type:'module' →
     // pas de rejet silencieux par WebView2 → state.editor défini → sliders visibles.
     transformIndexHtml() {
-      const base  = resolvedConfig?.base ?? '/';
+      const base = resolvedConfig?.base ?? '/';
       const paths = buildWorkerPaths(base);
       // IMPORTANT: utiliser getWorker() et non getWorkerUrl().
       // Monaco 0.55 (webWorkerFactory.js) force type:'module' même quand getWorkerUrl()
@@ -137,9 +142,9 @@ function monacoWorkerPlugin() {
       // getWorker() retourne directement un Worker classique (sans type:'module').
       return [
         {
-          tag:      'script',
+          tag: 'script',
           injectTo: 'head-prepend',
-          attrs:    {},   // pas de type:"module" → script synchrone classique
+          attrs: {}, // pas de type:"module" → script synchrone classique
           children: `self["MonacoEnvironment"]=(function(p){return{getWorker:function(id,label){return new Worker(p[label]||p["editorWorkerService"],{name:label});}}})(${JSON.stringify(paths)});`,
         },
       ];
@@ -186,7 +191,7 @@ function rawHtmlPlugin() {
     resolveId(id, importer) {
       // Only intercept *.html?raw imports
       const qIdx = id.indexOf('?');
-      const filePart  = qIdx === -1 ? id : id.slice(0, qIdx);
+      const filePart = qIdx === -1 ? id : id.slice(0, qIdx);
       const queryPart = qIdx === -1 ? '' : id.slice(qIdx + 1);
       if (!filePart.endsWith('.html')) return null;
       if (!queryPart.split('&').includes('raw')) return null;
@@ -196,8 +201,8 @@ function rawHtmlPlugin() {
       if (importer) {
         // Strip query/virtual prefix from importer path
         const importerClean = importer
-          .replace(/^\0[^:]+:/, '')   // strip any virtual prefix
-          .replace(/\?.*$/, '');      // strip query string
+          .replace(/^\0[^:]+:/, '') // strip any virtual prefix
+          .replace(/\?.*$/, ''); // strip query string
         const importerFile = importerClean.startsWith('file://')
           ? fileURLToPath(importerClean)
           : importerClean;
@@ -215,9 +220,9 @@ function rawHtmlPlugin() {
 
     load(id) {
       if (!id.startsWith(MARKER)) return null;
-      const encoded  = id.slice(MARKER.length);
+      const encoded = id.slice(MARKER.length);
       const filePath = Buffer.from(encoded, 'base64url').toString('utf-8');
-      const content  = readFileSync(filePath, 'utf-8');
+      const content = readFileSync(filePath, 'utf-8');
       // Single JSON.stringify — rolldown never sees ?raw on this virtual id.
       return `export default ${JSON.stringify(content)};`;
     },
@@ -265,7 +270,7 @@ export default defineConfig({
     // src/setup.js imports `./ui.html?raw` which requires this plugin to intercept
     // the ?raw query before rolldown handles it (would cause double JSON.stringify).
     // Removing it will break the build with a malformed DOM (escaped SVG attributes).
-    rawHtmlPlugin(),   // Fix 0.1 — must come before tauriStubPlugin
+    rawHtmlPlugin(), // Fix 0.1 — must come before tauriStubPlugin
     tauriStubPlugin(),
     // Fix tauri:dev — serve Monaco workers as real bundled files (not blob: URLs).
     // See monacoWorkerPlugin() above for the full explanation.
@@ -303,26 +308,25 @@ export default defineConfig({
           const norm = String(id || '').replace(/\\/g, '/');
 
           // ── Third-party vendors ──────────────────────────────────────────
-          if (norm.includes('/node_modules/three/'))         return 'vendor-three';
+          if (norm.includes('/node_modules/three/')) return 'vendor-three';
           if (norm.includes('/node_modules/monaco-editor/')) return 'vendor-monaco';
-          if (norm.includes('/node_modules/jszip/'))         return 'vendor-jszip';
+          if (norm.includes('/node_modules/jszip/')) return 'vendor-jszip';
 
           // ── Large data / doc chunks (lazy-loaded at runtime) ─────────────
           // These files are only needed after user interaction, so isolating
           // them keeps the initial bundle lean.
-          if (norm.includes('/src/io/presets.js'))                   return 'data-presets';
+          if (norm.includes('/src/io/presets.js')) return 'data-presets';
           if (norm.includes('/src/shader/snippet-pack-extended.js')) return 'data-snippets';
-          if (norm.includes('/src/ui/glsl-language.js'))            return 'data-glsl-lang';
-          if (norm.includes('/src/ui/help-center.js'))              return 'ui-help';
-          if (norm.includes('/src/render/lut-library.js'))          return 'data-luts';
-          if (norm.includes('/src/shader/glsl-docs-db.js'))         return 'data-glsl-docs';
-          if (norm.includes('/src/ui/version-history-panel.js'))    return 'ui-vh';
-          if (norm.includes('/src/ui/shader-library-panel.js'))     return 'ui-shader-lib';
-          if (norm.includes('/src/render/perf.js'))                 return 'render-perf';
+          if (norm.includes('/src/ui/glsl-language.js')) return 'data-glsl-lang';
+          if (norm.includes('/src/ui/help-center.js')) return 'ui-help';
+          if (norm.includes('/src/render/lut-library.js')) return 'data-luts';
+          if (norm.includes('/src/shader/glsl-docs-db.js')) return 'data-glsl-docs';
+          if (norm.includes('/src/ui/version-history-panel.js')) return 'ui-vh';
+          if (norm.includes('/src/ui/shader-library-panel.js')) return 'ui-shader-lib';
 
           // ── Core app chunks (grouped by domain) ──────────────────────────
-          if (norm.endsWith('/src/shader/parser.js'))  return 'glsl-parser';
-          if (norm.endsWith('/src/ui/slider.js'))      return 'ui-slider';
+          if (norm.endsWith('/src/shader/parser.js')) return 'glsl-parser';
+          if (norm.endsWith('/src/ui/slider.js')) return 'ui-slider';
         },
       },
     },
@@ -345,7 +349,7 @@ export default defineConfig({
     // They are also safe for npm run dev in a browser: COOP/COEP enable
     // SharedArrayBuffer and crossOriginIsolated, which is what we want anyway.
     headers: {
-      'Cross-Origin-Opener-Policy':   'same-origin',
+      'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Embedder-Policy': 'require-corp',
       'Cross-Origin-Resource-Policy': 'same-origin',
     },
@@ -354,7 +358,7 @@ export default defineConfig({
   preview: {
     port: 5173,
     headers: {
-      'Cross-Origin-Opener-Policy':   'same-origin',
+      'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Embedder-Policy': 'require-corp',
       'Cross-Origin-Resource-Policy': 'same-origin',
     },
@@ -370,4 +374,4 @@ export default defineConfig({
       reporter: ['text', 'html'],
     },
   },
-})
+});
