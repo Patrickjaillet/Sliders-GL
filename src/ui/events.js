@@ -37,6 +37,7 @@ import {
   openSTModal,
   closeSTModal,
   doSTImport,
+  _stConfirmImport,
   stStoreApiKey,
   stOpenInST,
   stStoreProxyUrlInput,
@@ -58,6 +59,7 @@ import { toggleInspectorPanel } from './inspector-context.js';
 import { toggleSettingsPanel, getEditorPrefs, patchEditorPref } from './settings-panel.js';
 import { toggleShaderAnatomy } from './shader-anatomy.js';
 import { openWhichKey } from './which-key.js';
+import { renderExportPreviewAtSelectedRes } from './export-last-used.js';
 import { playSound, toggleSound, isSoundEnabled } from './sound.js';
 import {
   toggleFileMenu,
@@ -136,6 +138,7 @@ const ACTIONS = {
   toggleMinimap,
   openCommandPalette,
   doSTImport,
+  _stConfirmImport,
   stStoreApiKey,
   stStoreProxyUrlInput,
   stSetUseProxyInput,
@@ -148,6 +151,7 @@ const ACTIONS = {
   exportGLSLSandbox,
   exportShaderToyFormat,
   renderExportPreview,
+  renderExportPreviewAtSelectedRes,
   toggleSound: () => {
     const on = toggleSound();
     playSound('click');

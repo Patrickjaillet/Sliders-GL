@@ -21,47 +21,52 @@ function escHTML(str) {
 
 function sanitizeShaderToyNoteValue(value, fallback = '') {
   const source = value || fallback;
-  return String(source).replace(/[\r\n]+/g, ' ').slice(0, 100);
+  return String(source)
+    .replace(/[\r\n]+/g, ' ')
+    .slice(0, 100);
 }
 
 // Built-in ShaderToy texture stubs (common ones).
 // Maps ShaderToy channel "src" patterns → placeholder colour (RGBA)
 const ST_TEX_MAP = {
-  '/media/a/': [128,128,128,255],   // various abstract textures → grey
-  'noise':     [80,80,80,255],
-  'organic':   [60,100,80,255],
-  'wood':      [120,80,40,255],
-  'rock':      [100,90,80,255],
-  'font':      [255,255,255,255],
-  'keyboard':  [0,0,0,255],
+  '/media/a/': [128, 128, 128, 255], // various abstract textures → grey
+  noise: [80, 80, 80, 255],
+  organic: [60, 100, 80, 255],
+  wood: [120, 80, 40, 255],
+  rock: [100, 90, 80, 255],
+  font: [255, 255, 255, 255],
+  keyboard: [0, 0, 0, 255],
 };
 
 // ShaderToy built-in textures tex00–tex20 → description Sliders GL lisible
 // Source: https://www.shadertoy.com/howto (channel presets)
 const ST_BUILTIN_TEX = {
-  'tex00': 'Abstract (512×512 RGBA)',
-  'tex01': 'Noise (256×256 RGBA LUT)',
-  'tex02': 'Stone wall (512×512)',
-  'tex03': 'Organic / cells (512×512)',
-  'tex04': 'Wood rings (512×512)',
-  'tex05': 'Rock / cliff (512×512)',
-  'tex06': 'Pebbles (512×512)',
-  'tex07': 'Rusted metal (512×512)',
-  'tex08': 'Abstract paint (512×512)',
-  'tex09': 'Paper (512×512)',
-  'tex10': 'Nyan cat (256×256 RGBA)',
-  'tex11': 'Abstract neon (256×256)',
-  'tex12': 'Font atlas (1024×64 RGBA)',
-  'tex14': 'Bayer dithering (256×256)',
-  'tex15': 'RGBA noise (256×256)',
-  'tex16': 'Grayscale noise small (64×64)',
-  'tex17': 'Abstract (512×512)',
-  'tex18': 'Gray noise medium (256×256)',
-  'tex19': 'Gray noise large (512×512)',
-  'tex20': 'Abstract tile (512×512)',
+  tex00: 'Abstract (512×512 RGBA)',
+  tex01: 'Noise (256×256 RGBA LUT)',
+  tex02: 'Stone wall (512×512)',
+  tex03: 'Organic / cells (512×512)',
+  tex04: 'Wood rings (512×512)',
+  tex05: 'Rock / cliff (512×512)',
+  tex06: 'Pebbles (512×512)',
+  tex07: 'Rusted metal (512×512)',
+  tex08: 'Abstract paint (512×512)',
+  tex09: 'Paper (512×512)',
+  tex10: 'Nyan cat (256×256 RGBA)',
+  tex11: 'Abstract neon (256×256)',
+  tex12: 'Font atlas (1024×64 RGBA)',
+  tex14: 'Bayer dithering (256×256)',
+  tex15: 'RGBA noise (256×256)',
+  tex16: 'Grayscale noise small (64×64)',
+  tex17: 'Abstract (512×512)',
+  tex18: 'Gray noise medium (256×256)',
+  tex19: 'Gray noise large (512×512)',
+  tex20: 'Abstract tile (512×512)',
 };
 
 let _stLastCode = null; // store last imported code for "Open in ST"
+// §9 roadmap — pending fetch result, set by doSTImport() once the fetch +
+// preview succeed; consumed and cleared by _stConfirmImport().
+let _stPending = null;
 const ST_PROXY_ENABLED_KEY = 'sl_stProxyEnabled';
 const ST_PROXY_URL_KEY = 'sl_stProxyUrl';
 
@@ -132,6 +137,11 @@ function openSTModal() {
   document.getElementById('stStatus').textContent = '';
   document.getElementById('stOpenBtn').style.display = 'none';
   _stLastCode = null;
+  // §9 roadmap — clear any pending (fetched-but-not-confirmed) preview from
+  // a previous open, and hide the thumbnail from that previous shader.
+  _stPending = null;
+  document.getElementById('stConfirmBtn')?.style.setProperty('display', 'none');
+  document.getElementById('stThumb')?.remove();
   openModalDialog('stModal', '#stShaderId');
 }
 
@@ -141,9 +151,10 @@ function closeSTModal() {
 
 function stParseId(raw) {
   const s = String(raw || '').trim();
-  const m = s.match(/^(?:https?:\/\/)?(?:www\.)?shadertoy\.com\/view\/([A-Za-z0-9]{6,8})(?:[/?#].*)?$/i)
-    || s.match(/^([A-Za-z0-9]{6,8})$/);
-  const id = m ? (m[1] || m[2]) : null;
+  const m =
+    s.match(/^(?:https?:\/\/)?(?:www\.)?shadertoy\.com\/view\/([A-Za-z0-9]{6,8})(?:[/?#].*)?$/i) ||
+    s.match(/^([A-Za-z0-9]{6,8})$/);
+  const id = m ? m[1] || m[2] : null;
   if (!id) {
     throw new Error('ID shader invalide — format attendu: XxXxXxXx ou shadertoy.com/view/XxXxXxXx');
   }
@@ -160,7 +171,7 @@ function stSetUseProxyInput(value) {
 
 async function doSTImport() {
   const apiKey = document.getElementById('stApiKey').value.trim();
-  const rawId  = document.getElementById('stShaderId').value.trim();
+  const rawId = document.getElementById('stShaderId').value.trim();
   const useProxy = !!document.getElementById('stUseProxy')?.checked;
   const proxyUrlRaw = document.getElementById('stProxyUrl')?.value || '';
   const proxyUrl = normalizeProxyUrl(proxyUrlRaw);
@@ -169,8 +180,16 @@ async function doSTImport() {
   stStoreProxyEnabled(useProxy);
   stStoreProxyUrl(proxyUrlRaw.trim());
 
-  if (!apiKey) { statusEl.textContent = '⚠ API key required'; statusEl.style.color = 'var(--ac4)'; return; }
-  if (!rawId)  { statusEl.textContent = '⚠ Shader ID required'; statusEl.style.color = 'var(--ac4)'; return; }
+  if (!apiKey) {
+    statusEl.textContent = '⚠ API key required';
+    statusEl.style.color = 'var(--ac4)';
+    return;
+  }
+  if (!rawId) {
+    statusEl.textContent = '⚠ Shader ID required';
+    statusEl.style.color = 'var(--ac4)';
+    return;
+  }
   if (useProxy && !proxyUrl) {
     statusEl.textContent = '⚠ Proxy URL invalid (use /api/... or http(s)://...)';
     statusEl.style.color = 'var(--ac4)';
@@ -185,7 +204,8 @@ async function doSTImport() {
     statusEl.style.color = 'var(--ac4)';
     return;
   }
-  statusEl.textContent = 'Fetching…'; statusEl.style.color = 'var(--t3)';
+  statusEl.textContent = 'Fetching…';
+  statusEl.style.color = 'var(--t3)';
   document.getElementById('stImportBtn').disabled = true;
 
   try {
@@ -209,11 +229,11 @@ async function doSTImport() {
     if (data.Error) throw new Error(data.Error);
 
     const shader = data.Shader;
-    const info   = shader.info;
+    const info = shader.info;
     const passes = shader.renderpass;
 
     // Find the Image pass
-    const imgPass = passes.find(p => p.type === 'image') || passes[0];
+    const imgPass = passes.find((p) => p.type === 'image') || passes[0];
     if (!imgPass) throw new Error('No image pass found');
 
     // ── Count extra (non-Image) passes for the user-facing summary ──
@@ -221,7 +241,7 @@ async function doSTImport() {
     // This build only ever imports the Image pass — buffers/cubemaps/sound are not
     // reproducible without the render layer's multipass support (removed), so they
     // are just reported as ignored rather than wired up.
-    const stExtraPassCount = passes.filter(p => p !== imgPass).length;
+    const stExtraPassCount = passes.filter((p) => p !== imgPass).length;
 
     // ── Channel resolver — used for each pass ──
     function resolvePassChannels(pass) {
@@ -230,7 +250,7 @@ async function doSTImport() {
       const cubemapChannels = [];
       const soundChannels = [];
       const bufferChannelMap = new Map(); // ch index → appId
-      (pass.inputs || []).forEach(inp => {
+      (pass.inputs || []).forEach((inp) => {
         const ch = inp.channel;
         const src = inp.src || '';
         const ctype = inp.ctype || 'texture';
@@ -238,16 +258,24 @@ async function doSTImport() {
         if (ctype === 'buffer') {
           // No multipass support in this build — buffer-fed channels always fall back to black.
           bufferChannelMap.set(ch, null);
-          channelNotes.push(`// iChannel${ch}: BUFFER PASS → not supported (multi-pass removed), replaced with vec4(0.)`);
+          channelNotes.push(
+            `// iChannel${ch}: BUFFER PASS → not supported (multi-pass removed), replaced with vec4(0.)`
+          );
         } else if (ctype === 'cubemap') {
           cubemapChannels.push(ch);
           const cubeName = sanitizeShaderToyNoteValue(src || 'cubemap', '');
-          channelNotes.push(`// iChannel${ch}: CUBEMAP [${cubeName}] → not supported, replaced with vec4(0.)`);
+          channelNotes.push(
+            `// iChannel${ch}: CUBEMAP [${cubeName}] → not supported, replaced with vec4(0.)`
+          );
         } else if (ctype === 'sound' || ctype === 'music') {
           soundChannels.push(ch);
-          channelNotes.push(`// iChannel${ch}: SOUND [${safeSrc}] → not supported, replaced with vec4(0.)`);
+          channelNotes.push(
+            `// iChannel${ch}: SOUND [${safeSrc}] → not supported, replaced with vec4(0.)`
+          );
         } else if (ctype === 'video') {
-          channelNotes.push(`// iChannel${ch}: VIDEO [${safeSrc}] → not supported, replaced with vec4(0.)`);
+          channelNotes.push(
+            `// iChannel${ch}: VIDEO [${safeSrc}] → not supported, replaced with vec4(0.)`
+          );
         } else if (ctype === 'keyboard') {
           channelNotes.push(`// iChannel${ch}: KEYBOARD → not supported, replaced with vec4(0.)`);
         } else {
@@ -261,7 +289,10 @@ async function doSTImport() {
             mapped = `${texDesc} — not supported, replaced with vec4(0.)`;
           } else {
             for (const [key] of Object.entries(ST_TEX_MAP)) {
-              if (src.includes(key)) { mapped = `${key.split('/').filter(Boolean).pop() || 'grey'} — not supported, replaced with vec4(0.)`; break; }
+              if (src.includes(key)) {
+                mapped = `${key.split('/').filter(Boolean).pop() || 'grey'} — not supported, replaced with vec4(0.)`;
+                break;
+              }
             }
           }
           const samplerType = ctype === 'volume' ? 'sampler3D' : 'sampler2D';
@@ -287,10 +318,14 @@ async function doSTImport() {
 
     // ── Crédits auteur + description en tête ──
     const authorLines = [];
-    if (info.username) authorLines.push(`// Author  : ${sanitizeShaderToyNoteValue(info.username)}`);
-    if (info.name)     authorLines.push(`// Title   : ${sanitizeShaderToyNoteValue(info.name)}`);
-    if (info.date)     authorLines.push(`// Date    : ${sanitizeShaderToyNoteValue(String(info.date))}`);
-    const stTags = Array.isArray(info.tags) ? info.tags.map(t => sanitizeShaderToyNoteValue(t)).join(', ') : '';
+    if (info.username)
+      authorLines.push(`// Author  : ${sanitizeShaderToyNoteValue(info.username)}`);
+    if (info.name) authorLines.push(`// Title   : ${sanitizeShaderToyNoteValue(info.name)}`);
+    if (info.date)
+      authorLines.push(`// Date    : ${sanitizeShaderToyNoteValue(String(info.date))}`);
+    const stTags = Array.isArray(info.tags)
+      ? info.tags.map((t) => sanitizeShaderToyNoteValue(t)).join(', ')
+      : '';
     if (stTags) authorLines.push(`// Tags    : ${stTags}`);
     if (info.description) {
       const desc = sanitizeShaderToyNoteValue(info.description).slice(0, 200);
@@ -302,30 +337,18 @@ async function doSTImport() {
     // Build channel header comment for image pass
     let channelBlock = '';
     if (imgResolved.channelNotes.length > 0) {
-      const hasUnresolved = [...imgResolved.bufferChannelMap.values()].some(v => v === null);
+      const hasUnresolved = [...imgResolved.bufferChannelMap.values()].some((v) => v === null);
       const warnLine = hasUnresolved
         ? `// ⚠ Some buffer channels unresolved → replaced with vec4(0.)\n`
-        : (imgResolved.cubemapChannels.length ? `// ⚠ Cubemap channel(s) not supported, replaced with vec4(0.)\n` : '');
+        : imgResolved.cubemapChannels.length
+          ? `// ⚠ Cubemap channel(s) not supported, replaced with vec4(0.)\n`
+          : '';
       channelBlock = `// === ShaderToy channels ===\n${imgResolved.channelNotes.join('\n')}\n${warnLine}// ===========================\n`;
     }
 
-    code = creditsBlock + (channelBlock ? '\n' + channelBlock : '') + '\n' + code;
+    code = `${creditsBlock + (channelBlock ? `\n${  channelBlock}` : '')  }\n${  code}`;
 
-    _stLastCode = code;
     const title = escHTML(info.name || shaderId);
-
-    // ── Thumbnail preview dans le modal ──
-    _stShowThumbnail(shaderId, info);
-
-    // ── Load the Image pass into the editor (single-pass only, multipass removed) ──
-    if (state.editor) {
-      pushHistory(state.editor.getValue() !== '' ? 'Before ST import' : null, state.editor.getValue());
-      state.editor.setValue(code);
-      state.pinnedIds.clear();
-      notify('pinnedIds', state.pinnedIds);
-      clearSliderCustomizations();
-    }
-    setTimeout(applyAndParse, 80);
 
     // Summary note
     const extraPassNote = stExtraPassCount
@@ -336,25 +359,69 @@ async function doSTImport() {
       : '';
     const summaryNote = extraPassNote + cubemapNote;
 
-    statusEl.textContent = `✓ Imported "${title}"${summaryNote}`;
+    // §9 roadmap — preview-before-commit: this used to write `code` straight
+    // into the editor here, with the thumbnail only appearing informationally
+    // *after* the overwrite already happened — no actual chance to review
+    // before committing. The fetched code/summary are now stashed and the
+    // thumbnail is shown as a real review step; nothing touches the editor
+    // until the user clicks "Confirm Import" (_stConfirmImport below).
+    _stPending = { shaderId, code, title, summaryNote };
+    _stShowThumbnail(shaderId, info);
+
+    statusEl.textContent = `Loaded preview of "${title}"${summaryNote} — review, then Confirm Import.`;
     statusEl.style.color = 'var(--ac3)';
     document.getElementById('stOpenBtn').style.display = '';
-    document.getElementById('stOpenBtn').onclick = () => window.open(`https://www.shadertoy.com/view/${shaderId}`, '_blank');
-
-    toast(`Imported: ${title}${summaryNote}`, 'ok');
-    setTimeout(closeSTModal, 1500);
-  } catch(err) {
+    document.getElementById('stOpenBtn').onclick = () =>
+      window.open(`https://www.shadertoy.com/view/${shaderId}`, '_blank');
+    _stShowConfirmBtn(true);
+  } catch (err) {
     // ShaderToy import is the app's one intentional online feature (Roadmap §8);
     // everything else works fully offline. Give a clearer hint when the failure
     // looks network-related instead of a raw "Failed to fetch".
-    const offlineHint = (!navigator.onLine || /failed to fetch|networkerror/i.test(err.message))
-      ? ' (no internet connection — ShaderToy import requires network access)'
-      : '';
+    const offlineHint =
+      !navigator.onLine || /failed to fetch|networkerror/i.test(err.message)
+        ? ' (no internet connection — ShaderToy import requires network access)'
+        : '';
     statusEl.textContent = `✗ ${err.message}${offlineHint}`;
     statusEl.style.color = '#ff8080';
   } finally {
     document.getElementById('stImportBtn').disabled = false;
   }
+}
+
+function _stShowConfirmBtn(show) {
+  const btn = document.getElementById('stConfirmBtn');
+  if (btn) btn.style.display = show ? '' : 'none';
+}
+
+/** Commit the previously fetched-and-previewed shader into the editor. */
+function _stConfirmImport() {
+  if (!_stPending) return;
+  const { code, title, summaryNote } = _stPending;
+  _stLastCode = code;
+
+  if (state.editor) {
+    pushHistory(
+      state.editor.getValue() !== '' ? 'Before ST import' : null,
+      state.editor.getValue()
+    );
+    state.editor.setValue(code);
+    state.pinnedIds.clear();
+    notify('pinnedIds', state.pinnedIds);
+    clearSliderCustomizations();
+  }
+  setTimeout(applyAndParse, 80);
+
+  const statusEl = document.getElementById('stStatus');
+  if (statusEl) {
+    statusEl.textContent = `✓ Imported "${title}"${summaryNote}`;
+    statusEl.style.color = 'var(--ac3)';
+  }
+
+  toast(`Imported: ${title}${summaryNote}`, 'ok');
+  _stPending = null;
+  _stShowConfirmBtn(false);
+  setTimeout(closeSTModal, 1500);
 }
 
 function stOpenInST() {
@@ -382,7 +449,7 @@ function openCurrentInST() {
   }
   // Encode as data URI for Shadertoy's "new" page paste flow isn't possible via URL,
   // so we just open shadertoy.com/new and copy to clipboard
-  navigator.clipboard?.writeText(code).catch(()=>{});
+  navigator.clipboard?.writeText(code).catch(() => {});
   window.open('https://www.shadertoy.com/new', '_blank');
   toast('Code copied — paste in ShaderToy editor', 'ok');
 }
@@ -413,9 +480,13 @@ function _stShowThumbnail(shaderId, info) {
   const thumbnailUrl = `https://www.shadertoy.com/media/shaders/${shaderId}.jpg`;
   const likes = info.likes ?? 0;
   const views = info.viewed ?? 0;
-  const tagsHtml = Array.isArray(info.tags) && info.tags.length
-    ? `<div class="st-meta">Tags: ${info.tags.slice(0, 6).map(t => escHTML(t)).join(', ')}</div>`
-    : '';
+  const tagsHtml =
+    Array.isArray(info.tags) && info.tags.length
+      ? `<div class="st-meta">Tags: ${info.tags
+          .slice(0, 6)
+          .map((t) => escHTML(t))
+          .join(', ')}</div>`
+      : '';
 
   thumbEl.innerHTML = `
     <img src="${thumbnailUrl}" alt="Shader preview" loading="lazy"
@@ -436,6 +507,7 @@ export {
   closeSTModal,
   stParseId,
   doSTImport,
+  _stConfirmImport,
   stOpenInST,
   openCurrentInST,
   stStoreProxyUrlInput,

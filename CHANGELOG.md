@@ -5,6 +5,34 @@ All notable changes to Sliders GL are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] — 2026-09-12
+
+### Added
+
+- The export dialog now shows a "Last export" thumbnail after a successful
+  screenshot download, not just a preview of what's about to be exported.
+- ShaderToy import is now a real two-step flow: "Fetch & Preview" loads the
+  shader's thumbnail and metadata for review, and a new "Confirm Import"
+  button is required before the code actually replaces what's in the
+  editor — previously the editor was overwritten immediately, with the
+  preview only appearing afterward.
+- The command palette (Ctrl+Shift+P) gained roughly two dozen entries that
+  were missing: reset/randomize sliders, all 8 export formats, Help
+  Center, Keyboard Shortcuts, the which-key overlay, guides/HUD/gizmo/
+  compare toggles, and project New/Open/Save/Save As/Import from ShaderToy.
+
+### Fixed
+
+- The export dialog's "Preview Frame" button always rendered at a fixed
+  1920×1080 regardless of the resolution actually selected in the dropdown.
+- The 8 code-export format buttons now sit in a fixed 2-column grid instead
+  of a wrapping flex row, which could leave an uneven last row depending
+  on the modal's exact width.
+- Removed a phantom keyboard shortcut ("Randomize Sliders" via Alt+R) shown
+  in Settings that was never actually bound to anything.
+- The "info" toast type (used in a dozen places) had a dedicated icon but
+  no color styling, so it looked identical to an untyped toast.
+
 ## [1.7.0] — 2026-09-12
 
 ### Added
@@ -196,6 +224,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   locally — zero network dependency for core functionality.
 - MIT license.
 
+[1.8.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.8.0
 [1.7.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.7.0
 [1.6.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.6.0
 [1.5.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.5.0

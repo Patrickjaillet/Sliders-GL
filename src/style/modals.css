@@ -487,6 +487,19 @@
   background: linear-gradient(var(--status-warn-bg), var(--status-warn-bg)), var(--bg-panel);
 }
 
+/* §9 roadmap audit — 'info' is a real, frequently-used toast type (12 call
+   sites) with its own dedicated icon (TOAST_ICONS.info in io/actions.js)
+   but no matching color rule — it silently fell back to the unstyled base
+   .toast look, indistinguishable from a typeless toast. There's no
+   dedicated "info" entry in the --status-* token set (only ok/warn/err/run,
+   and run is just an alias of ok), so this uses the neutral --border-mid/
+   --text-dim pairing rather than inventing a new accent color. */
+.toast.info {
+  color: var(--text-dim);
+  border-color: var(--border-mid);
+  background: var(--bg-panel);
+}
+
 .toast.err,
 .toast.error {
   color: var(--status-err);

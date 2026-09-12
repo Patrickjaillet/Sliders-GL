@@ -7,7 +7,7 @@ import './monaco-env.js';
 import * as monaco from 'monaco-editor';
 import { state } from '../core/state.js';
 import { parseShader, parseSymbols, typeCheck } from '../shader/parser.js';
-import { buildUI, syncSlidersFromCode, isFromSlider } from './slider.js';
+import { buildUI, syncSlidersFromCode, isFromSlider, randomizeUnpinnedSliders } from './slider.js';
 import { applyGLShader, checkFragCompile, wrapFrag, showErr, hideErr } from '../gl/renderer.js';
 import { EXAMPLE } from '../core/constants.js';
 import { initBrowserFileDrop } from '../import/local-file-import.js';
@@ -16,7 +16,7 @@ import { initValueScrub } from './value-scrub.js';
 import { initColorInline } from './color-inline.js';
 import { initHoverInspector, findSliderEntry } from './hover-inspector.js';
 import { initShaderAnatomy, toggleShaderAnatomy } from './shader-anatomy.js';
-import { applyAndParse , toast , loadExample, copyCode } from '../io/actions.js';
+import { applyAndParse, toast, loadExample, copyCode, resetSliders } from '../io/actions.js';
 
 import {
   registerGLSLLanguage,
@@ -29,10 +29,38 @@ import { formatGLSL, flashFormattedStatus } from '../shader/glsl-formatter.js';
 import { loadPreset } from '../io/library.js';
 import { loadUserPresets } from '../io/presets.js';
 import { toggleInspectorPanel } from './inspector-context.js';
-import { exportScreenshot, openExportModal } from '../export/export.js';
+import {
+  exportScreenshot,
+  exportCurrentFrame,
+  openExportModal,
+  exportStandaloneHTML,
+  exportPureGLSL,
+  exportMinifiedGLSL,
+  exportThreeSnippet,
+  exportProjectZip,
+  exportP5Sketch,
+  exportGLSLSandbox,
+  exportShaderToyFormat,
+} from '../export/export.js';
 import { toggleFullscreenVP, togglePause } from './viewport.js';
 import { adaptiveDebounce, cancelAdaptiveDebounce } from '../render/adaptive-debounce.js';
 import { toggleSettingsPanel } from './settings-panel.js';
+// §9 roadmap — command palette completeness audit: these were all already
+// reachable somewhere in the UI (topbar, tool shelf, viewport header) but
+// missing from the palette itself, which the roadmap wants to be the
+// exhaustive entry point to every action in the app.
+import { openHelpCenter } from './help-center.js';
+import { showShortcutsPanel } from './onboarding.js';
+import { toggleGuides, toggleHUD, toggleCompareView } from './canvas-tools.js';
+import { toggleCanvasGizmos } from './canvas-gizmos.js';
+import { openWhichKey } from './which-key.js';
+import {
+  handleNewProject,
+  handleOpenProject,
+  handleSaveProject,
+  handleSaveProjectAs,
+} from '../io/project-ui.js';
+import { openSTModal } from '../io/shadertoy.js';
 
 export { toggleSettingsPanel };
 // 1.4: GLSL completions — token lists come from glsl-language.js
@@ -144,7 +172,7 @@ function collectASTSymbolCompletions(code, range) {
 
   for (const fn of functions) {
     const paramStr = fn.params
-      .map((p) => (p.qualifier ? `${p.qualifier  } ` : '') + p.type + (p.name ? ` ${  p.name}` : ''))
+      .map((p) => (p.qualifier ? `${p.qualifier} ` : '') + p.type + (p.name ? ` ${p.name}` : ''))
       .join(', ');
     items.push({
       label: fn.name,
@@ -232,6 +260,8 @@ function buildPaletteCommands() {
   return [
     // ── Shader ──────────────────────────────────────────────────────────────
     { label: 'Apply & Parse Shader', keys: 'Ctrl+S / Ctrl+Enter', run: () => applyAndParse() },
+    { label: 'Reset Sliders', keys: '', run: () => resetSliders() },
+    { label: 'Randomize Unpinned Sliders', keys: '', run: () => randomizeUnpinnedSliders() },
     // ── Editor ──────────────────────────────────────────────────────────────
     {
       label: 'Find / Replace with Regex',
@@ -313,11 +343,34 @@ function buildPaletteCommands() {
       run: () => toggleShaderLibrary(),
     },
     // ── Export ──────────────────────────────────────────────────────────────
-    { label: 'Export → Screenshot', keys: '', run: () => exportScreenshot() },
-    { label: 'Export → Standalone HTML', keys: '', run: () => openExportModal() },
+    { label: 'Export…', keys: '', detail: 'Open export dialog', run: () => openExportModal() },
+    { label: 'Export → Screenshot (PNG)', keys: '', run: () => exportScreenshot() },
+    { label: 'Export → Current Frame (PNG)', keys: '', run: () => exportCurrentFrame() },
+    { label: 'Export → Standalone HTML', keys: '', run: () => exportStandaloneHTML() },
+    { label: 'Export → Pure GLSL', keys: '', run: () => exportPureGLSL() },
+    { label: 'Export → Minified GLSL', keys: '', run: () => exportMinifiedGLSL() },
+    { label: 'Export → Three.js Snippet', keys: '', run: () => exportThreeSnippet() },
+    { label: 'Export → Project ZIP', keys: '', run: () => exportProjectZip() },
+    { label: 'Export → p5.js Sketch', keys: '', run: () => exportP5Sketch() },
+    { label: 'Export → GLSL Sandbox', keys: '', run: () => exportGLSLSandbox() },
+    { label: 'Export → ShaderToy Format', keys: '', run: () => exportShaderToyFormat() },
     // ── Viewport ────────────────────────────────────────────────────────────
-    { label: 'Toggle Fullscreen Viewport', keys: '', run: () => toggleFullscreenVP() },
-    { label: 'Toggle Pause Rendering', keys: '', run: () => togglePause() },
+    { label: 'Toggle Fullscreen Viewport', keys: 'F11', run: () => toggleFullscreenVP() },
+    { label: 'Toggle Pause Rendering', keys: 'Space', run: () => togglePause() },
+    { label: 'Toggle Guides', keys: 'G', run: () => toggleGuides() },
+    { label: 'Toggle HUD', keys: 'H', run: () => toggleHUD() },
+    { label: 'Toggle Canvas Position Gizmos', keys: '', run: () => toggleCanvasGizmos() },
+    { label: 'Toggle Before/After Compare', keys: 'hold B', run: () => toggleCompareView() },
+    // ── Project ─────────────────────────────────────────────────────────────
+    { label: 'New Project', keys: 'Ctrl+N', run: () => handleNewProject() },
+    { label: 'Open Project…', keys: 'Ctrl+O', run: () => handleOpenProject() },
+    { label: 'Save Project', keys: 'Ctrl+S', run: () => handleSaveProject() },
+    { label: 'Save Project As…', keys: 'Ctrl+Shift+S', run: () => handleSaveProjectAs() },
+    { label: 'Import from ShaderToy…', keys: '', run: () => openSTModal() },
+    // ── Help ────────────────────────────────────────────────────────────────
+    { label: 'Help Center', keys: 'F1', run: () => openHelpCenter() },
+    { label: 'Keyboard Shortcuts', keys: '', run: () => showShortcutsPanel() },
+    { label: 'Keyboard Map (which-key)', keys: '?', run: () => openWhichKey() },
     // ── Theme ───────────────────────────────────────────────────────────────
     // ── Presets (Phase T) — user's own saved presets only; the full builtin
     // catalog (dozens of entries) would drown out everything else here.
@@ -438,7 +491,7 @@ function openCommandPalette() {
         list.appendChild(sep);
       }
       const row = document.createElement('div');
-      row.className = `zcp-item${  i === activeIdx ? ' zcp-active' : ''}`;
+      row.className = `zcp-item${i === activeIdx ? ' zcp-active' : ''}`;
       row.setAttribute('role', 'option');
       row.setAttribute('aria-selected', String(i === activeIdx));
       row.dataset.idx = String(i);
@@ -933,13 +986,11 @@ function openCommandPalette() {
       const lines = src.split('\n');
       const highlights = [];
 
-      const WRITE_RE = new RegExp(
-        `(?:^|[^.\\w])${  name  }\\s*(?:[+\\-*\\/&|^%]?=(?!=)|\\+\\+|--)`
-      );
+      const WRITE_RE = new RegExp(`(?:^|[^.\\w])${name}\\s*(?:[+\\-*\\/&|^%]?=(?!=)|\\+\\+|--)`);
 
       for (let li = 0; li < lines.length; li++) {
         const line = lines[li];
-        const tokenRe = new RegExp(`(?<![.\\w])${  name  }(?![\\w])`, 'g');
+        const tokenRe = new RegExp(`(?<![.\\w])${name}(?![\\w])`, 'g');
         let m;
         while ((m = tokenRe.exec(line)) !== null) {
           const col = m.index + 1;
@@ -980,7 +1031,7 @@ function openCommandPalette() {
       const lines = model.getValue().split('\n');
       const refs = [];
       for (let li = 0; li < lines.length; li++) {
-        const tokenRe = new RegExp(`(?<![.\\w])${  name  }(?![\\w])`, 'g');
+        const tokenRe = new RegExp(`(?<![.\\w])${name}(?![\\w])`, 'g');
         let m;
         while ((m = tokenRe.exec(lines[li])) !== null) {
           refs.push({
@@ -1021,7 +1072,7 @@ function openCommandPalette() {
     const id = state.mp?.active;
     if (!id) return;
     document
-      .getElementById(`ptab-${  id}`)
+      .getElementById(`ptab-${id}`)
       ?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   });
 
@@ -1059,7 +1110,7 @@ function openCommandPalette() {
     const entry = word && findSliderEntry(word.word);
     if (!entry) return;
     e.event.preventDefault();
-    const row = document.getElementById(`sr-${  entry.id}`);
+    const row = document.getElementById(`sr-${entry.id}`);
     if (!row) return;
     row.scrollIntoView({ behavior: 'smooth', block: 'center' });
     row.classList.remove('sl-flash');

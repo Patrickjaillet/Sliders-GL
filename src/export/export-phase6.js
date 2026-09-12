@@ -194,7 +194,7 @@ export function exportShaderToyFormat() {
   ];
   const uniformRegex = new RegExp(
     `^\\s*uniform\\s+\\S+\\s+(${builtinUniforms.join('|')})\\s*(?:\\[\\d+\\])?\\s*;\\s*$`,
-    'gm',
+    'gm'
   );
   cleaned = cleaned.replace(uniformRegex, '');
 
@@ -225,8 +225,15 @@ export function exportShaderToyFormat() {
 /**
  * Render and display a small thumbnail preview of the first frame
  * in the export dialog, so users can verify the output before committing.
+ *
+ * @param {string} containerId
+ * @param {string} [resVal]
+ * @param {string} [caption] - §9 roadmap: lets a caller show this as a
+ *   short-history "Last export" thumbnail (ui/export-last-used.js, reusing
+ *   this renderer right after a successful download) rather than only the
+ *   default "about to export" framing - same render, different label.
  */
-export async function renderExportPreview(containerId, resVal) {
+export async function renderExportPreview(containerId, resVal, caption = 'Preview') {
   const container = document.getElementById(containerId);
   if (!container) return;
 
@@ -235,9 +242,10 @@ export async function renderExportPreview(containerId, resVal) {
   const pw = Math.min(w, 320);
   const ph = Math.round(pw * (h / w));
 
-  container.innerHTML = '<div style="font-size:10px;color:var(--prose-lo);font-family:var(--font-mono)">Rendering preview…</div>';
+  container.innerHTML =
+    '<div style="font-size:10px;color:var(--prose-lo);font-family:var(--font-mono)">Rendering preview…</div>';
 
-  await new Promise(r => setTimeout(r, 16));
+  await new Promise((r) => setTimeout(r, 16));
 
   try {
     const imgData = _renderOffscreen(pw, ph);
@@ -248,14 +256,13 @@ export async function renderExportPreview(containerId, resVal) {
 
     const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
     container.innerHTML = `
-      <img src="${dataUrl}" alt="Export preview"
+      <img src="${dataUrl}" alt="${caption === 'Preview' ? 'Export preview' : 'Last exported image'}"
         style="width:100%;border-radius:6px;border:1px solid var(--b1);display:block"
-        aria-label="Preview of frame to be exported">
+        aria-label="${caption === 'Preview' ? 'Preview of frame to be exported' : 'Thumbnail of the last completed export'}">
       <div style="font-size:9px;color:var(--prose-lo);font-family:var(--font-mono);margin-top:3px;text-align:center">
-        Preview — ${pw}×${ph}
+        ${caption} — ${pw}×${ph}
       </div>`;
   } catch (e) {
     container.innerHTML = `<div style="font-size:10px;color:var(--spark-hot);font-family:var(--font-mono)">Preview failed: ${e.message}</div>`;
   }
 }
-

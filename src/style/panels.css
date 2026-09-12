@@ -1107,13 +1107,17 @@
   padding-bottom: 4px;
   border-bottom: 1px solid var(--border);
 }
+/* §9 roadmap audit — was display:flex + flex-wrap, which lets the number
+   of buttons per row vary with the modal's exact width and each button's
+   natural content size, risking an orphaned last row (8 buttons doesn't
+   divide evenly into every row count). A fixed 2-column grid guarantees
+   4 even rows regardless of width. */
 .exp-code-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 4px;
-  flex-wrap: wrap;
 }
 .exp-code-btn {
-  flex: 1;
   min-width: 0;
   padding: 6px 4px;
   font-family: var(--font-mono);

@@ -2271,13 +2271,29 @@
         >
           Open in ST ↗
         </button>
+        <!-- §9 roadmap — two-step flow: "Fetch & Preview" only fetches and
+             shows the thumbnail/metadata (doSTImport, below) without
+             touching the editor; "Confirm Import" (hidden until a preview
+             has loaded) commits the code. Previously "Import" did both at
+             once — the thumbnail appeared only after the editor was
+             already overwritten, so there was no real chance to review
+             first. -->
         <button
           class="modal-btn confirm"
           data-action="doSTImport"
           id="stImportBtn"
-          aria-label="Import shader from ShaderToy"
+          aria-label="Fetch shader from ShaderToy and preview it"
         >
-          Import
+          Fetch &amp; Preview
+        </button>
+        <button
+          class="modal-btn confirm"
+          data-action="_stConfirmImport"
+          id="stConfirmBtn"
+          style="display: none"
+          aria-label="Confirm import into the editor, replacing current code"
+        >
+          Confirm Import ↓
         </button>
       </div>
     </div>
@@ -2426,11 +2442,14 @@
         >
           ↓ Download PNG
         </button>
+        <!-- §9 roadmap — was data-args="exp-img-preview,1920x1080": a static
+             resolution that ignored whatever #exp-res was actually set to.
+             Now dispatches through renderExportPreviewAtSelectedRes (below),
+             which reads the live select value. -->
         <button
           class="exp-action-btn"
           style="background: var(--bg3); margin-top: 0"
-          data-action="renderExportPreview"
-          data-args="exp-img-preview,1920x1080"
+          data-action="renderExportPreviewAtSelectedRes"
           aria-label="Preview first frame before exporting"
         >
           <span aria-hidden="true">👁</span> Preview Frame

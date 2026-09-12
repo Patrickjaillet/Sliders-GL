@@ -13,20 +13,30 @@ const _STORAGE_KEY = 'sl_shortcuts_v1';
 // Default shortcut registry: actionId → { label, keys, handler, editorOnly }
 // handler is null for editor-only shortcuts (managed by Monaco directly).
 const _DEFAULTS = new Map([
-  ['apply-parse',     { label: 'Apply & Parse Shader',   keys: 'Ctrl+Enter',       editorOnly: true  }],
-  ['save-project',    { label: 'Save Project',            keys: 'Ctrl+S',           editorOnly: true  }],
-  ['export-frame',    { label: 'Export Frame (PNG)',      keys: 'Ctrl+E',           editorOnly: false }],
-  ['fullscreen',      { label: 'Fullscreen Viewport',    keys: 'F11',              editorOnly: false }],
-  ['undo-slider',     { label: 'Undo Slider',            keys: 'Ctrl+Z',           editorOnly: false }],
-  ['command-palette', { label: 'Command Palette',        keys: 'Ctrl+Shift+P',     editorOnly: false }],
-  ['code-focus',      { label: 'Code Focus Mode',        keys: 'Ctrl+Shift+F',     editorOnly: false }],
-  ['randomize',       { label: 'Randomize Sliders',      keys: 'Alt+R',            editorOnly: false }],
+  ['apply-parse', { label: 'Apply & Parse Shader', keys: 'Ctrl+Enter', editorOnly: true }],
+  ['save-project', { label: 'Save Project', keys: 'Ctrl+S', editorOnly: true }],
+  ['export-frame', { label: 'Export Frame (PNG)', keys: 'Ctrl+E', editorOnly: false }],
+  ['fullscreen', { label: 'Fullscreen Viewport', keys: 'F11', editorOnly: false }],
+  ['undo-slider', { label: 'Undo Slider', keys: 'Ctrl+Z', editorOnly: false }],
+  ['command-palette', { label: 'Command Palette', keys: 'Ctrl+Shift+P', editorOnly: false }],
+  ['code-focus', { label: 'Code Focus Mode', keys: 'Ctrl+Shift+F', editorOnly: false }],
 ]);
+// §9 roadmap audit — a 'randomize' entry ("Randomize Sliders", Alt+R) used
+// to live here, but Alt+R was never bound to anything anywhere in the
+// codebase (grepped exhaustively) — a phantom shortcut shown to users in
+// the Settings shortcuts panel that did nothing if pressed or remapped.
+// Removed rather than wired up, since randomizing sliders already has a
+// real UI entry point (tool shelf, sidebar panel menu, command palette)
+// and no prior evidence of an intended keybinding to restore.
 
 let _overrides = {};
 
 function _load() {
-  try { _overrides = JSON.parse(safeLocalGet(_STORAGE_KEY, '{}')); } catch { _overrides = {}; }
+  try {
+    _overrides = JSON.parse(safeLocalGet(_STORAGE_KEY, '{}'));
+  } catch {
+    _overrides = {};
+  }
 }
 
 function _save() {
@@ -102,7 +112,9 @@ export function renderShortcutsSettings(container) {
     <table class="ks-table">
       <thead><tr><th>Action</th><th>Keys</th><th></th></tr></thead>
       <tbody>
-        ${shortcuts.map(s => `
+        ${shortcuts
+          .map(
+            (s) => `
           <tr class="ks-row" data-action="${s.actionId}">
             <td class="ks-label">${s.label}${s.editorOnly ? ' <span class="ks-tag">editor</span>' : ''}</td>
             <td><input class="ks-key-input" value="${s.keys}" data-default="${s.defaultKeys}" readonly/></td>
@@ -110,12 +122,14 @@ export function renderShortcutsSettings(container) {
               <button class="ks-capture-btn" data-action="${s.actionId}" title="Click then press new key combination">✎</button>
               ${s.overridden ? `<button class="ks-reset-btn ks-reset-one" data-action="${s.actionId}" title="Reset to ${s.defaultKeys}">↩</button>` : ''}
             </td>
-          </tr>`).join('')}
+          </tr>`
+          )
+          .join('')}
       </tbody>
     </table>`;
 
   // Wire capture buttons
-  container.querySelectorAll('.ks-capture-btn').forEach(btn => {
+  container.querySelectorAll('.ks-capture-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const actionId = btn.dataset.action;
       const row = container.querySelector(`.ks-row[data-action="${actionId}"]`);
@@ -147,7 +161,7 @@ export function renderShortcutsSettings(container) {
     });
   });
 
-  container.querySelectorAll('.ks-reset-one').forEach(btn => {
+  container.querySelectorAll('.ks-reset-one').forEach((btn) => {
     btn.addEventListener('click', () => {
       setShortcut(btn.dataset.action, '');
       renderShortcutsSettings(container);
