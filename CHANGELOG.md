@@ -5,6 +5,19 @@ All notable changes to Sliders GL are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] — 2026-09-12
+
+### Added
+
+- A sound feedback toggle button is now in the topbar. It was already fully
+  wired up in code (state syncing, click sounds, icon swap) but the button
+  itself was missing from the page, so the feature was completely
+  unreachable.
+- The Help menu gained two entries: "Replay Tutorial" and "GLSL Quick
+  Reference", both already implemented but previously only reachable via
+  the one-time first-launch welcome screen or a dedicated keyboard
+  shortcut.
+
 ## [1.8.0] — 2026-09-12
 
 ### Added
@@ -224,6 +237,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   locally — zero network dependency for core functionality.
 - MIT license.
 
+[1.9.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.0
 [1.8.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.8.0
 [1.7.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.7.0
 [1.6.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.6.0

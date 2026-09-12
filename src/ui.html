@@ -1025,6 +1025,22 @@
           ></span>
           Keyboard Shortcuts
         </button>
+        <!-- §10 roadmap — startTutorial and openGLSLReference (onboarding.js)
+             were already wired into the ACTIONS map but had no menu entry
+             anywhere, reachable only via the once-per-install welcome
+             screen or (for the GLSL reference) its own shortcut. -->
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="startTutorial">
+          <span class="fmenu-icon" aria-hidden="true"
+            ><svg><use href="#icon-info" /></svg
+          ></span>
+          Replay Tutorial
+        </button>
+        <button class="fmenu-item" role="menuitem" tabindex="-1" data-action="openGLSLReference">
+          <span class="fmenu-icon" aria-hidden="true"
+            ><svg><use href="#icon-help" /></svg
+          ></span>
+          GLSL Quick Reference
+        </button>
         <div class="fmenu-sep" role="separator"></div>
         <button
           class="fmenu-item"
@@ -1092,6 +1108,22 @@
       aria-label="Toggle fullscreen viewport"
     >
       <svg><use href="#icon-fullscreen" /></svg><span class="hb-label">fullscreen</span>
+    </button>
+
+    <!-- §10 roadmap — sound.js/toggleSound were fully wired (events.js,
+         app/init.js both reference #soundToggleBtn to sync state and icon)
+         but the button itself was never added to the topbar markup, so
+         sound feedback was unreachable from the UI. -->
+    <button
+      class="hb"
+      id="soundToggleBtn"
+      data-action="toggleSound"
+      title="Sound feedback: OFF"
+      aria-label="Toggle sound feedback"
+    >
+      <svg width="12" height="12" style="vertical-align: middle; margin-right: 3px">
+        <use href="#icon-sound" /></svg
+      >off
     </button>
 
     <button class="hb help-btn" id="helpBtn" title="Help (F1)" aria-label="Open help center">
