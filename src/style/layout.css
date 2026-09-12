@@ -1408,6 +1408,26 @@ canvas#glc {
   padding: 1px 5px;
 }
 
+/* §7 roadmap — per-category slider group rows, indented one level under
+   the top-level "Uniforms" row they belong to. */
+.outliner-tree-cats {
+  padding-bottom: 4px;
+}
+
+.outliner-row-cat {
+  padding-left: 26px;
+  font-size: 11px;
+}
+
+.outliner-row-cat .outliner-icon {
+  font-size: 11px;
+}
+
+.outliner-row-cat:focus-visible {
+  outline: 2px solid var(--border-hot);
+  outline-offset: -2px;
+}
+
 .inspector,
 #inspector {
   display: flex;

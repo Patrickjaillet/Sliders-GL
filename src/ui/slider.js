@@ -98,10 +98,10 @@ function _flushFrame() {
   for (const id of _fillQueue) {
     const e = state.varMap[id];
     if (!e) continue;
-    const field = document.getElementById(`sl-${  id}`);
+    const field = document.getElementById(`sl-${id}`);
     const { min: softMin, max: softMax } = _softRange(e);
     const pct = e.isLog ? _logPct(e.value, softMin, softMax) : clampPct(e.value, softMin, softMax);
-    if (field) field.style.setProperty('--fill-pct', `${pct  }%`);
+    if (field) field.style.setProperty('--fill-pct', `${pct}%`);
     _updateDial(id); // no-op unless an angle dial exists for this id
     const xyg = _xyByComp.get(id);
     if (xyg) _updateXY(xyg);
@@ -111,8 +111,8 @@ function _flushFrame() {
   // ── Flush sv + aria + modified ────────────────────────────────
   for (const [id, { val, decimals }] of _domQueue) {
     const e = state.varMap[id];
-    const sv = document.getElementById(`sv-${  id}`);
-    const row = document.getElementById(`sr-${  id}`);
+    const sv = document.getElementById(`sv-${id}`);
+    const row = document.getElementById(`sr-${id}`);
 
     if (sv && document.activeElement !== sv) {
       // Ne pas écraser la valeur si l'input est en cours d'édition
@@ -385,7 +385,7 @@ function enumSetVal(id, idx) {
   if (!e) return;
   onValChange(id, idx);
   // Update button states
-  const sr = document.getElementById(`sr-${  id}`);
+  const sr = document.getElementById(`sr-${id}`);
   sr?.querySelectorAll('.sl-enum-btn').forEach((btn, i) => {
     btn.classList.toggle('active', i === idx);
     btn.setAttribute('aria-checked', String(i === idx));
@@ -421,13 +421,13 @@ function boolToggle(id) {
   if (!e) return;
   const newVal = e.value > 0.5 ? 0 : 1;
   onValChange(id, newVal);
-  const btn = document.getElementById(`bool-${  id}`);
+  const btn = document.getElementById(`bool-${id}`);
   if (btn) {
     btn.classList.toggle('on', newVal > 0.5);
     btn.setAttribute('aria-checked', String(newVal > 0.5));
     btn.textContent = newVal > 0.5 ? 'ON' : 'OFF';
   }
-  const row = document.getElementById(`sr-${  id}`);
+  const row = document.getElementById(`sr-${id}`);
   if (row) row.classList.toggle('modified', Math.abs(newVal - e.defaultValue) > 1e-9);
 }
 
@@ -449,8 +449,8 @@ function _needleXY(value) {
   return { x: _DIAL_CX + _DIAL_R * Math.cos(value), y: _DIAL_CY + _DIAL_R * Math.sin(value) };
 }
 function _deg(value, e) {
-  if (e?.angleUnit === 'rad') return `${value.toFixed(3)  } rad`;
-  return `${Math.round((value * 180) / Math.PI)  }°`;
+  if (e?.angleUnit === 'rad') return `${value.toFixed(3)} rad`;
+  return `${Math.round((value * 180) / Math.PI)}°`;
 }
 
 function _dialRowHTML(e) {
@@ -490,19 +490,19 @@ function _dialRowHTML(e) {
 
 function _updateDial(id) {
   const e = state.varMap[id];
-  const needle = document.getElementById(`dialN-${  id}`);
+  const needle = document.getElementById(`dialN-${id}`);
   if (!e || !needle) return;
   const { x, y } = _needleXY(e.value);
   needle.setAttribute('x2', x.toFixed(2));
   needle.setAttribute('y2', y.toFixed(2));
-  const handle = document.getElementById(`dialH-${  id}`);
+  const handle = document.getElementById(`dialH-${id}`);
   if (handle) {
     handle.setAttribute('cx', x.toFixed(2));
     handle.setAttribute('cy', y.toFixed(2));
   }
-  const deg = document.getElementById(`dialD-${  id}`);
+  const deg = document.getElementById(`dialD-${id}`);
   if (deg) deg.textContent = _deg(e.value, e);
-  const svg = document.getElementById(`dial-${  id}`);
+  const svg = document.getElementById(`dial-${id}`);
   if (svg) svg.setAttribute('aria-valuenow', e.value.toFixed(3));
 }
 
@@ -647,17 +647,17 @@ function _xyRowHTML(unit) {
 }
 
 function _updateXY(gid) {
-  const pad = document.getElementById(`xy-${  gid}`);
+  const pad = document.getElementById(`xy-${gid}`);
   if (!pad) return;
   const ex = state.varMap[pad.dataset.xId];
   const ey = state.varMap[pad.dataset.yId];
   if (!ex || !ey) return;
-  const pt = document.getElementById(`xyP-${  gid}`);
+  const pt = document.getElementById(`xyP-${gid}`);
   if (pt) {
-    pt.style.left = `${(_frac(ex) * 100).toFixed(1)  }%`;
-    pt.style.top = `${((1 - _frac(ey)) * 100).toFixed(1)  }%`;
+    pt.style.left = `${(_frac(ex) * 100).toFixed(1)}%`;
+    pt.style.top = `${((1 - _frac(ey)) * 100).toFixed(1)}%`;
   }
-  const ro = document.getElementById(`xyR-${  gid}`);
+  const ro = document.getElementById(`xyR-${gid}`);
   if (ro) ro.textContent = `${fmtN(ex.value, ex.decimals)}, ${fmtN(ey.value, ey.decimals)}`;
 }
 
@@ -1043,7 +1043,7 @@ function _initStepper(stepper) {
 // Bind the numeric `.sv` input for a given slider id (shared by track sliders
 // and steppers, which have an input but no track).
 function _bindSvInput(id) {
-  const input = document.getElementById(`sv-${  id}`);
+  const input = document.getElementById(`sv-${id}`);
   if (!input || input._slBound) return;
   input._slBound = true;
   input.addEventListener('input', (ev) => onValChange(id, ev.target.value));
@@ -1117,7 +1117,7 @@ function _initScrubField(field) {
   _bindSvInput(id);
   if (field._slBound) return;
   field._slBound = true;
-  const input = document.getElementById(`sv-${  id}`);
+  const input = document.getElementById(`sv-${id}`);
 
   const focusForEdit = () => {
     input?.focus();
@@ -1276,12 +1276,12 @@ function onValChange(id, rawVal) {
   // Auto-extend range if out of bounds
   if (n < e.min) {
     e.min = n - Math.abs(n) * 0.5 - 1;
-    const track = document.getElementById(`sl-${  id}`);
+    const track = document.getElementById(`sl-${id}`);
     if (track) track.dataset.min = e.min;
   }
   if (n > e.max) {
     e.max = n + Math.abs(n) * 0.5 + 1;
-    const track = document.getElementById(`sl-${  id}`);
+    const track = document.getElementById(`sl-${id}`);
     if (track) track.dataset.max = e.max;
   }
   _setVal(id, n);
@@ -1289,7 +1289,7 @@ function onValChange(id, rawVal) {
 }
 
 function _flashConfirm(id) {
-  const sv = document.getElementById(`sv-${  id}`);
+  const sv = document.getElementById(`sv-${id}`);
   if (!sv) return;
   sv.classList.remove('confirmed');
   void sv.offsetWidth;
@@ -1318,7 +1318,7 @@ function syncSlidersFromCode(code) {
     ov.tokenRaw = nv.tokenRaw;
     if (!state.pinnedIds.has(ov.stableKey) && Math.abs(nv.value - ov.value) > 1e-9) {
       ov.value = nv.value;
-      const sv = document.getElementById(`sv-${  ov.id}`);
+      const sv = document.getElementById(`sv-${ov.id}`);
       if (sv) sv.value = fmtN(ov.value, ov.decimals);
       scheduleFillUpdate(ov.id);
     }
@@ -1395,11 +1395,32 @@ function jumpTo(li) {
   state.editor.focus();
 }
 
+/**
+ * §7 roadmap — jump from the Outliner tree to a slider category group in
+ * the Uniforms panel: expands the group if collapsed, scrolls it into
+ * view, and reuses the existing expand-reveal flash animation.
+ * @param {string} cat
+ */
+function jumpToCategory(cat) {
+  if (collapsedGroups.has(cat)) {
+    collapsedGroups.delete(cat);
+    safeLocalSet('sl_collapsed_groups', JSON.stringify([...collapsedGroups]));
+    buildUI(state.vars);
+  }
+  const header = document.querySelector(`.sh[data-cat="${CSS.escape(cat)}"]`);
+  if (header) {
+    header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    _flashGroupReveal(cat);
+  }
+}
+
 export {
   CAT_ORDER,
+  CAT_ICONS,
   collapsedGroups,
   buildUI,
   toggleGroup,
+  jumpToCategory,
   togglePin,
   clampPct,
   fmtN,

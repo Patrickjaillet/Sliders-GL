@@ -29,6 +29,7 @@ import { initSidebarRenderDiagnostics } from '../ui/sidebar-render-diagnostics.j
 import { initExportLastUsedTracker } from '../ui/export-last-used.js';
 import { initSidebarExportSummary } from '../ui/sidebar-export-summary.js';
 import { initSidebarSettingsSummary } from '../ui/sidebar-settings-summary.js';
+import { initOutlinerTree } from '../ui/outliner.js';
 import { initInspectorContext } from '../ui/inspector-context.js';
 import { initSliderGutterDots } from '../ui/slider-gutter.js';
 import { initCanvasTools } from '../ui/canvas-tools.js';
@@ -92,6 +93,8 @@ window.addEventListener('load', async () => {
   initSidebarExportSummary();
   // §5 roadmap — Settings pane: active preferences summary
   initSidebarSettingsSummary();
+  // §7 roadmap — Outliner: per-category slider group tree
+  initOutlinerTree();
   // Phase Q — inspector contextuel (perf/pass/slider/uniform)
   initInspectorContext();
   // Phase R — scrubber temporel + overlays viewport

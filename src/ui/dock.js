@@ -53,7 +53,7 @@ function _wsKey() {
 function _loadWidthMap(storageKey) {
   try {
     const obj = JSON.parse(safeLocalGet(storageKey, '{}') || '{}');
-    return (obj && typeof obj === 'object') ? obj : {};
+    return obj && typeof obj === 'object' ? obj : {};
   } catch {
     return {};
   }
@@ -66,12 +66,14 @@ function _saveWidthForWs(storageKey, value) {
 
 let _activeTabId = 'uniforms';
 
-const PANEL_TABS = [
-  { id: 'uniforms', label: 'Uniforms', icon: '◈' },
-];
+const PANEL_TABS = [{ id: 'uniforms', label: 'Uniforms', icon: '◈' }];
 
-function _getPanel()      { return document.querySelector('#layout > .panel'); }
-function _getEditorZone() { return document.getElementById('editorZone'); }
+function _getPanel() {
+  return document.querySelector('#layout > .panel');
+}
+function _getEditorZone() {
+  return document.getElementById('editorZone');
+}
 
 function _setPanelWidth(px) {
   const w = Math.max(0, Math.min(px, PW_MAX));
@@ -82,14 +84,14 @@ function _setPanelWidth(px) {
   // this handle updated localStorage but never actually resized the
   // sidebar column. Write --sw directly, same as _setInspectorWidth
   // already correctly does for --iw.
-  document.documentElement.style.setProperty('--sw', w + 'px');
+  document.documentElement.style.setProperty('--sw', `${w  }px`);
   safeLocalSet('sl_panelW', String(Math.round(w)));
   doResize();
 }
 
 function _setInspectorWidth(px) {
   const w = Math.max(IW_MIN, Math.min(px, IW_MAX));
-  document.documentElement.style.setProperty('--iw', w + 'px');
+  document.documentElement.style.setProperty('--iw', `${w  }px`);
   doResize();
   return w;
 }
@@ -102,7 +104,7 @@ function _setInspectorWidth(px) {
 // mirroring _initPanelResizeHandle's mousemove handler for the sidebar.
 function _setInspectorWidthRaw(px) {
   const w = Math.max(COLLAPSE_SLIVER, Math.min(px, IW_MAX));
-  document.documentElement.style.setProperty('--iw', w + 'px');
+  document.documentElement.style.setProperty('--iw', `${w  }px`);
   doResize();
   return w;
 }
@@ -120,7 +122,7 @@ function _applySidebarCollapsed(isCollapsed, persist) {
   if (!panel) return;
   panel.classList.toggle('sb-collapsed', isCollapsed);
   if (isCollapsed) {
-    document.documentElement.style.setProperty('--sw', COLLAPSE_SLIVER + 'px');
+    document.documentElement.style.setProperty('--sw', `${COLLAPSE_SLIVER  }px`);
     doResize();
   } else {
     _setPanelWidth(_lastSidebarWidth);
@@ -135,7 +137,12 @@ function _initPanelResizeHandle() {
   const handle = document.createElement('div');
   handle.className = 'dock-resize-handle';
   handle.title = 'Drag to resize panel (drag to the edge to collapse)';
-  handle.setAttribute('aria-hidden', 'true');
+  // §7 roadmap — parity with the inspector column's own handle
+  // (_initInspectorResizeHandle below), which already has a proper
+  // role/aria-label instead of aria-hidden.
+  handle.setAttribute('role', 'separator');
+  handle.setAttribute('aria-orientation', 'vertical');
+  handle.setAttribute('aria-label', 'Sidebar panel collapse handle');
   panel.appendChild(handle);
 
   let dragging = false;
@@ -143,18 +150,20 @@ function _initPanelResizeHandle() {
   let startX = 0;
   let startW = 0;
 
-  handle.addEventListener('mousedown', e => {
+  handle.addEventListener('mousedown', (e) => {
     dragging = true;
     moved = false;
     startX = e.clientX;
-    startW = panel.classList.contains('sb-collapsed') ? COLLAPSE_SLIVER : panel.getBoundingClientRect().width;
+    startW = panel.classList.contains('sb-collapsed')
+      ? COLLAPSE_SLIVER
+      : panel.getBoundingClientRect().width;
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
     handle.classList.add('dragging');
     e.preventDefault();
   });
 
-  document.addEventListener('mousemove', e => {
+  document.addEventListener('mousemove', (e) => {
     if (!dragging) return;
     const delta = e.clientX - startX;
     if (Math.abs(delta) > 3) moved = true;
@@ -162,7 +171,7 @@ function _initPanelResizeHandle() {
     // PW_MIN only once the drag ends (see mouseup below), same two-phase
     // pattern as the tool shelf handle.
     const raw = Math.max(COLLAPSE_SLIVER, Math.min(startW + delta, PW_MAX));
-    document.documentElement.style.setProperty('--sw', raw + 'px');
+    document.documentElement.style.setProperty('--sw', `${raw  }px`);
     panel.classList.toggle('sb-collapsed', raw <= SW_COLLAPSE_THRESHOLD);
     doResize();
   });
@@ -215,7 +224,7 @@ function _applyInspectorCollapsed(isCollapsed, persist) {
   if (!inspector) return;
   inspector.classList.toggle('iw-collapsed', isCollapsed);
   if (isCollapsed) {
-    document.documentElement.style.setProperty('--iw', COLLAPSE_SLIVER + 'px');
+    document.documentElement.style.setProperty('--iw', `${COLLAPSE_SLIVER  }px`);
     doResize();
   } else {
     _setInspectorWidth(_lastInspectorWidth);
@@ -244,18 +253,20 @@ function _initInspectorResizeHandle() {
   let startX = 0;
   let startW = 0;
 
-  handle.addEventListener('mousedown', e => {
+  handle.addEventListener('mousedown', (e) => {
     dragging = true;
     moved = false;
     startX = e.clientX;
-    startW = inspector.classList.contains('iw-collapsed') ? COLLAPSE_SLIVER : inspector.getBoundingClientRect().width;
+    startW = inspector.classList.contains('iw-collapsed')
+      ? COLLAPSE_SLIVER
+      : inspector.getBoundingClientRect().width;
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
     handle.classList.add('dragging');
     e.preventDefault();
   });
 
-  document.addEventListener('mousemove', e => {
+  document.addEventListener('mousemove', (e) => {
     if (!dragging) return;
     // L'inspecteur est à droite : glisser vers la gauche l'élargit.
     const delta = startX - e.clientX;
@@ -304,7 +315,7 @@ function _restoreInspectorCollapsed() {
 
 function _setToolShelfWidth(px) {
   const w = Math.max(TS_COLLAPSED, Math.min(px, TS_EXPANDED));
-  document.documentElement.style.setProperty('--tsw', w + 'px');
+  document.documentElement.style.setProperty('--tsw', `${w  }px`);
   doResize();
   return w;
 }
@@ -328,7 +339,7 @@ function _initToolShelfCollapseHandle() {
   function _applyCollapsed(isCollapsed, persist) {
     shelf.classList.toggle('ts-collapsed', isCollapsed);
     _setToolShelfWidth(isCollapsed ? TS_COLLAPSED : TS_EXPANDED);
-    shelf.querySelectorAll('.ts-tool').forEach(btn => {
+    shelf.querySelectorAll('.ts-tool').forEach((btn) => {
       btn.tabIndex = isCollapsed ? -1 : 0;
     });
     if (persist) safeLocalSet('sl_toolShelfCollapsed', isCollapsed ? '1' : '0');
@@ -339,7 +350,7 @@ function _initToolShelfCollapseHandle() {
   let startX = 0;
   let startW = 0;
 
-  handle.addEventListener('mousedown', e => {
+  handle.addEventListener('mousedown', (e) => {
     dragging = true;
     moved = false;
     startX = e.clientX;
@@ -350,7 +361,7 @@ function _initToolShelfCollapseHandle() {
     e.preventDefault();
   });
 
-  document.addEventListener('mousemove', e => {
+  document.addEventListener('mousemove', (e) => {
     if (!dragging) return;
     const delta = e.clientX - startX;
     if (Math.abs(delta) > 3) moved = true;
@@ -397,7 +408,7 @@ function _restoreWorkspaceWidths(onlyIfStored) {
   if (iw >= IW_MIN && iw <= IW_MAX) {
     _setInspectorWidth(iw);
   } else if (!onlyIfStored) {
-    document.documentElement.style.setProperty('--iw', IW_DEFAULT + 'px');
+    document.documentElement.style.setProperty('--iw', `${IW_DEFAULT  }px`);
   }
 }
 
@@ -411,7 +422,7 @@ function _switchPanelTab(id) {
     if (sw) sw.style.display = '';
   }
 
-  document.querySelectorAll('.panel-tab-btn').forEach(btn => {
+  document.querySelectorAll('.panel-tab-btn').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.tabId === id);
     btn.setAttribute('aria-selected', String(btn.dataset.tabId === id));
   });
@@ -426,7 +437,7 @@ function _initPanelTabs() {
   tabBar.setAttribute('role', 'tablist');
   tabBar.setAttribute('aria-label', 'Panel sections');
 
-  PANEL_TABS.forEach(tab => {
+  PANEL_TABS.forEach((tab) => {
     const btn = document.createElement('button');
     btn.className = 'panel-tab-btn';
     btn.dataset.tabId = tab.id;
@@ -448,13 +459,13 @@ function _initPanelTabs() {
   }
 
   const savedTab = safeLocalGet('sl_panelTab', 'uniforms');
-  _switchPanelTab(PANEL_TABS.find(t => t.id === savedTab) ? savedTab : 'uniforms');
+  _switchPanelTab(PANEL_TABS.find((t) => t.id === savedTab) ? savedTab : 'uniforms');
 }
 
 function _restoreSavedWidth() {
   const saved = parseInt(safeLocalGet('sl_panelW', ''), 10);
   if (!isNaN(saved) && saved >= PW_MIN && saved <= PW_MAX) {
-    document.documentElement.style.setProperty('--sw', saved + 'px');
+    document.documentElement.style.setProperty('--sw', `${saved  }px`);
   }
 }
 

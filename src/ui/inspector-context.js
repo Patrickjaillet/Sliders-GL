@@ -13,6 +13,7 @@ import { state } from '../core/state.js';
 import { esc, fmtN, safeLocalGet, safeLocalSet } from '../core/utils.js';
 import { startRangeEdit } from './context-menu.js';
 import { RUNTIME, findSliderEntry } from './hover-inspector.js';
+import { scoreGLSL } from '../shader/glsl-complexity.js';
 
 const MODE_TITLES = { pass: 'Pass', slider: 'Slider', uniform: 'Uniform' };
 let _mode = 'pass';
@@ -45,32 +46,49 @@ function _emptyState(msg) {
 
 // ── Mode "pass" ──────────────────────────────────────────────────────────────
 
-async function _renderPassInfo() {
-  const id = state.mp?.active;
-  const p = id && state.mp.passes[id];
-  if (!p) {
-    setInspectorMode('pass', _emptyState('No active pass.'));
-    return;
+// §7 roadmap — this pane used to render state.mp's per-pass channel wiring
+// (iChannel0-3) and resolution/feedback settings, all leftovers of the
+// removed multi-pass/channel-wiring system: state.mp.passes.image.ch is
+// permanently [null,null,null,null] and .resolutionScale/.feedbackDelay
+// don't even exist on that object (see core/state.js), so this always
+// rendered 4x "— empty —" plus a fake "100% / off" rather than anything
+// real. It's also only ever called from the 'zgl:passchange' event, which
+// nothing dispatches any more (the module that used to emit it,
+// multipass.js, was removed) — so in practice this pane was permanently
+// stuck on its "No active pass." fallback despite a pass always being
+// active. Replaced with an always-accurate global shader summary (uniform
+// count, how many differ from their default, complexity score), which is
+// genuinely useful default content instead of either the false "empty"
+// message or fake per-channel data.
+function _renderPassInfo() {
+  const vars = state.vars || [];
+  const modified = vars.filter(
+    (e) => Math.abs(e.value - (state.defaultValues[e.id] ?? e.defaultValue)) > 1e-9
+  ).length;
+
+  let complexityRow = '';
+  try {
+    const code = state.editor ? state.editor.getValue() : state.currentCode || '';
+    const res = scoreGLSL(code);
+    if (res) {
+      complexityRow = `<div class="insp-row"><span class="insp-k">Complexity</span><span class="insp-v">${esc(res.label)} (${res.score})</span></div>`;
+    }
+  } catch {
+    /* non-fatal — leave complexity row out */
   }
 
-  const label = id === 'image' ? 'Image' : id;
-
-  const rows = [];
-  for (let i = 0; i < 4; i++) {
-    const srcId = p.ch[i];
-    const chLabel = srcId ? (srcId === 'image' ? 'Image' : srcId) : '— empty —';
-    rows.push(
-      `<div class="insp-row"><span class="insp-k">iChannel${i}</span><span class="insp-v">${esc(chLabel)}</span></div>`
-    );
+  if (vars.length === 0 && !complexityRow) {
+    setInspectorMode('pass', _emptyState('Paste a shader to see its summary.'));
+    return;
   }
 
   setInspectorMode(
     'pass',
     `
-    <div class="insp-section-title">${esc(label)}</div>
-    <div class="insp-row"><span class="insp-k">Resolution</span><span class="insp-v">${Math.round((p.resolutionScale ?? 1) * 100)}%</span></div>
-    <div class="insp-row"><span class="insp-k">Feedback</span><span class="insp-v">${p.feedbackDelay ? 'on' : 'off'}</span></div>
-    ${rows.join('')}
+    <div class="insp-section-title">Shader summary</div>
+    <div class="insp-row"><span class="insp-k">Uniforms</span><span class="insp-v">${vars.length}</span></div>
+    <div class="insp-row"><span class="insp-k">Modified</span><span class="insp-v">${modified}</span></div>
+    ${complexityRow}
   `
   );
 }
@@ -176,9 +194,19 @@ function _initDefaultOpenState() {
 export function initInspectorContext() {
   // Switching the active pass is a deliberate user action — always surface its info.
   window.addEventListener('zgl:passchange', () => _renderPassInfo());
+  // §7 roadmap — nothing dispatches 'zgl:passchange' any more (see the long
+  // comment on _renderPassInfo above), so this pane also refreshes on every
+  // buildUI() call (state.callbacks.onBuildUI, chained the same way
+  // outliner.js/slider-gutter.js do) to stay current as the shader changes.
+  const prevOnBuildUI = state.callbacks.onBuildUI;
+  state.callbacks.onBuildUI = (entries) => {
+    if (typeof prevOnBuildUI === 'function') prevOnBuildUI(entries);
+    if (_mode === 'pass') _renderPassInfo();
+  };
   _initSliderHover();
   _initUniformHover();
   _initDefaultOpenState();
+  _renderPassInfo();
 }
 
 export { setInspectorMode };

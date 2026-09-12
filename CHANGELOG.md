@@ -5,6 +5,25 @@ All notable changes to Sliders GL are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] — 2026-09-12
+
+### Added
+
+- The Outliner now shows a real structure tree: every slider category
+  group with a live count, click to jump to and expand that group in the
+  Uniforms panel.
+- The Inspector's default "Pass" view now shows an always-accurate shader
+  summary (uniform count, how many differ from their default, complexity
+  score) instead of a permanently stuck "No active pass." message.
+
+### Fixed
+
+- The Outliner's "Uniforms" count was never actually updated by any code
+  and always read "0".
+- The left sidebar's resize handle is now keyboard/screen-reader
+  accessible (role="separator" + label), matching the inspector column's
+  and tool shelf's handles, which already had this.
+
 ## [1.5.0] — 2026-09-12
 
 ### Added
@@ -158,6 +177,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   locally — zero network dependency for core functionality.
 - MIT license.
 
+[1.6.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.6.0
 [1.5.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.5.0
 [1.4.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.4.0
 [1.3.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.3.0
