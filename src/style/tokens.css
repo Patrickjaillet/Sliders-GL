@@ -276,7 +276,10 @@
   /* aliases */
   --pw: var(--sw);
 
-  /* titlebar (Tauri) */
+  /* titlebar (Tauri) — used only by layout.css's `.tauri-titlebar` rule;
+     the actual custom titlebar (native/titlebar.js + style/titlebar.css)
+     is forced to 32px inline by JS regardless of this value. Kept as a
+     separate, smaller value on purpose (see the comment atop titlebar.css). */
   --titlebar-h: 24px;
   --titlebar-bg: var(--bg-surface);
   --titlebar-fg: var(--text-primary);

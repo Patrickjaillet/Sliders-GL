@@ -30,6 +30,7 @@
 @import './scrollbars.css';
 @import './typography.css';
 @import './layout.css';
+@import './titlebar.css';
 @import './animations.css';
 
 /* Phase 2 — Sliders ultra-performants ✓ */

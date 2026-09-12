@@ -5,6 +5,21 @@ All notable changes to Sliders GL are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.1] — 2026-09-12
+
+### Fixed
+
+- The sidebar no longer stays at full width under 900px viewport width when
+  the inspector panel is closed (the common case) — the responsive
+  breakpoint's narrower-sidebar rule wasn't reaching the grid in that state.
+- The sidebar is now actually hidden (not just visually squeezed to zero)
+  under the 640px single-column breakpoint.
+- The custom desktop title bar's minimize/maximize/close buttons now use
+  their intended Windows 11–style appearance (full-height, 46px wide, red
+  hover on Close) instead of the small generic toolbar-button style they
+  were inheriting by coincidence — their real stylesheet was never linked
+  into the app.
+
 ## [1.9.0] — 2026-09-12
 
 ### Added
@@ -237,6 +252,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   locally — zero network dependency for core functionality.
 - MIT license.
 
+[1.9.1]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.1
 [1.9.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.0
 [1.8.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.8.0
 [1.7.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.7.0

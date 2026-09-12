@@ -1882,6 +1882,19 @@ body.embed-mode .cw {
     grid-template-columns: var(--tsw) var(--pw) 1fr;
   }
 
+  /* §11 roadmap breakpoint revalidation: the base (inspector-closed) rule
+     at the top of this file hardcodes `var(--sw)` for its sidebar column,
+     never `var(--pw)` — so this media query's `--pw: 220px` override above
+     only ever reached the sidebar when `.inspector-open` was also present.
+     In the far more common inspector-closed state, the sidebar silently
+     stayed at the full `--sw` (280px) under 900px, defeating the narrower-
+     sidebar behavior for most users. Mirror the same 3-column, --pw-based
+     override here for the closed state (4th/inspector column is already
+     0px at this width regardless, same as the unqualified `.layout` rule). */
+  .layout:not(.inspector-open) {
+    grid-template-columns: var(--tsw) var(--pw) 1fr 0px;
+  }
+
   /* Overlay the *entire* right-hand column (Outliner + Inspector), not just
      the inner `.inspector` pane — matches toggleInspectorPanel()'s own
      documented contract ("toggle the visibility of the whole right-hand
@@ -1902,10 +1915,28 @@ body.embed-mode .cw {
 
 /* Sous 640px : pile mono-colonne — panneau masqué (accessible via plein écran) */
 @media (max-width: 640px) {
-  .layout {
+  /* §11 roadmap breakpoint revalidation: the 900px query above added a
+     `.layout:not(.inspector-open)` rule (specificity 0-2-0) for its own
+     narrower-sidebar fix. Both media queries match simultaneously between
+     640px and 900px, and that selector outranks the plain `.layout` below
+     (0-1-0) regardless of source order, so under 640px the sidebar came
+     back at 220px instead of collapsing to 0 — silently reintroducing the
+     "no empty interface space" bug this file already fixed once. Match its
+     specificity here so the mono-column collapse wins again at this width. */
+  .layout,
+  .layout:not(.inspector-open) {
     grid-template-columns: 0 1fr 0;
   }
-  .layout .panel {
+  /* §11 roadmap breakpoint revalidation: `.panel, #sidebar { display:flex }`
+     in panels.css includes an ID selector (specificity 1-0-0), which
+     outranks `.layout .panel` here (0-2-0) — so the sidebar kept rendering
+     at `display:flex` under 640px even though its grid column had already
+     collapsed to 0px. Match the ID's specificity so this override actually
+     wins; harmless when the sidebar has no width to show regardless, but
+     `display:none` is what lets other rules (and assistive tech) treat it
+     as genuinely hidden rather than a zero-width-but-present flex box. */
+  .layout .panel,
+  .layout #sidebar {
     display: none;
   }
   .layout .right {
