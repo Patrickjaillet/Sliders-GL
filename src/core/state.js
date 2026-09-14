@@ -1,4 +1,3 @@
-
 import { safeLocalGet } from './utils.js';
 
 // Legacy multipass state shape, reduced to the single surviving "Image" pass
@@ -9,16 +8,30 @@ import { safeLocalGet } from './utils.js';
 function createInitialMultipassState() {
   return {
     passes: {
-      image: { code: '', enabled: true, rt: null, mat: null, ch: [null, null, null, null], chBlend: ['normal','normal','normal','normal'] },
+      image: {
+        code: '',
+        enabled: true,
+        rt: null,
+        mat: null,
+        ch: [null, null, null, null],
+        chBlend: ['normal', 'normal', 'normal', 'normal'],
+      },
     },
     active: 'image',
   };
 }
 
 export const state = {
-
   currentCode: '',
   editor: null,
+  // §1 ROADMAP-GOLF.md — maps a 1-based line number in the macro-expanded
+  // GLSL sent to the GPU back to the corresponding 1-based line in the
+  // editor's original source, since #define expansion (glsl-preprocess.js)
+  // can change line counts. Set by applyGLShader() on every compile
+  // attempt; read by renderer.js's showErr() when reporting compile
+  // errors. Defaults to identity (n => n) so error reporting still works
+  // correctly before the first compile, or if preprocessing was skipped.
+  glslLineMap: (n) => n,
 
   renderer3: null,
   scene3: null,
@@ -30,7 +43,7 @@ export const state = {
   ftimer: 0,
   simTime: 0,
   paused: false,
-  lastTs: (typeof performance !== 'undefined') ? performance.now() : 0,
+  lastTs: typeof performance !== 'undefined' ? performance.now() : 0,
 
   mesh3: null,
 
@@ -49,11 +62,11 @@ export const state = {
   mp: createInitialMultipassState(),
 
   ai: {
-    modelId:      null,
-    ready:        false,
-    loading:      false,
+    modelId: null,
+    ready: false,
+    loading: false,
     loadProgress: 0,
-    panelOpen:    false,
+    panelOpen: false,
   },
 
   hlslEditMode: false,
@@ -62,7 +75,7 @@ export const state = {
 
   // Phase 20.1 — Workspace multi-projets (données partagées par workspace-manager.js
   // et shader-library-panel.js)
-  activeProjectId:   null,
+  activeProjectId: null,
   activeProjectName: null,
 
   activePresetId: null,
@@ -84,7 +97,9 @@ if (import.meta.env.DEV) {
   state.callbacks = new Proxy(state.callbacks, {
     set(target, key, value) {
       if (value !== null && typeof value !== 'function') {
-        console.error(`[state.callbacks] "${String(key)}" must be a function or null, got ${typeof value}`);
+        console.error(
+          `[state.callbacks] "${String(key)}" must be a function or null, got ${typeof value}`
+        );
         return false;
       }
       target[key] = value;
@@ -94,11 +109,16 @@ if (import.meta.env.DEV) {
       if (key === Symbol.toStringTag || key === 'constructor') return target[key];
       // onBuildUI is intentionally optional (future MIDI hook) — skip warning for it.
       const OPTIONAL_CALLBACKS = new Set(['onBuildUI']);
-      if (key in target && target[key] === null && typeof key === 'string' && !OPTIONAL_CALLBACKS.has(key)) {
+      if (
+        key in target &&
+        target[key] === null &&
+        typeof key === 'string' &&
+        !OPTIONAL_CALLBACKS.has(key)
+      ) {
         console.warn(`[state.callbacks.${key}] accessed before registration — callback is null`);
       }
       return target[key];
-    }
+    },
   });
 }
 
@@ -109,7 +129,7 @@ export function subscribe(key, callback) {
   subscribers[key].push(callback);
   return () => {
     if (subscribers[key]) {
-      subscribers[key] = subscribers[key].filter(cb => cb !== callback);
+      subscribers[key] = subscribers[key].filter((cb) => cb !== callback);
     }
   };
 }

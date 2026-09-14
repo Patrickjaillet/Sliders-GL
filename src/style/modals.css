@@ -224,6 +224,65 @@
   overflow-y: auto;
 }
 
+/* ── Dégolf preview modal (ROADMAP-GOLF.md §2/§5) ───────────────── */
+
+.degolf-modal {
+  width: 860px;
+  max-width: min(94vw, 860px);
+  max-height: min(90vh, 90dvh);
+}
+
+.degolf-panes {
+  display: flex;
+  gap: 10px;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.degolf-pane {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 50%;
+  min-width: 0;
+}
+
+.degolf-pane-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--t2);
+  margin-bottom: 4px;
+}
+
+.degolf-pane pre {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 10px;
+  overflow: auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-mid);
+  background: var(--bg-editor);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre;
+  color: #d4d4d4;
+  max-height: min(56vh, 56dvh);
+}
+
+.degolf-warnings {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--status-warn-border);
+  background: var(--status-warn-bg);
+  color: var(--t2);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
 /* ── Menu contextuel ─────────────────────────────────────────── */
 
 .ctx-menu {

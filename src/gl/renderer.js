@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { state } from '../core/state.js';
 import { EXAMPLE } from '../core/constants.js';
 import { explainGLSLError } from '../shader/glsl-error-explain.js';
+import { preprocessWithLineMap } from '../shader/glsl-preprocess.js';
 import { toast } from '../io/actions.js';
 import { shaderNeedsRecompile, markCompiled } from '../render/shader-cache.js';
 import {
@@ -93,8 +94,8 @@ export function wrapFrag(userCode) {
   const hasMain = /void\s+mainImage\s*\(/.test(userCode);
   const channelDecls = [];
   for (let i = 0; i < 4; i++) {
-    if (new RegExp(`iChannel${  i}`).test(userCode)) {
-      channelDecls.push(`uniform sampler2D iChannel${  i  };`);
+    if (new RegExp(`iChannel${i}`).test(userCode)) {
+      channelDecls.push(`uniform sampler2D iChannel${i};`);
     }
   }
   // F-7.4 — always inject sampleChannel() so shaders can opt-in to blend modes
@@ -270,7 +271,7 @@ export function initGL(canvas, width, height) {
   })();
 
   state.mat3._ownedDummies = [0, 1, 2, 3]
-    .map((i) => material.uniforms[`iChannel${  i}`]?.value)
+    .map((i) => material.uniforms[`iChannel${i}`]?.value)
     .filter(Boolean);
 
   doResize();
@@ -408,21 +409,34 @@ function _tick() {
   if (state.ftimer >= 0.5) {
     const fps = Math.round(state.fcount / state.ftimer);
     if (dom.fpspill) {
-      dom.fpspill.textContent = `${fps  } FPS`;
+      dom.fpspill.textContent = `${fps} FPS`;
       dom.fpspill.classList.remove('fps-good', 'fps-warn', 'fps-bad');
       dom.fpspill.classList.add(fpsColorClass(fps));
     }
-    if (dom.fps) dom.fps.textContent = `${fps  } fps`;
+    if (dom.fps) dom.fps.textContent = `${fps} fps`;
     state.fcount = 0;
     state.ftimer = 0;
   }
 
-  if (dom.tpill) dom.tpill.textContent = `t = ${  state.simTime.toFixed(2)}`;
+  if (dom.tpill) dom.tpill.textContent = `t = ${state.simTime.toFixed(2)}`;
 }
 
 export async function applyGLShader(code) {
   if (!state.mat3) return;
-  const fragSrc = wrapFrag(code);
+
+  // §1 ROADMAP-GOLF.md — expand #define macros before compiling, so
+  // Shadertoy "code-golf" idioms like `#define v normalize(vec3(` (valid
+  // only after textual macro substitution — confirmed neither the GLSL
+  // AST parser nor this app's own compile path understood it otherwise)
+  // work the same way they do on Shadertoy itself. state.glslLineMap is
+  // updated on every call so showErr() can translate a GPU error's line
+  // number (relative to the expanded source) back to the real editor
+  // line, since expansion can change line counts (e.g. the #define line
+  // itself disappears from the output).
+  const { code: expandedCode, mapLine } = preprocessWithLineMap(code);
+  state.glslLineMap = mapLine;
+
+  const fragSrc = wrapFrag(expandedCode);
 
   // Phase 1.3 — In-memory cache (FNV-1a, session only)
   if (!shaderNeedsRecompile(fragSrc)) {
@@ -458,7 +472,7 @@ export async function applyGLShader(code) {
   for (let i = 0; i < 4; i++) {
     const d = makeDummyTexture();
     newDummies.push(d);
-    chanUniforms[`iChannel${  i}`] = { value: d };
+    chanUniforms[`iChannel${i}`] = { value: d };
   }
 
   state.mat3.uniforms = {
@@ -577,8 +591,17 @@ function _esc(str) {
     .replace(/"/g, '&quot;');
 }
 
-function _wrapOffset() {
-  return 0;
+// §1 ROADMAP-GOLF.md — translates a 1-based line number from a GPU compile
+// error (relative to the macro-expanded source actually sent to the
+// driver) back to the real 1-based line in the editor's original source.
+// Replaces the old flat-offset `_wrapOffset()` (always 0, correct only
+// because no preprocessing happened before this — see applyGLShader,
+// which now sets state.glslLineMap on every compile) with a proper
+// per-line lookup, since #define expansion can change line counts
+// unevenly (a macro definition line disappears; others stay 1:1).
+function _mapErrorLine(lineNo) {
+  if (lineNo === null || lineNo === undefined) return lineNo;
+  return state.glslLineMap(lineNo);
 }
 
 // §B.2 (UI v2) — chorégraphie de compilation : pulse de bordure sur l'éditeur.
@@ -612,7 +635,6 @@ export function showErr(log) {
   _pulseEditor('err');
   const errors = parseGLSLErrors(log);
   const userCode = state.editor ? state.editor.getValue() : '';
-  const wrapOffset = _wrapOffset();
 
   const body = document.getElementById('cerrBody');
   const wrap = document.getElementById('cerrWrap');
@@ -640,7 +662,7 @@ export function showErr(log) {
 
   let html = '';
   errors.forEach((err) => {
-    const userLine = err.lineNo ? err.lineNo - wrapOffset : null;
+    const userLine = err.lineNo ? _mapErrorLine(err.lineNo) : null;
     const lineStr = userLine && userLine > 0 ? `L${userLine}` : '?';
     const jumpAttr =
       userLine > 0
@@ -692,9 +714,9 @@ export function showErr(log) {
     }
 
     const decors = realErrors
-      .filter((err) => err.lineNo - wrapOffset > 0)
+      .filter((err) => _mapErrorLine(err.lineNo) > 0)
       .map((err) => {
-        const l = err.lineNo - wrapOffset;
+        const l = _mapErrorLine(err.lineNo);
         const loc = _resolveColumns(l, err.colNo);
         const colHint = err.colNo ? ` (col ${err.colNo})` : '';
         return {
@@ -706,7 +728,7 @@ export function showErr(log) {
             glyphMarginHoverMessage: { value: `**GLSL Error**${colHint} — ${err.msg}` },
             hoverMessage: { value: `⛔ **${err.msg}**${colHint}` },
             after: {
-              content: `  ⛔ ${  err.msg}`,
+              content: `  ⛔ ${err.msg}`,
               inlineClassName: 'errorInlineMsg',
             },
             overviewRuler: { color: '#ff5050', position: monaco.editor.OverviewRulerLane.Full },
@@ -718,9 +740,9 @@ export function showErr(log) {
 
     if (model) {
       const markers = realErrors
-        .filter((err) => err.lineNo - wrapOffset > 0)
+        .filter((err) => _mapErrorLine(err.lineNo) > 0)
         .map((err) => {
-          const editorLine = err.lineNo - wrapOffset;
+          const editorLine = _mapErrorLine(err.lineNo);
           const loc = _resolveColumns(editorLine, err.colNo);
           return {
             startLineNumber: editorLine,
@@ -779,7 +801,7 @@ export function toggleErrPanel() {
 function setStatus(s) {
   const badge = document.getElementById('statusBadge');
   const txt = document.getElementById('stxt');
-  if (badge) badge.className = `status-badge ${  s}`;
+  if (badge) badge.className = `status-badge ${s}`;
   if (txt) txt.textContent = s.toUpperCase();
   // §1.3 — teinte la barre de statut en cas d'erreur de compilation
   const bar = document.getElementById('appStatusBar');

@@ -88,6 +88,7 @@ import {
   toggleCompareView,
 } from './canvas-tools.js';
 import { toggleCanvasGizmos } from './canvas-gizmos.js';
+import { openDegolfModal, closeDegolfModal, confirmDegolf } from './degolf-modal.js';
 
 const ACTIONS = {
   // Wrapped so the click Event (or a Monaco command accessor, see editor.js)
@@ -146,6 +147,9 @@ const ACTIONS = {
 
   exportProjectZip,
   expZipBtn: exportProjectZip,
+  openDegolfModal,
+  closeDegolfModal,
+  confirmDegolf,
   // Phase 6 — Export & Sharing
   exportP5Sketch,
   exportGLSLSandbox,

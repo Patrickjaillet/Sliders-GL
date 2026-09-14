@@ -61,6 +61,7 @@ import {
   handleSaveProjectAs,
 } from '../io/project-ui.js';
 import { openSTModal } from '../io/shadertoy.js';
+import { openDegolfModal } from './degolf-modal.js';
 
 export { toggleSettingsPanel };
 // 1.4: GLSL completions — token lists come from glsl-language.js
@@ -354,6 +355,12 @@ function buildPaletteCommands() {
     { label: 'Export → p5.js Sketch', keys: '', run: () => exportP5Sketch() },
     { label: 'Export → GLSL Sandbox', keys: '', run: () => exportGLSLSandbox() },
     { label: 'Export → ShaderToy Format', keys: '', run: () => exportShaderToyFormat() },
+    {
+      label: 'Dégolf Shader…',
+      keys: '',
+      detail: 'Preview a readable reformat, then apply to editor',
+      run: () => openDegolfModal(),
+    },
     // ── Viewport ────────────────────────────────────────────────────────────
     { label: 'Toggle Fullscreen Viewport', keys: 'F11', run: () => toggleFullscreenVP() },
     { label: 'Toggle Pause Rendering', keys: 'Space', run: () => togglePause() },

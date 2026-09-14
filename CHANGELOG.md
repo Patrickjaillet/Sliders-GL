@@ -5,6 +5,31 @@ All notable changes to Sliders GL are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] — 2026-09-14
+
+### Added
+
+- Shadertoy `#define` macro expansion before compiling: shaders using
+  multi-line or parameterized macro idioms (common in Shadertoy "code-golf"
+  shaders, e.g. `#define v normalize(vec3(`) that previously failed to
+  compile now work, matching Shadertoy's own preprocess-then-compile
+  behavior. Compile errors still point at the correct line in your
+  original source, even though the code sent to the GPU has been expanded.
+- New "Dégolf" feature: reformats a code-golfed/minified shader into
+  readable code — expands macros, splits chained declarations
+  (`float a=1.,b=2.;` → separate statements), and renames single-letter
+  variables to descriptive names where it's safe to infer one (falling
+  back to a neutral `var1`, `var2`… otherwise). Available from the Export
+  dialog's Code tab and the command palette; shows a before/after preview
+  and only touches your code when you click "Apply to editor" (undoable
+  like any other edit).
+
+### Fixed
+
+- The GLSL auto-formatter no longer breaks a `for(init; condition;
+increment)` loop header across three lines, and no longer leaves a
+  struct declaration's trailing semicolon dangling on its own line.
+
 ## [1.10.0] — 2026-09-12
 
 ### Added
@@ -306,6 +331,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   locally — zero network dependency for core functionality.
 - MIT license.
 
+[1.11.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.11.0
 [1.10.0]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.10.0
 [1.9.4]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.4
 [1.9.3]: https://github.com/Patrickjaillet/Sliders-GL/releases/tag/v1.9.3

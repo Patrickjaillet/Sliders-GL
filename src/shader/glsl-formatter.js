@@ -1,8 +1,8 @@
 const INDENT = '  ';
 
 const PREPROCESSOR_RE = /^\s*#/;
-const BLOCK_OPEN_RE   = /\{[^}]*$/;
-const BLOCK_CLOSE_RE  = /^\s*\}/;
+const BLOCK_OPEN_RE = /\{[^}]*$/;
+const BLOCK_CLOSE_RE = /^\s*\}/;
 
 function _tokenise(src) {
   const tokens = [];
@@ -25,7 +25,10 @@ function _tokenise(src) {
     if (src[i] === '"' || src[i] === "'") {
       const q = src[i];
       let j = i + 1;
-      while (j < src.length && src[j] !== q) { if (src[j] === '\\') j++; j++; }
+      while (j < src.length && src[j] !== q) {
+        if (src[j] === '\\') j++;
+        j++;
+      }
       tokens.push({ type: 'string', text: src.slice(i, j + 1) });
       i = j + 1;
       continue;
@@ -58,9 +61,32 @@ function _restore(code, slots) {
 function _normaliseOperators(code) {
   code = code.replace(/[ \t]*([,;])[ \t]*/g, '$1 ');
   code = code.replace(/\s*([=+\-*/%&|^~!<>?:]+)\s*/g, (m, op) => {
-    const no_space = ['++', '--', '+=', '-=', '*=', '/=', '%=', '&=', '|=', '^=',
-      '<=', '>=', '==', '!=', '&&', '||', '<<', '>>', '<<=', '>>=', '!', '~',
-      '->', '::'];
+    const no_space = [
+      '++',
+      '--',
+      '+=',
+      '-=',
+      '*=',
+      '/=',
+      '%=',
+      '&=',
+      '|=',
+      '^=',
+      '<=',
+      '>=',
+      '==',
+      '!=',
+      '&&',
+      '||',
+      '<<',
+      '>>',
+      '<<=',
+      '>>=',
+      '!',
+      '~',
+      '->',
+      '::',
+    ];
     const unary = ['!', '~'];
     if (no_space.includes(op.trim())) return ` ${op.trim()} `;
     if (unary.includes(op.trim())) return op.trim();
@@ -76,19 +102,37 @@ function _normaliseOperators(code) {
   return code;
 }
 
+// Splits `;` only outside of any parens, so a `for(a;b;c)` header's own
+// semicolons (which separate its init/condition/operation clauses, not
+// statements) are never broken onto their own lines.
+function _splitSemicolonsOutsideParens(str) {
+  let depth = 0;
+  let out = '';
+  for (const ch of str) {
+    if (ch === '(') depth++;
+    else if (ch === ')') depth--;
+    out += ch;
+    if (ch === ';' && depth === 0) out += '\n';
+  }
+  return out;
+}
+
 function _splitLines(code) {
   const raw = code.split('\n');
   const out = [];
   for (const line of raw) {
     const trimmed = line.trim();
-    if (!trimmed) { out.push(''); continue; }
-    if (PREPROCESSOR_RE.test(trimmed)) { out.push(trimmed); continue; }
-    const parts = trimmed
-      .replace(/\{/g, '{\n')
-      .replace(/\}/g, '\n}\n')
-      .replace(/;(?!\n)/g, ';\n')
-      .split('\n');
-    for (const p of parts) {
+    if (!trimmed) {
+      out.push('');
+      continue;
+    }
+    if (PREPROCESSOR_RE.test(trimmed)) {
+      out.push(trimmed);
+      continue;
+    }
+    const parts = trimmed.replace(/\{/g, '{\n').replace(/\}/g, '\n}\n');
+    const withSemis = _splitSemicolonsOutsideParens(parts);
+    for (const p of withSemis.split('\n')) {
       const t = p.trim();
       if (t) out.push(t);
     }
@@ -100,12 +144,34 @@ function _indent(lines) {
   let depth = 0;
   const out = [];
   for (const line of lines) {
-    if (!line) { out.push(''); continue; }
-    if (PREPROCESSOR_RE.test(line)) { out.push(line); continue; }
+    if (!line) {
+      out.push('');
+      continue;
+    }
+    if (PREPROCESSOR_RE.test(line)) {
+      out.push(line);
+      continue;
+    }
     const closes = BLOCK_CLOSE_RE.test(line);
     if (closes && depth > 0) depth--;
     out.push(INDENT.repeat(depth) + line);
     if (BLOCK_OPEN_RE.test(line)) depth++;
+  }
+  return out;
+}
+
+// A lone `;` line happens when a `}` (struct/block) is immediately
+// followed by the statement-terminating semicolon a struct declaration
+// requires (`struct Ray{...};`) — merge it back onto the closing `}`
+// rather than leaving a dangling semicolon on its own line.
+function _mergeDanglingSemicolons(lines) {
+  const out = [];
+  for (const line of lines) {
+    if (line.trim() === ';' && out.length > 0) {
+      out[out.length - 1] += ';';
+    } else {
+      out.push(line);
+    }
   }
   return out;
 }
@@ -127,9 +193,9 @@ function _collapseBlankLines(lines) {
  */
 export function flashFormattedStatus() {
   const badge = document.getElementById('statusBadge');
-  const txt   = document.getElementById('stxt');
+  const txt = document.getElementById('stxt');
   if (!txt || !badge) return;
-  const prevText  = txt.textContent;
+  const prevText = txt.textContent;
   const prevClass = badge.className;
   txt.textContent = 'FORMATTED ✓';
   badge.className = 'status-badge ok';
@@ -141,10 +207,10 @@ export function flashFormattedStatus() {
 
 export function formatGLSL(src) {
   const { code, slots } = _stripAndRestore(src);
-  let processed = _normaliseOperators(code);
-  const raw_lines = _splitLines(processed);
-  const indented  = _indent(raw_lines);
+  const processed = _normaliseOperators(code);
+  const raw_lines = _mergeDanglingSemicolons(_splitLines(processed));
+  const indented = _indent(raw_lines);
   const collapsed = _collapseBlankLines(indented);
-  const joined    = collapsed.join('\n').trim() + '\n';
+  const joined = `${collapsed.join('\n').trim()  }\n`;
   return _restore(joined, slots);
 }

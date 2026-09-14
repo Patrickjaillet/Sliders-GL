@@ -2597,17 +2597,70 @@
           >
             🌐<br />ShaderToy
           </button>
+          <button
+            class="exp-code-btn"
+            data-action="openDegolfModal"
+            aria-label="Dégolf: reformat code-golfed GLSL into readable code"
+          >
+            ✎<br />Dégolf
+          </button>
         </div>
         <div class="exp-note">
           Standalone HTML: self-contained file, no Monaco, no dependencies.<br />Minified GLSL:
           strips comments and whitespace for sharing.<br />Three.js: paste-ready ShaderMaterial ·
-          p5.js: runs in the p5 editor · GLSL Sandbox / ShaderToy: platform-compatible paste format.
+          p5.js: runs in the p5 editor · GLSL Sandbox / ShaderToy: platform-compatible paste format
+          · Dégolf: previews a readable reformat (macro expansion, split declarations, descriptive
+          names) and applies it to the editor on confirm — unlike the buttons above, it doesn't
+          download a file.
         </div>
       </div>
 
       <div style="margin-top: 8px; text-align: right">
         <button class="modal-btn" data-action="closeExportModal" aria-label="Close export dialog">
           Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dégolf preview/confirm modal (ROADMAP-GOLF.md §2/§5) -->
+  <div class="modal-overlay" id="degolfModal" data-action="closeDegolfModal" aria-hidden="true">
+    <div
+      class="modal degolf-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="degolfModalTitle"
+      tabindex="-1"
+    >
+      <div class="modal-header">
+        <h3 id="degolfModalTitle">Dégolf preview</h3>
+        <button class="modal-close" data-action="closeDegolfModal" aria-label="Close">
+          <svg viewBox="0 0 14 14">
+            <line x1="2" y1="2" x2="12" y2="12" />
+            <line x1="12" y1="2" x2="2" y2="12" />
+          </svg>
+        </button>
+      </div>
+      <div class="degolf-panes">
+        <div class="degolf-pane">
+          <div class="degolf-pane-label">Current</div>
+          <pre id="degolfBefore"></pre>
+        </div>
+        <div class="degolf-pane">
+          <div class="degolf-pane-label">Dégolfed</div>
+          <pre id="degolfAfter"></pre>
+        </div>
+      </div>
+      <div class="degolf-warnings" id="degolfWarnings" hidden></div>
+      <div class="modal-actions">
+        <button class="modal-btn" data-action="closeDegolfModal" aria-label="Cancel">Cancel</button>
+        <button
+          class="modal-btn confirm"
+          data-action="confirmDegolf"
+          id="degolfConfirmBtn"
+          aria-label="Apply dégolfed code to editor"
+        >
+          Apply to editor
         </button>
       </div>
     </div>
